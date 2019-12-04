@@ -1,7 +1,7 @@
 type BookmarkTreeNode = browser.bookmarks.BookmarkTreeNode
 
-const openUserInterface = async () => {
-    const url = browser.extension.getURL("index.html")
+const openUI = async () => {
+    const url = browser.extension.getURL("ui.html")
 
     const tabs = await browser.tabs.query({})
 
@@ -22,10 +22,10 @@ const openUserInterface = async () => {
 }
 
 if (__DEV__) {
-    openUserInterface()
+    openUI()
 }
 
-browser.browserAction.onClicked.addListener(openUserInterface)
+browser.browserAction.onClicked.addListener(openUI)
 
 const init = async () => {
     const tree = (await browser.bookmarks.getTree())[0]

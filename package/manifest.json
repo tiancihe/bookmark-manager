@@ -1,0 +1,15 @@
+{
+  "manifest_version": 2,
+  "name": "bookmark-manager",
+  "version": "0.0.0",
+  "icons": {
+    "48": "icon.svg"
+  },
+  "browser_action": {
+    "default_icon": "icon.svg"
+  },
+  "background": {
+    "scripts": ["background.bundle.js"]
+  },
+  "permissions": ["bookmarks", "storage", "tabs"]
+}

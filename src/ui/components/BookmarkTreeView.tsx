@@ -49,7 +49,7 @@ const BookmarkTreeView: React.FC = () => {
     }, [bookmarkTree])
 
     return (
-        <Paper>
+        <Paper style={{ padding: 16 }}>
             <TreeView>{view}</TreeView>
         </Paper>
     )

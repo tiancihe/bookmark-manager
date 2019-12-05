@@ -7,17 +7,17 @@ const INIT_STORE = {
 }
 
 enum ActionType {
-    Init = "init"
+    LoadTree = "LoadTree"
 }
 
 type Action = {
-    type: ActionType.Init
+    type: ActionType.LoadTree
     payload: Pick<Store, "bookmarkTree">
 }
 
 const reducer: (store: Store, action: Action) => Store = (store, action) => {
     switch (action.type) {
-        case ActionType.Init:
+        case ActionType.LoadTree:
             return {
                 ...store,
                 ...action.payload
@@ -37,16 +37,28 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
     const [store, dispatch] = useReducer(reducer, INIT_STORE)
 
     useEffect(() => {
-        const init = async () => {
+        const loadTree = async () => {
             dispatch({
-                type: ActionType.Init,
+                type: ActionType.LoadTree,
                 payload: {
                     bookmarkTree: (await browser.bookmarks.getTree())[0]
                 }
             })
         }
 
-        init()
+        loadTree()
+
+        browser.bookmarks.onCreated.addListener(loadTree)
+        browser.bookmarks.onChanged.addListener(loadTree)
+        browser.bookmarks.onRemoved.addListener(loadTree)
+        browser.bookmarks.onMoved.addListener(loadTree)
+
+        return () => {
+            browser.bookmarks.onCreated.removeListener(loadTree)
+            browser.bookmarks.onChanged.removeListener(loadTree)
+            browser.bookmarks.onRemoved.removeListener(loadTree)
+            browser.bookmarks.onMoved.removeListener(loadTree)
+        }
     }, [])
 
     return (

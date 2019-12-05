@@ -17,12 +17,10 @@ const BookmarkTreeView: React.FC = () => {
     }
 
     const view = useMemo(() => {
-        // let renderResult = (<React.Fragment />) as React.ReactElement
         let renderResult = null as React.ReactElement | null
 
         const renderBookmark = (
             bookmarkNode: BookmarkTreeNode,
-            // parent: React.ReactElement
             parent: React.ReactElement | null
         ) => {
             const elm = <BookmarkTreeItem bookmarkNode={bookmarkNode} />

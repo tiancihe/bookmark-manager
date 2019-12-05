@@ -11,9 +11,5 @@
   "background": {
     "scripts": ["background.js"]
   },
-  "options_ui": {
-    "page": "ui.html",
-    "open_in_tab": true
-  },
   "permissions": ["bookmarks", "storage", "tabs"]
 }

@@ -1,9 +1,24 @@
 import React from "react"
-import { Paper } from "react-md"
-import { hot } from "react-hot-loader"
+import { Toolbar, Paper } from "@material-ui/core"
+
+import { useStore } from "./Store"
+import BookmarkCard from "./components/BookmarkCard"
 
 const App: React.FC = () => {
-    return <Paper>Bookmark Manager</Paper>
+    const store = useStore()
+
+    console.log(store)
+
+    return (
+        <div>
+            <Toolbar title="Bookmark Manager"></Toolbar>
+            <Paper>
+                {store.bookmarkTreeNodes.map(node => (
+                    <BookmarkCard key={node.id} bookmarkNode={node} />
+                ))}
+            </Paper>
+        </div>
+    )
 }
 
-export default hot(module)(App)
+export default App

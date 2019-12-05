@@ -1,5 +1,3 @@
-type BookmarkTreeNode = browser.bookmarks.BookmarkTreeNode
-
 const openUI = async () => {
     const url = browser.extension.getURL("ui.html")
 
@@ -26,21 +24,3 @@ if (__DEV__) {
 }
 
 browser.browserAction.onClicked.addListener(openUI)
-
-const init = async () => {
-    const tree = (await browser.bookmarks.getTree())[0]
-    console.log(tree)
-
-    const nodes: BookmarkTreeNode[] = []
-    const flattenBookmarkTreeNodes = (node: BookmarkTreeNode) => {
-        nodes.push(node)
-
-        if (node.children) {
-            node.children.forEach(flattenBookmarkTreeNodes)
-        }
-    }
-    flattenBookmarkTreeNodes(tree)
-    console.log(nodes)
-}
-
-init()

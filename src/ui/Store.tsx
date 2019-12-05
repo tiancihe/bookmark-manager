@@ -3,7 +3,7 @@ import React, { createContext, useReducer, useContext, useEffect } from "react"
 import { BookmarkTreeNode } from "../types"
 
 const INIT_STORE = {
-    bookmarkTreeNodes: [] as BookmarkTreeNode[]
+    bookmarkTree: null as BookmarkTreeNode | null
 }
 
 enum ActionType {
@@ -12,7 +12,7 @@ enum ActionType {
 
 type Action = {
     type: ActionType.Init
-    payload: Pick<Store, "bookmarkTreeNodes">
+    payload: Pick<Store, "bookmarkTree">
 }
 
 const reducer: (store: Store, action: Action) => Store = (store, action) => {
@@ -38,22 +38,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
 
     useEffect(() => {
         const init = async () => {
-            const tree = (await browser.bookmarks.getTree())[0]
-            const bookmarkTreeNodes: BookmarkTreeNode[] = []
-
-            const flattenBookmarkTreeNodes = (node: BookmarkTreeNode) => {
-                bookmarkTreeNodes.push(node)
-
-                if (node.children) {
-                    node.children.forEach(flattenBookmarkTreeNodes)
-                }
-            }
-            flattenBookmarkTreeNodes(tree)
-
             dispatch({
                 type: ActionType.Init,
                 payload: {
-                    bookmarkTreeNodes
+                    bookmarkTree: (await browser.bookmarks.getTree())[0]
                 }
             })
         }

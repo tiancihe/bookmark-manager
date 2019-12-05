@@ -13,28 +13,19 @@ const config = {
     },
     output: {
         path: path.join(__dirname, "package"),
-        filename: "[name].js",
-        chunkFilename: "[name].js"
+        filename: "[name].js"
     },
     mode: "production",
     resolve: {
-        extensions: [".js", ".ts", ".tsx", ".css"]
+        extensions: [".js", ".ts", ".tsx"]
     },
     module: {
         rules: [
             {
-                test: /\.(j|t)sx?$/,
-                use: ["babel-loader"]
+                test: /\.tsx?$/,
+                use: ["ts-loader"]
             }
         ]
-    },
-    optimization: {
-        splitChunks: {
-            chunks: "all",
-            automaticNameDelimiter: ".",
-            name: true
-        },
-        namedChunks: true
     },
     plugins: [
         new webpack.DefinePlugin({

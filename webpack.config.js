@@ -15,6 +15,7 @@ const config = {
         path: path.join(__dirname, "package"),
         filename: "[name].js"
     },
+    stats: "minimal",
     mode: "production",
     resolve: {
         extensions: [".js", ".ts", ".tsx"]
@@ -32,6 +33,11 @@ const config = {
             __DEV__
         })
     ]
+}
+
+if (__DEV__) {
+    config.watch = true
+    config.plugins.push(new webpack.ProgressPlugin())
 }
 
 module.exports = config

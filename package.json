@@ -4,7 +4,7 @@
   "description": "",
   "private": true,
   "scripts": {
-    "start": "cross-env NODE_ENV=development webpack --watch"
+    "start": "cross-env NODE_ENV=development webpack"
   },
   "dependencies": {
     "@material-ui/core": "^4.7.1",

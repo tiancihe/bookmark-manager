@@ -16,6 +16,9 @@ const config = {
         filename: "[name].js"
     },
     stats: "minimal",
+    performance: {
+        hints: false
+    },
     mode: "production",
     resolve: {
         extensions: [".js", ".ts", ".tsx"]
@@ -29,6 +32,7 @@ const config = {
         ]
     },
     plugins: [
+        new webpack.ProgressPlugin(),
         new webpack.DefinePlugin({
             __DEV__
         })
@@ -37,7 +41,6 @@ const config = {
 
 if (__DEV__) {
     config.watch = true
-    config.plugins.push(new webpack.ProgressPlugin())
 }
 
 module.exports = config

@@ -3,6 +3,7 @@ import { makeStyles, Theme } from "@material-ui/core"
 import { ArrowRight, ArrowDropDown, FolderTwoTone } from "@material-ui/icons"
 
 import { BookmarkTreeNode } from "../../types"
+import { useStore } from "../Store"
 
 const useFolderTreeItemStyle = makeStyles<
     Theme,
@@ -12,7 +13,8 @@ const useFolderTreeItemStyle = makeStyles<
         display: "flex",
         alignItems: "center",
         height: "40px",
-        paddingLeft: props => props.level * 24 + "px"
+        paddingLeft: props => props.level * 24 + "px",
+        cursor: "pointer"
     },
     icon: {
         display: "flex",
@@ -31,10 +33,14 @@ const useFolderTreeItemStyle = makeStyles<
 
 const FolderTreeItem: React.FC<React.PropsWithChildren<{
     level: number
-    active: boolean
     bookmarkNode: BookmarkTreeNode
-}>> = ({ level, active, bookmarkNode, children }) => {
-    const classNames = useFolderTreeItemStyle({ level, active })
+}>> = ({ level, bookmarkNode, children }) => {
+    const { activeFolder, setActiveFolder } = useStore()
+
+    const classNames = useFolderTreeItemStyle({
+        level,
+        active: activeFolder !== null && activeFolder.id === bookmarkNode.id
+    })
 
     const [open, setOpen] = useState(false)
 
@@ -50,7 +56,13 @@ const FolderTreeItem: React.FC<React.PropsWithChildren<{
 
     return (
         <React.Fragment>
-            <div className={classNames.container}>
+            <div
+                className={classNames.container}
+                onClick={() =>
+                    (!activeFolder || activeFolder.id !== bookmarkNode.id) &&
+                    setActiveFolder(bookmarkNode)
+                }
+            >
                 <div className={classNames.icon}>
                     {hasSubfolders &&
                         (open ? (

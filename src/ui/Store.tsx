@@ -3,21 +3,30 @@ import React, { createContext, useReducer, useContext, useEffect } from "react"
 import { BookmarkTreeNode } from "../types"
 
 const INIT_STORE = {
-    bookmarkTree: null as BookmarkTreeNode | null
+    bookmarkTree: null as BookmarkTreeNode | null,
+    activeFolder: null as BookmarkTreeNode | null
 }
 
 enum ActionType {
-    LoadTree = "LoadTree"
+    LoadTree = "LoadTree",
+    SetActiveFolder = "SetActiveFolder"
 }
 
-type Action = {
-    type: ActionType.LoadTree
-    payload: Pick<Store, "bookmarkTree">
-}
+type Action =
+    | {
+          type: ActionType.LoadTree
+          payload: Pick<Store, "bookmarkTree">
+      }
+    | {
+          type: ActionType.SetActiveFolder
+          payload: Pick<Store, "activeFolder">
+      }
 
 const reducer: (store: Store, action: Action) => Store = (store, action) => {
+    console.log(action)
     switch (action.type) {
         case ActionType.LoadTree:
+        case ActionType.SetActiveFolder:
             return {
                 ...store,
                 ...action.payload
@@ -27,14 +36,16 @@ const reducer: (store: Store, action: Action) => Store = (store, action) => {
     }
 }
 
-type Store = typeof INIT_STORE & {}
+type Store = typeof INIT_STORE & {
+    setActiveFolder: (bookmarkNode: BookmarkTreeNode) => void
+}
 
 const StoreContext = createContext({} as Store)
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
     children
 }) => {
-    const [store, dispatch] = useReducer(reducer, INIT_STORE)
+    const [store, dispatch] = useReducer(reducer, INIT_STORE as Store)
 
     useEffect(() => {
         const loadTree = async () => {
@@ -61,8 +72,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
         }
     }, [])
 
+    const setActiveFolder = (bookmarkNode: BookmarkTreeNode) =>
+        dispatch({
+            type: ActionType.SetActiveFolder,
+            payload: {
+                activeFolder: bookmarkNode
+            }
+        })
+
     return (
-        <StoreContext.Provider value={{ ...store }}>
+        <StoreContext.Provider value={{ ...store, setActiveFolder }}>
             {children}
         </StoreContext.Provider>
     )

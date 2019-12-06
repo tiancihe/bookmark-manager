@@ -24,11 +24,7 @@ const FolderPanel: React.FC = () => {
             level: number
         ) => {
             const elm = (
-                <FolderTreeItem
-                    bookmarkNode={bookmarkNode}
-                    level={level}
-                    active={false}
-                />
+                <FolderTreeItem bookmarkNode={bookmarkNode} level={level} />
             )
 
             if (bookmarkNode.children) {

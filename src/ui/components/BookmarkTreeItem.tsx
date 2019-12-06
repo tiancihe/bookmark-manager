@@ -1,65 +1,59 @@
 import React from "react"
 import { makeStyles } from "@material-ui/core"
-import { TreeItem } from "@material-ui/lab"
-import { Folder, FolderOpen } from "@material-ui/icons"
+import { FolderTwoTone } from "@material-ui/icons"
 
 import { BookmarkTreeNode } from "../../types"
 import { getFavicon } from "../utils"
 import BookmarkActionMenu from "./BookmarkActionMenu"
 
-const useStyle = makeStyles({
-    bookmarkItem: {
+const useBookmarkListItemStyle = makeStyles({
+    container: {
         display: "flex",
-        alignItems: "center"
+        alignItems: "center",
+        paddingLeft: "24px"
     },
-    bookmarkTitle: {
+    icon: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "24px",
+        height: "24px"
+    },
+    title: {
         flex: 1,
+        margin: "0 16px",
         overflow: "hidden",
         whiteSpace: "nowrap",
         textOverflow: "ellipsis"
     },
-    bookmarkActionMenu: {
+    actions: {
         justifySelf: "flex-end"
     }
 })
 
-const BookmarkTreeItem: React.FC<React.PropsWithChildren<{
+const BookmarkTreeItem: React.FC<{
     bookmarkNode: BookmarkTreeNode
-}>> = ({ bookmarkNode, children }) => {
-    const classNames = useStyle()
+}> = ({ bookmarkNode }) => {
+    const classNames = useBookmarkListItemStyle()
 
     const isFolder = bookmarkNode.type === "folder"
     const isBookmark = bookmarkNode.type === "bookmark"
 
     if (isFolder || isBookmark) {
         return (
-            <TreeItem
-                nodeId={bookmarkNode.id}
-                expandIcon={isFolder && <Folder />}
-                collapseIcon={isFolder && <FolderOpen />}
-                icon={
-                    isBookmark && (
+            <div className={classNames.container}>
+                <div className={classNames.icon}>
+                    {isFolder && <FolderTwoTone />}
+                    {isBookmark && (
                         <img src={getFavicon(bookmarkNode.url || "")} />
-                    )
-                }
-                label={
-                    <div className={classNames.bookmarkItem}>
-                        <div className={classNames.bookmarkTitle}>
-                            {bookmarkNode.title}
-                        </div>
-                        <div
-                            className={classNames.bookmarkActionMenu}
-                            onClick={
-                                isFolder ? e => e.stopPropagation() : undefined
-                            }
-                        >
-                            <BookmarkActionMenu bookmarkNode={bookmarkNode} />
-                        </div>
-                    </div>
-                }
-            >
-                {children}
-            </TreeItem>
+                    )}
+                </div>
+                <div className={classNames.title}>{bookmarkNode.title}</div>
+                <BookmarkActionMenu
+                    className={classNames.actions}
+                    bookmarkNode={bookmarkNode}
+                />
+            </div>
         )
     }
 

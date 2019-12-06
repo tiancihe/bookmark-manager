@@ -3,6 +3,7 @@ import {
     Menu,
     MenuItem,
     Button,
+    IconButton,
     ListItemIcon,
     ListItemText,
     Dialog,
@@ -17,9 +18,10 @@ import { MoreVert, Delete, BugReport } from "@material-ui/icons"
 import { BookmarkTreeNode } from "../../types"
 import BookmarkEditModal from "./BookmarkEditModal"
 
-const BookmarkActionMenu: React.FC<{ bookmarkNode: BookmarkTreeNode }> = ({
-    bookmarkNode
-}) => {
+const BookmarkActionMenu: React.FC<{
+    bookmarkNode: BookmarkTreeNode
+    className?: string
+}> = ({ bookmarkNode, className }) => {
     const [menuAnchor, setMenuAnchor] = useState<HTMLButtonElement | null>(null)
 
     const [showConfirmModal, setShowConfirmModal] = useState(false)
@@ -38,9 +40,12 @@ const BookmarkActionMenu: React.FC<{ bookmarkNode: BookmarkTreeNode }> = ({
 
     return (
         <React.Fragment>
-            <Button onClick={e => setMenuAnchor(e.currentTarget)}>
+            <IconButton
+                className={className}
+                onClick={e => setMenuAnchor(e.currentTarget)}
+            >
                 <MoreVert />
-            </Button>
+            </IconButton>
             <Menu
                 anchorEl={menuAnchor}
                 open={Boolean(menuAnchor)}

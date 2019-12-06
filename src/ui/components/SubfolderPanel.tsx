@@ -1,35 +1,92 @@
-import React from "react"
-import { makeStyles, styled, Paper } from "@material-ui/core"
+import React, { useState } from "react"
+import { makeStyles, Paper, Menu, MenuItem } from "@material-ui/core"
 
 import { useStore } from "../Store"
 import BookmarkTreeItem from "./BookmarkTreeItem"
+import CreateBookmarkModal from "./CreateBookmarkModal"
 
-const useSubfolderPanelStyle = makeStyles({
-    container: {
-        padding: "24px 32px 24px 16px"
+const useSubfolderStyle = makeStyles({
+    paper: {
+        width: "100%",
+        maxWidth: "960px",
+        padding: "8px 0",
+        margin: "auto"
     }
 })
 
-const SPaper = styled(Paper)({
-    width: "100%",
-    padding: "8px 0"
-})
-
-const SubfolderPanel: React.FC = () => {
-    const classNames = useSubfolderPanelStyle()
+const SubfolderPanel: React.FC<{ className?: string }> = ({ className }) => {
+    const classNames = useSubfolderStyle()
 
     const { activeFolder } = useStore()
 
+    const [mousePosition, setMousePosition] = useState<{
+        x: number
+        y: number
+    } | null>(null)
+
+    const [createType, setCreateType] = useState<"bookmark" | "folder" | null>(
+        null
+    )
+
+    const closeContextMenu = () => {
+        setMousePosition(null)
+    }
+
     return (
-        <div className={classNames.container}>
+        <div
+            className={className}
+            onContextMenu={e => {
+                e.preventDefault()
+                setMousePosition({
+                    x: e.clientX - 2,
+                    y: e.clientY - 4
+                })
+            }}
+        >
             {!activeFolder ||
             !activeFolder.children ||
             !activeFolder.children.length ? null : (
-                <SPaper>
+                <Paper className={classNames.paper}>
                     {activeFolder.children.map(child => (
-                        <BookmarkTreeItem bookmarkNode={child} />
+                        <BookmarkTreeItem key={child.id} bookmarkNode={child} />
                     ))}
-                </SPaper>
+                </Paper>
+            )}
+            <Menu
+                anchorPosition={
+                    mousePosition
+                        ? {
+                              left: mousePosition.x,
+                              top: mousePosition.y
+                          }
+                        : undefined
+                }
+                anchorReference="anchorPosition"
+                open={Boolean(mousePosition)}
+                onClose={closeContextMenu}
+            >
+                <MenuItem
+                    onClick={() => {
+                        setCreateType("bookmark")
+                        closeContextMenu()
+                    }}
+                >
+                    Add new bookmark
+                </MenuItem>
+                <MenuItem
+                    onClick={() => {
+                        setCreateType("folder")
+                        closeContextMenu()
+                    }}
+                >
+                    Add new folder
+                </MenuItem>
+            </Menu>
+            {createType && (
+                <CreateBookmarkModal
+                    createType={createType}
+                    onClose={() => setCreateType(null)}
+                />
             )}
         </div>
     )

@@ -4,8 +4,6 @@ import {
     MenuItem,
     Button,
     IconButton,
-    ListItemIcon,
-    ListItemText,
     Dialog,
     DialogTitle,
     DialogContent,
@@ -13,7 +11,7 @@ import {
     DialogActions,
     Divider
 } from "@material-ui/core"
-import { MoreVert, Delete, BugReport } from "@material-ui/icons"
+import { MoreVert } from "@material-ui/icons"
 
 import { BookmarkTreeNode } from "../../types"
 import BookmarkEditModal from "./BookmarkEditModal"
@@ -50,24 +48,24 @@ const BookmarkActionMenu: React.FC<{
                 anchorEl={menuAnchor}
                 open={Boolean(menuAnchor)}
                 onClose={() => setMenuAnchor(null)}
+                anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "left"
+                }}
+                transformOrigin={{
+                    vertical: "top",
+                    horizontal: "center"
+                }}
             >
                 <MenuItem>
                     <BookmarkEditModal bookmarkNode={bookmarkNode} />
                 </MenuItem>
-                <MenuItem onClick={handleDeleteNode}>
-                    <ListItemIcon>
-                        <Delete />
-                    </ListItemIcon>
-                    <ListItemText primary="Delete" />
-                </MenuItem>
+                <MenuItem onClick={handleDeleteNode}>Delete</MenuItem>
                 {__DEV__ && (
                     <React.Fragment>
                         <Divider />
                         <MenuItem onClick={() => console.log(bookmarkNode)}>
-                            <ListItemIcon>
-                                <BugReport />
-                            </ListItemIcon>
-                            <ListItemText primary="Log This" />
+                            Log This
                         </MenuItem>
                     </React.Fragment>
                 )}

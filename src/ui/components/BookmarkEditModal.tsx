@@ -4,8 +4,6 @@ import {
     Modal,
     Backdrop,
     Fade,
-    ListItemIcon,
-    ListItemText,
     Card,
     CardHeader,
     CardContent,
@@ -13,7 +11,6 @@ import {
     CardActions,
     Button
 } from "@material-ui/core"
-import { Edit } from "@material-ui/icons"
 
 import { BookmarkTreeNode } from "../../types"
 
@@ -45,17 +42,10 @@ const BookmarkEditModal: React.FC<{ bookmarkNode: BookmarkTreeNode }> = ({
 
     const handleCloseModal = () => setOpen(false)
 
-    const handleSubmit = () => {
-        browser.bookmarks.update(bookmarkNode.id, formData)
-    }
-
     return (
         <React.Fragment>
             <div className={classNames.trigger} onClick={() => setOpen(true)}>
-                <ListItemIcon>
-                    <Edit />
-                </ListItemIcon>
-                <ListItemText primary={isBookmark ? "Edit" : "Rename"} />
+                {isBookmark ? "Edit" : "Rename"}
             </div>
             <Modal
                 className={classNames.modal}
@@ -64,7 +54,12 @@ const BookmarkEditModal: React.FC<{ bookmarkNode: BookmarkTreeNode }> = ({
                 BackdropComponent={Backdrop}
             >
                 <Fade in={open}>
-                    <form onSubmit={handleSubmit}>
+                    <form
+                        onSubmit={e => {
+                            e.preventDefault()
+                            browser.bookmarks.update(bookmarkNode.id, formData)
+                        }}
+                    >
                         <Card>
                             <CardHeader
                                 title={
@@ -110,7 +105,6 @@ const BookmarkEditModal: React.FC<{ bookmarkNode: BookmarkTreeNode }> = ({
                                     type="submit"
                                     variant="contained"
                                     color="primary"
-                                    onClick={handleSubmit}
                                 >
                                     Save
                                 </Button>

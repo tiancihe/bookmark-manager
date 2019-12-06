@@ -1,16 +1,10 @@
 import React, { useMemo } from "react"
-import { styled } from "@material-ui/core"
 
 import { BookmarkTreeNode } from "../../types"
 import { useStore } from "../Store"
 import FolderTreeItem from "./FolderTreeItem"
 
-const Panel = styled("div")({
-    width: "40vw",
-    padding: "8px 4px 0 16px"
-})
-
-const FolderPanel: React.FC = () => {
+const FolderPanel: React.FC<{ className?: string }> = ({ className }) => {
     const { bookmarkTree } = useStore()
 
     if (!bookmarkTree) return null
@@ -50,7 +44,7 @@ const FolderPanel: React.FC = () => {
         return renderResult
     }, [bookmarkTree])
 
-    return <Panel>{folderTree}</Panel>
+    return <div className={className}>{folderTree}</div>
 }
 
 export default FolderPanel

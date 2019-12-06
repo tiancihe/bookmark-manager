@@ -8,16 +8,26 @@ import SubfolderPanel from "./components/SubfolderPanel"
 const useAppStyle = makeStyles({
     container: {
         display: "flex",
-        flexDirection: "column"
+        flexDirection: "column",
+        width: "100vw",
+        height: "100vh"
     },
     mainContent: {
-        display: "flex"
+        flex: 1,
+        display: "flex",
+        overflow: "hidden"
     },
     folderPanel: {
-        width: "40%"
+        width: "30%",
+        height: "100%",
+        padding: "8px 4px 0 16px",
+        overflow: "auto"
     },
     subfolderPanel: {
-        width: "60%"
+        width: "70%",
+        height: "100%",
+        padding: "24px 32px 24px 16px",
+        overflow: "auto"
     }
 })
 

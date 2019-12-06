@@ -9,7 +9,8 @@ const INIT_STORE = {
 
 enum ActionType {
     LoadTree = "LoadTree",
-    SetActiveFolder = "SetActiveFolder"
+    SetActiveFolder = "SetActiveFolder",
+    Reload = "Reload"
 }
 
 type Action =
@@ -21,12 +22,18 @@ type Action =
           type: ActionType.SetActiveFolder
           payload: Pick<Store, "activeFolder">
       }
+    | {
+          type: ActionType.Reload
+          payload: Pick<Store, "bookmarkTree" | "activeFolder">
+      }
 
 const reducer: (store: Store, action: Action) => Store = (store, action) => {
+    console.log("action:")
     console.log(action)
     switch (action.type) {
         case ActionType.LoadTree:
         case ActionType.SetActiveFolder:
+        case ActionType.Reload:
             return {
                 ...store,
                 ...action.payload
@@ -46,6 +53,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
     children
 }) => {
     const [store, dispatch] = useReducer(reducer, INIT_STORE as Store)
+    console.log("store:")
+    console.log(store)
 
     useEffect(() => {
         const loadTree = async () => {
@@ -56,21 +65,39 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
                 }
             })
         }
-
         loadTree()
+    }, [])
 
-        browser.bookmarks.onCreated.addListener(loadTree)
-        browser.bookmarks.onChanged.addListener(loadTree)
-        browser.bookmarks.onRemoved.addListener(loadTree)
-        browser.bookmarks.onMoved.addListener(loadTree)
+    useEffect(() => {
+        const listener = async () => {
+            const bookmarkTree = (await browser.bookmarks.getTree())[0]
+            let activeFolder = store.activeFolder
+            if (activeFolder) {
+                activeFolder = (
+                    await browser.bookmarks.getSubTree(activeFolder.id)
+                )[0]
+            }
+            dispatch({
+                type: ActionType.Reload,
+                payload: {
+                    bookmarkTree,
+                    activeFolder
+                }
+            })
+        }
+
+        browser.bookmarks.onCreated.addListener(listener)
+        browser.bookmarks.onChanged.addListener(listener)
+        browser.bookmarks.onRemoved.addListener(listener)
+        browser.bookmarks.onMoved.addListener(listener)
 
         return () => {
-            browser.bookmarks.onCreated.removeListener(loadTree)
-            browser.bookmarks.onChanged.removeListener(loadTree)
-            browser.bookmarks.onRemoved.removeListener(loadTree)
-            browser.bookmarks.onMoved.removeListener(loadTree)
+            browser.bookmarks.onCreated.removeListener(listener)
+            browser.bookmarks.onChanged.removeListener(listener)
+            browser.bookmarks.onRemoved.removeListener(listener)
+            browser.bookmarks.onMoved.removeListener(listener)
         }
-    }, [])
+    }, [store])
 
     const setActiveFolder = (bookmarkNode: BookmarkTreeNode) =>
         dispatch({

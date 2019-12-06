@@ -26,7 +26,7 @@ const useFolderTreeItemStyle = makeStyles<
         paddingLeft: "8px",
         color: props =>
             props.active
-                ? theme.palette.primary.light
+                ? theme.palette.primary.main
                 : theme.palette.text.primary
     }
 }))

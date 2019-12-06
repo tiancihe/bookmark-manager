@@ -4,5 +4,8 @@ package-lock.json
 yarn.lock
 
 package/*.js
+package/.web-extension-id
+
+web-ext-artifacts
 
 .DS_store

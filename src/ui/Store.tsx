@@ -1,16 +1,26 @@
-import React, { createContext, useReducer, useContext, useEffect } from "react"
+import React, {
+    createContext,
+    useReducer,
+    useContext,
+    useEffect,
+    useMemo,
+    useCallback
+} from "react"
 
 import { BookmarkTreeNode } from "../types"
 
 const INIT_STORE = {
     bookmarkTree: null as BookmarkTreeNode | null,
-    activeFolder: null as BookmarkTreeNode | null
+    activeFolder: null as BookmarkTreeNode | null,
+    searchInput: "",
+    searchResult: [] as BookmarkTreeNode[]
 }
 
 enum ActionType {
     LoadTree = "LoadTree",
     SetActiveFolder = "SetActiveFolder",
-    Reload = "Reload"
+    Reload = "Reload",
+    Search = "Search"
 }
 
 type Action =
@@ -26,25 +36,47 @@ type Action =
           type: ActionType.Reload
           payload: Pick<Store, "bookmarkTree" | "activeFolder">
       }
+    | {
+          type: ActionType.Search
+          payload: Pick<Store, "searchInput" | "searchResult">
+      }
 
 const reducer: (store: Store, action: Action) => Store = (store, action) => {
     console.log("action:")
     console.log(action)
     switch (action.type) {
         case ActionType.LoadTree:
-        case ActionType.SetActiveFolder:
         case ActionType.Reload:
             return {
                 ...store,
                 ...action.payload
+            }
+        case ActionType.Search:
+            return {
+                ...store,
+                ...action.payload,
+                activeFolder: null
+            }
+        case ActionType.SetActiveFolder:
+            return {
+                ...store,
+                ...action.payload,
+                searchResult: []
             }
         default:
             return store
     }
 }
 
+type BookmarkMap = { [key: string]: BookmarkTreeNode }
+
 type Store = typeof INIT_STORE & {
+    bookmarkMap: BookmarkMap
+    bookmarkList: BookmarkTreeNode[]
+
     setActiveFolder: (bookmarkNode: BookmarkTreeNode) => void
+
+    search: (search: string) => void
 }
 
 const StoreContext = createContext({} as Store)
@@ -97,7 +129,29 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
             browser.bookmarks.onRemoved.removeListener(listener)
             browser.bookmarks.onMoved.removeListener(listener)
         }
-    }, [store])
+    }, [store.activeFolder])
+
+    const { bookmarkMap, bookmarkList } = useMemo(() => {
+        const map: { [key: string]: BookmarkTreeNode } = {}
+        const list: BookmarkTreeNode[] = []
+        const { bookmarkTree } = store
+
+        if (bookmarkTree) {
+            const iterate = (node: BookmarkTreeNode) => {
+                if (node) {
+                    map[node.title] = node
+                    list.push(node)
+
+                    if (node.children) {
+                        node.children.forEach(iterate)
+                    }
+                }
+            }
+            iterate(bookmarkTree)
+        }
+
+        return { bookmarkMap: map, bookmarkList: list }
+    }, [store.bookmarkTree])
 
     const setActiveFolder = (bookmarkNode: BookmarkTreeNode) =>
         dispatch({
@@ -107,8 +161,39 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
             }
         })
 
+    const search = useCallback(
+        (title: string) => {
+            let searchResult = [] as BookmarkTreeNode[]
+
+            if (title) {
+                const reg = new RegExp(title, "gi")
+
+                searchResult = bookmarkList.filter(bookmark =>
+                    reg.test(bookmark.title)
+                )
+            }
+
+            dispatch({
+                type: ActionType.Search,
+                payload: {
+                    searchInput: title,
+                    searchResult
+                }
+            })
+        },
+        [bookmarkList]
+    )
+
     return (
-        <StoreContext.Provider value={{ ...store, setActiveFolder }}>
+        <StoreContext.Provider
+            value={{
+                ...store,
+                bookmarkMap,
+                bookmarkList,
+                setActiveFolder,
+                search
+            }}
+        >
             {children}
         </StoreContext.Provider>
     )

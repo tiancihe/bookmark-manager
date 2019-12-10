@@ -3,7 +3,6 @@ import {
     makeStyles,
     Modal,
     Backdrop,
-    Fade,
     Card,
     CardHeader,
     CardContent,
@@ -15,105 +14,88 @@ import {
 import { BookmarkTreeNode } from "../../types"
 
 const useStyle = makeStyles({
-    trigger: {
-        display: "flex"
-    },
     modal: {
         display: "flex",
         alignItems: "center",
         justifyContent: "center"
+    },
+    content: {
+        minWidth: "500px"
     },
     actions: {
         justifyContent: "flex-end"
     }
 })
 
-const BookmarkEditModal: React.FC<{ bookmarkNode: BookmarkTreeNode }> = ({
-    bookmarkNode
-}) => {
+const BookmarkEditModal: React.FC<{
+    bookmarkNode: BookmarkTreeNode
+    onClose: () => void
+}> = ({ bookmarkNode, onClose }) => {
     const classNames = useStyle()
-    const [open, setOpen] = useState(false)
-    const [formData, setFormData] = useState({
-        title: bookmarkNode.title,
-        url: bookmarkNode.url
-    } as Pick<BookmarkTreeNode, "title" | "url">)
+
+    const [title, setTitle] = useState(bookmarkNode.title)
+    const [url, setUrl] = useState(bookmarkNode.url)
 
     const isBookmark = bookmarkNode.type === "bookmark"
 
-    const handleCloseModal = () => setOpen(false)
+    const handleSubmit = () => {
+        const payload: Partial<Pick<BookmarkTreeNode, "title" | "url">> = {
+            title
+        }
+
+        if (isBookmark) {
+            payload.url = url
+        }
+
+        try {
+            browser.bookmarks.update(bookmarkNode.id, payload)
+        } catch (err) {
+            console.error(err)
+        }
+    }
 
     return (
-        <React.Fragment>
-            <div className={classNames.trigger} onClick={() => setOpen(true)}>
-                {isBookmark ? "Edit" : "Rename"}
-            </div>
-            <Modal
-                className={classNames.modal}
-                open={open}
-                onClose={handleCloseModal}
-                BackdropComponent={Backdrop}
-            >
-                <Fade in={open}>
-                    <form
-                        onSubmit={e => {
-                            e.preventDefault()
-                            browser.bookmarks.update(bookmarkNode.id, formData)
-                        }}
+        <Modal
+            className={classNames.modal}
+            open
+            onClose={onClose}
+            BackdropComponent={Backdrop}
+        >
+            <Card className={classNames.content}>
+                <CardHeader
+                    title={isBookmark ? "Edit Bookmark" : "Rename Folder"}
+                />
+                <CardContent>
+                    <TextField
+                        fullWidth
+                        autoFocus
+                        label="Title"
+                        value={title}
+                        onChange={e => setTitle(e.target.value)}
+                    />
+                    {isBookmark && (
+                        <TextField
+                            fullWidth
+                            label="URL"
+                            value={url}
+                            onChange={e => setUrl(e.target.value)}
+                        />
+                    )}
+                </CardContent>
+                <CardActions className={classNames.actions}>
+                    <Button variant="outlined" onClick={onClose}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleSubmit}
                     >
-                        <Card>
-                            <CardHeader
-                                title={
-                                    isBookmark
-                                        ? "Edit Bookmark"
-                                        : "Rename Folder"
-                                }
-                            />
-                            <CardContent>
-                                <TextField
-                                    fullWidth
-                                    label="Title"
-                                    value={formData.title}
-                                    onChange={e =>
-                                        setFormData({
-                                            ...formData,
-                                            title: e.target.value
-                                        })
-                                    }
-                                />
-                                {isBookmark && (
-                                    <TextField
-                                        fullWidth
-                                        label="URL"
-                                        value={formData.url}
-                                        onChange={e =>
-                                            setFormData({
-                                                ...formData,
-                                                url: e.target.value
-                                            })
-                                        }
-                                    />
-                                )}
-                            </CardContent>
-                            <CardActions className={classNames.actions}>
-                                <Button
-                                    variant="outlined"
-                                    onClick={handleCloseModal}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    variant="contained"
-                                    color="primary"
-                                >
-                                    Save
-                                </Button>
-                            </CardActions>
-                        </Card>
-                    </form>
-                </Fade>
-            </Modal>
-        </React.Fragment>
+                        Save
+                    </Button>
+                </CardActions>
+            </Card>
+        </Modal>
     )
 }
 

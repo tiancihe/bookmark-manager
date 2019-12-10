@@ -17,7 +17,7 @@ const useSubfolderStyle = makeStyles({
 const SubfolderPanel: React.FC<{ className?: string }> = ({ className }) => {
     const classNames = useSubfolderStyle()
 
-    const { activeFolder } = useStore()
+    const { activeFolder, searchResult } = useStore()
 
     const [mousePosition, setMousePosition] = useState<{
         x: number
@@ -32,6 +32,29 @@ const SubfolderPanel: React.FC<{ className?: string }> = ({ className }) => {
         setMousePosition(null)
     }
 
+    let content: React.ReactNode = null
+    if (Array.isArray(searchResult) && searchResult.length) {
+        content = (
+            <Paper className={classNames.paper} elevation={3}>
+                {searchResult.map(child => (
+                    <BookmarkTreeItem key={child.id} bookmarkNode={child} />
+                ))}
+            </Paper>
+        )
+    } else if (
+        activeFolder &&
+        activeFolder.children &&
+        activeFolder.children.length
+    ) {
+        content = (
+            <Paper className={classNames.paper} elevation={3}>
+                {activeFolder.children.map(child => (
+                    <BookmarkTreeItem key={child.id} bookmarkNode={child} />
+                ))}
+            </Paper>
+        )
+    }
+
     return (
         <div
             className={className}
@@ -43,15 +66,7 @@ const SubfolderPanel: React.FC<{ className?: string }> = ({ className }) => {
                 })
             }}
         >
-            {!activeFolder ||
-            !activeFolder.children ||
-            !activeFolder.children.length ? null : (
-                <Paper className={classNames.paper}>
-                    {activeFolder.children.map(child => (
-                        <BookmarkTreeItem key={child.id} bookmarkNode={child} />
-                    ))}
-                </Paper>
-            )}
+            {content}
             <Menu
                 anchorPosition={
                     mousePosition

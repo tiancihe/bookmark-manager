@@ -41,6 +41,9 @@ const config = {
 
 if (__DEV__) {
     config.watch = true
+    config.optimization = {
+        minimize: false
+    }
 }
 
 module.exports = config

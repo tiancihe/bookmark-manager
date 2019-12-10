@@ -22,6 +22,9 @@ const BookmarkActionMenu: React.FC<{
 }> = ({ bookmarkNode, className }) => {
     const [menuAnchor, setMenuAnchor] = useState<HTMLButtonElement | null>(null)
 
+    const closeMenu = () => setMenuAnchor(null)
+
+    const [showEditModal, setShowEditModal] = useState(false)
     const [showConfirmModal, setShowConfirmModal] = useState(false)
 
     const handleDeleteNode = () => {
@@ -47,7 +50,7 @@ const BookmarkActionMenu: React.FC<{
             <Menu
                 anchorEl={menuAnchor}
                 open={Boolean(menuAnchor)}
-                onClose={() => setMenuAnchor(null)}
+                onClose={closeMenu}
                 anchorOrigin={{
                     vertical: "top",
                     horizontal: "left"
@@ -57,8 +60,13 @@ const BookmarkActionMenu: React.FC<{
                     horizontal: "center"
                 }}
             >
-                <MenuItem>
-                    <BookmarkEditModal bookmarkNode={bookmarkNode} />
+                <MenuItem
+                    onClick={() => {
+                        setShowEditModal(true)
+                        closeMenu()
+                    }}
+                >
+                    {bookmarkNode.type === "bookmark" ? "Edit" : "Rename"}
                 </MenuItem>
                 <MenuItem onClick={handleDeleteNode}>Delete</MenuItem>
                 {__DEV__ && (
@@ -70,6 +78,14 @@ const BookmarkActionMenu: React.FC<{
                     </React.Fragment>
                 )}
             </Menu>
+            {showEditModal && (
+                <BookmarkEditModal
+                    bookmarkNode={bookmarkNode}
+                    onClose={() => {
+                        setShowEditModal(false)
+                    }}
+                />
+            )}
             <Dialog open={showConfirmModal}>
                 <DialogTitle>Folder Not Empty!</DialogTitle>
                 <DialogContent>
@@ -83,7 +99,10 @@ const BookmarkActionMenu: React.FC<{
                 <DialogActions style={{ justifyContent: "flex-end" }}>
                     <Button
                         variant="outlined"
-                        onClick={() => setShowConfirmModal(false)}
+                        onClick={() => {
+                            setShowConfirmModal(false)
+                            closeMenu()
+                        }}
                     >
                         Cancel
                     </Button>

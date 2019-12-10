@@ -1,6 +1,6 @@
 {
   "name": "bookmark-manager",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Chrome Bookmark Manager for Firefox",
   "private": true,
   "scripts": {
@@ -10,11 +10,13 @@
   "dependencies": {
     "@material-ui/core": "^4.7.1",
     "@material-ui/icons": "^4.5.1",
+    "lodash": "^4.17.15",
     "react": "^16.12.0",
     "react-dom": "^16.12.0"
   },
   "devDependencies": {
     "@types/firefox-webext-browser": "^70.0.1",
+    "@types/lodash": "^4.14.149",
     "@types/react": "^16.9.14",
     "@types/react-dom": "^16.9.4",
     "cross-env": "^6.0.3",

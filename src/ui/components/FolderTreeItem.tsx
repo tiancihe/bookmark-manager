@@ -66,9 +66,19 @@ const FolderTreeItem: React.FC<React.PropsWithChildren<{
                 <div className={classNames.icon}>
                     {hasSubfolders &&
                         (open ? (
-                            <ArrowDropDown onClick={() => setOpen(false)} />
+                            <ArrowDropDown
+                                onClick={e => {
+                                    e.stopPropagation()
+                                    setOpen(false)
+                                }}
+                            />
                         ) : (
-                            <ArrowRight onClick={() => setOpen(true)} />
+                            <ArrowRight
+                                onClick={e => {
+                                    e.stopPropagation()
+                                    setOpen(true)
+                                }}
+                            />
                         ))}
                 </div>
                 <div className={classNames.icon}>

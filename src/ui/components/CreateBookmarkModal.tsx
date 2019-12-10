@@ -23,6 +23,9 @@ const useCreateBookmarkModal = makeStyles({
     },
     content: {
         minWidth: "500px"
+    },
+    actions: {
+        justifyContent: "flex-end"
     }
 })
 
@@ -82,6 +85,7 @@ const CreateBookmarkModal: React.FC<{
                     <TextField
                         label="Name"
                         fullWidth
+                        autoFocus
                         value={title}
                         onChange={e => setTitle(e.target.value)}
                     />
@@ -95,7 +99,7 @@ const CreateBookmarkModal: React.FC<{
                         />
                     )}
                 </CardContent>
-                <CardActions style={{ justifyContent: "flex-end" }}>
+                <CardActions className={classNames.actions}>
                     <Button
                         variant="outlined"
                         color="primary"

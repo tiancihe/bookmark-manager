@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "start": "cross-env NODE_ENV=development webpack",
-    "build": "webpack"
+    "build": "webpack",
+    "bundle": "web-ext build --source-dir package"
   },
   "dependencies": {
     "@material-ui/core": "^4.8.0",

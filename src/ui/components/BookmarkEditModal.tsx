@@ -38,7 +38,7 @@ const BookmarkEditModal: React.FC<{
 
     const isBookmark = bookmarkNode.type === "bookmark"
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const payload: Partial<Pick<BookmarkTreeNode, "title" | "url">> = {
             title
         }
@@ -48,7 +48,8 @@ const BookmarkEditModal: React.FC<{
         }
 
         try {
-            browser.bookmarks.update(bookmarkNode.id, payload)
+            await browser.bookmarks.update(bookmarkNode.id, payload)
+            onClose()
         } catch (err) {
             console.error(err)
         }

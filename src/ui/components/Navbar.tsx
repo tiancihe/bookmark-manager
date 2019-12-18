@@ -69,10 +69,7 @@ const Navbar: React.FC = () => {
         ) as HTMLInputElement
 
         const handleChange = debounce(() => {
-            const value = input.value
-            if (value) {
-                search(value)
-            }
+            search(input.value)
         }, 500)
 
         const handleEnter = (e: HTMLElementEventMap["keydown"]) => {

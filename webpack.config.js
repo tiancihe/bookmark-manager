@@ -32,7 +32,6 @@ const config = {
         ]
     },
     plugins: [
-        new webpack.ProgressPlugin(),
         new webpack.DefinePlugin({
             __DEV__
         })

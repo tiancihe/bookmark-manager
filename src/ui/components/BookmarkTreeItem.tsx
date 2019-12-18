@@ -5,12 +5,14 @@ import { FolderTwoTone } from "@material-ui/icons"
 import { BookmarkTreeNode } from "../../types"
 import { getFavicon } from "../utils"
 import BookmarkActionMenu from "./BookmarkActionMenu"
+import { useStore } from "../Store"
 
 const useBookmarkListItemStyle = makeStyles({
     container: {
         display: "flex",
         alignItems: "center",
-        paddingLeft: "24px"
+        paddingLeft: "24px",
+        userSelect: "none"
     },
     icon: {
         display: "flex",
@@ -34,6 +36,8 @@ const useBookmarkListItemStyle = makeStyles({
 const BookmarkTreeItem: React.FC<{
     bookmarkNode: BookmarkTreeNode
 }> = ({ bookmarkNode }) => {
+    const { setActiveFolder } = useStore()
+
     const classNames = useBookmarkListItemStyle()
 
     const isFolder = bookmarkNode.type === "folder"
@@ -41,7 +45,21 @@ const BookmarkTreeItem: React.FC<{
 
     if (isFolder || isBookmark) {
         return (
-            <div className={classNames.container}>
+            <div
+                className={classNames.container}
+                onDoubleClick={() => {
+                    if (isFolder) {
+                        setActiveFolder(bookmarkNode.id)
+                    }
+
+                    if (isBookmark) {
+                        browser.tabs.create({
+                            url: bookmarkNode.url,
+                            active: true
+                        })
+                    }
+                }}
+            >
                 <div className={classNames.icon}>
                     {isFolder && <FolderTwoTone />}
                     {isBookmark && (

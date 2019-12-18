@@ -1,6 +1,6 @@
 {
   "name": "bookmark-manager",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Chrome Bookmark Manager for Firefox",
   "private": true,
   "scripts": {
@@ -8,7 +8,7 @@
     "build": "webpack"
   },
   "dependencies": {
-    "@material-ui/core": "^4.7.1",
+    "@material-ui/core": "^4.8.0",
     "@material-ui/icons": "^4.5.1",
     "lodash": "^4.17.15",
     "react": "^16.12.0",
@@ -17,13 +17,13 @@
   "devDependencies": {
     "@types/firefox-webext-browser": "^70.0.1",
     "@types/lodash": "^4.14.149",
-    "@types/react": "^16.9.14",
+    "@types/react": "^16.9.16",
     "@types/react-dom": "^16.9.4",
     "cross-env": "^6.0.3",
     "ts-loader": "^6.2.1",
     "typescript": "^3.7.2",
     "web-ext": "^3.2.1",
-    "webpack": "^4.41.2",
+    "webpack": "^4.41.3",
     "webpack-cli": "^3.3.10"
   }
 }

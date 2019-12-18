@@ -35,11 +35,11 @@ const FolderTreeItem: React.FC<React.PropsWithChildren<{
     level: number
     bookmarkNode: BookmarkTreeNode
 }>> = ({ level, bookmarkNode, children }) => {
-    const { activeFolder, setActiveFolder } = useStore()
+    const { activeFolderId, setActiveFolder } = useStore()
 
     const classNames = useFolderTreeItemStyle({
         level,
-        active: activeFolder !== null && activeFolder.id === bookmarkNode.id
+        active: activeFolderId === bookmarkNode.id
     })
 
     const [open, setOpen] = useState(false)
@@ -59,8 +59,8 @@ const FolderTreeItem: React.FC<React.PropsWithChildren<{
             <div
                 className={classNames.container}
                 onClick={() =>
-                    (!activeFolder || activeFolder.id !== bookmarkNode.id) &&
-                    setActiveFolder(bookmarkNode)
+                    activeFolderId !== bookmarkNode.id &&
+                    setActiveFolder(bookmarkNode.id)
                 }
             >
                 <div className={classNames.icon}>

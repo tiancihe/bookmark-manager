@@ -8,14 +8,15 @@ import {
     CardContent,
     CardActions,
     Button,
-    TextField
+    TextField,
+    Snackbar
 } from "@material-ui/core"
 
 import { useStore } from "../Store"
 
 type CreateDetails = browser.bookmarks.CreateDetails
 
-const useCreateBookmarkModal = makeStyles({
+const useCreateBookmarkModalStyle = makeStyles({
     modal: {
         display: "flex",
         alignItems: "center",
@@ -33,9 +34,9 @@ const CreateBookmarkModal: React.FC<{
     createType: "bookmark" | "folder"
     onClose: () => void
 }> = ({ createType, onClose }) => {
-    const { activeFolder } = useStore()
+    const { activeFolderId } = useStore()
 
-    const classNames = useCreateBookmarkModal()
+    const classNames = useCreateBookmarkModalStyle()
 
     const [title, setTitle] = useState("")
     const [url, setUrl] = useState("")
@@ -45,15 +46,19 @@ const CreateBookmarkModal: React.FC<{
         null
     )
 
+    const [showNoActiveFolderError, setShowNoActiveFolderError] = useState(
+        false
+    )
+
     const handleSubmit = async () => {
-        if (activeFolder) {
+        if (activeFolderId) {
             if (createType === "bookmark" && !url) {
                 setUrlValidationError("Invalid url!")
                 return
             }
 
             const detail: CreateDetails = {
-                parentId: activeFolder.id,
+                parentId: activeFolderId,
                 title,
                 url,
                 type: createType
@@ -69,6 +74,8 @@ const CreateBookmarkModal: React.FC<{
             } catch (err) {
                 console.error(err)
             }
+        } else {
+            setShowNoActiveFolderError(true)
         }
     }
 
@@ -115,6 +122,16 @@ const CreateBookmarkModal: React.FC<{
                         Save
                     </Button>
                 </CardActions>
+                <Snackbar
+                    anchorOrigin={{
+                        vertical: "bottom",
+                        horizontal: "left"
+                    }}
+                    open={showNoActiveFolderError}
+                    autoHideDuration={1500}
+                    onClose={() => setShowNoActiveFolderError(false)}
+                    message="Select a folder on the left panel first"
+                />
             </Card>
         </Modal>
     )

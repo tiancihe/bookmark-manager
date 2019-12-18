@@ -11,13 +11,24 @@ const useSubfolderStyle = makeStyles({
         maxWidth: "960px",
         padding: "8px 0",
         margin: "auto"
+    },
+    emptySearchResults: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100%",
+        fontSize: "14px",
+        fontWeight: "bold",
+        color: "#6e6e6e",
+        userSelect: "none",
+        cursor: "default"
     }
 })
 
 const SubfolderPanel: React.FC<{ className?: string }> = ({ className }) => {
     const classNames = useSubfolderStyle()
 
-    const { activeFolder, searchResult } = useStore()
+    const { activeFolder, searchInput, searchResult } = useStore()
 
     const [mousePosition, setMousePosition] = useState<{
         x: number
@@ -33,14 +44,22 @@ const SubfolderPanel: React.FC<{ className?: string }> = ({ className }) => {
     }
 
     let content: React.ReactNode = null
-    if (Array.isArray(searchResult) && searchResult.length) {
-        content = (
-            <Paper className={classNames.paper} elevation={3}>
-                {searchResult.map(child => (
-                    <BookmarkTreeItem key={child.id} bookmarkNode={child} />
-                ))}
-            </Paper>
-        )
+    if (searchInput) {
+        if (searchResult.length) {
+            content = (
+                <Paper className={classNames.paper} elevation={3}>
+                    {searchResult.map(child => (
+                        <BookmarkTreeItem key={child.id} bookmarkNode={child} />
+                    ))}
+                </Paper>
+            )
+        } else {
+            content = (
+                <div className={classNames.emptySearchResults}>
+                    No search results found
+                </div>
+            )
+        }
     } else if (
         activeFolder &&
         activeFolder.children &&

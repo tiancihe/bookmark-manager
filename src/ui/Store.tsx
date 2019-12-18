@@ -3,23 +3,20 @@ import React, {
     useReducer,
     useContext,
     useEffect,
-    useMemo,
-    useCallback
+    useMemo
 } from "react"
 
 import { BookmarkTreeNode } from "../types"
 
 const INIT_STORE = {
     bookmarkTree: null as BookmarkTreeNode | null,
-    activeFolder: null as BookmarkTreeNode | null,
-    searchInput: "",
-    searchResult: [] as BookmarkTreeNode[]
+    activeFolderId: "",
+    searchInput: ""
 }
 
 enum ActionType {
     LoadTree = "LoadTree",
     SetActiveFolder = "SetActiveFolder",
-    Reload = "Reload",
     Search = "Search"
 }
 
@@ -30,38 +27,31 @@ type Action =
       }
     | {
           type: ActionType.SetActiveFolder
-          payload: Pick<Store, "activeFolder">
-      }
-    | {
-          type: ActionType.Reload
-          payload: Pick<Store, "bookmarkTree" | "activeFolder">
+          payload: Pick<Store, "activeFolderId">
       }
     | {
           type: ActionType.Search
-          payload: Pick<Store, "searchInput" | "searchResult">
+          payload: Pick<Store, "searchInput">
       }
 
 const reducer: (store: Store, action: Action) => Store = (store, action) => {
-    console.log("action:")
-    console.log(action)
+    if (__DEV__) {
+        console.log("action:")
+        console.log(action)
+    }
+
     switch (action.type) {
         case ActionType.LoadTree:
-        case ActionType.Reload:
-            return {
-                ...store,
-                ...action.payload
-            }
         case ActionType.Search:
             return {
                 ...store,
-                ...action.payload,
-                activeFolder: null
+                ...action.payload
             }
         case ActionType.SetActiveFolder:
             return {
                 ...store,
                 ...action.payload,
-                searchResult: []
+                searchInput: ""
             }
         default:
             return store
@@ -71,11 +61,12 @@ const reducer: (store: Store, action: Action) => Store = (store, action) => {
 type BookmarkMap = { [key: string]: BookmarkTreeNode }
 
 type Store = typeof INIT_STORE & {
+    activeFolder: BookmarkTreeNode
     bookmarkMap: BookmarkMap
     bookmarkList: BookmarkTreeNode[]
+    searchResult: BookmarkTreeNode[]
 
-    setActiveFolder: (bookmarkNode: BookmarkTreeNode) => void
-
+    setActiveFolder: (id: string) => void
     search: (search: string) => void
 }
 
@@ -85,8 +76,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
     children
 }) => {
     const [store, dispatch] = useReducer(reducer, INIT_STORE as Store)
-    console.log("store:")
-    console.log(store)
 
     useEffect(() => {
         const loadTree = async () => {
@@ -98,48 +87,30 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
             })
         }
         loadTree()
-    }, [])
 
-    useEffect(() => {
-        const listener = async () => {
-            const bookmarkTree = (await browser.bookmarks.getTree())[0]
-            let activeFolder = store.activeFolder
-            if (activeFolder) {
-                activeFolder = (
-                    await browser.bookmarks.getSubTree(activeFolder.id)
-                )[0]
-            }
-            dispatch({
-                type: ActionType.Reload,
-                payload: {
-                    bookmarkTree,
-                    activeFolder
-                }
-            })
-        }
-
-        browser.bookmarks.onCreated.addListener(listener)
-        browser.bookmarks.onChanged.addListener(listener)
-        browser.bookmarks.onRemoved.addListener(listener)
-        browser.bookmarks.onMoved.addListener(listener)
+        browser.bookmarks.onCreated.addListener(loadTree)
+        browser.bookmarks.onChanged.addListener(loadTree)
+        browser.bookmarks.onRemoved.addListener(loadTree)
+        browser.bookmarks.onMoved.addListener(loadTree)
 
         return () => {
-            browser.bookmarks.onCreated.removeListener(listener)
-            browser.bookmarks.onChanged.removeListener(listener)
-            browser.bookmarks.onRemoved.removeListener(listener)
-            browser.bookmarks.onMoved.removeListener(listener)
+            browser.bookmarks.onCreated.removeListener(loadTree)
+            browser.bookmarks.onChanged.removeListener(loadTree)
+            browser.bookmarks.onRemoved.removeListener(loadTree)
+            browser.bookmarks.onMoved.removeListener(loadTree)
         }
-    }, [store.activeFolder])
+    }, [])
 
     const { bookmarkMap, bookmarkList } = useMemo(() => {
         const map: { [key: string]: BookmarkTreeNode } = {}
         const list: BookmarkTreeNode[] = []
+
         const { bookmarkTree } = store
 
         if (bookmarkTree) {
             const iterate = (node: BookmarkTreeNode) => {
                 if (node) {
-                    map[node.title] = node
+                    map[node.id] = node
                     list.push(node)
 
                     if (node.children) {
@@ -153,47 +124,51 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
         return { bookmarkMap: map, bookmarkList: list }
     }, [store.bookmarkTree])
 
-    const setActiveFolder = (bookmarkNode: BookmarkTreeNode) =>
+    const setActiveFolder = (id: BookmarkTreeNode["id"]) => {
         dispatch({
             type: ActionType.SetActiveFolder,
             payload: {
-                activeFolder: bookmarkNode
+                activeFolderId: id
             }
         })
+    }
 
-    const search = useCallback(
-        (title: string) => {
-            let searchResult = [] as BookmarkTreeNode[]
+    const searchResult = useMemo(() => {
+        if (!store.searchInput) {
+            return []
+        }
 
-            if (title) {
-                const reg = new RegExp(title, "gi")
+        const reg = new RegExp(store.searchInput, "gi")
 
-                searchResult = bookmarkList.filter(bookmark =>
-                    reg.test(bookmark.title)
-                )
+        return bookmarkList.filter(bookmark => reg.test(bookmark.title))
+    }, [bookmarkList, store.searchInput])
+
+    const search = (title: string) => {
+        dispatch({
+            type: ActionType.Search,
+            payload: {
+                searchInput: title
             }
+        })
+    }
 
-            dispatch({
-                type: ActionType.Search,
-                payload: {
-                    searchInput: title,
-                    searchResult
-                }
-            })
-        },
-        [bookmarkList]
-    )
+    const resolvedStore: Store = {
+        ...store,
+        activeFolder: bookmarkMap[store.activeFolderId],
+        bookmarkMap,
+        bookmarkList,
+        setActiveFolder,
+        search,
+        searchResult
+    }
+
+    if (__DEV__) {
+        console.log("store:")
+        console.log(resolvedStore)
+    }
 
     return (
-        <StoreContext.Provider
-            value={{
-                ...store,
-                bookmarkMap,
-                bookmarkList,
-                setActiveFolder,
-                search
-            }}
-        >
+        <StoreContext.Provider value={resolvedStore}>
             {children}
         </StoreContext.Provider>
     )

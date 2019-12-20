@@ -8,6 +8,14 @@
   "browser_action": {
     "default_icon": "icon.svg"
   },
+  "commands": {
+    "_execute_browser_action": {
+      "suggested_key": {
+        "default": "Ctrl+Alt+B",
+        "mac": "MacCtrl+Command+B"
+      }
+    }
+  },
   "background": {
     "scripts": ["background.js"]
   },

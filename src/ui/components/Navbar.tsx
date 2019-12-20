@@ -96,6 +96,7 @@ const Navbar: React.FC = () => {
                         <Search />
                     </div>
                     <InputBase
+                        autoFocus
                         id={SEARCH_INPUT_ID}
                         placeholder="Search here"
                         classes={{

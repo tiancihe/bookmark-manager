@@ -7,3 +7,8 @@
 - add empty search results placeholder
 - create modal now shows a help message if create option failed
 - search now triggers on empty seach input
+
+## v0.2.1 (2019/12/25)
+
+- add default shortcut
+- autofocus for search

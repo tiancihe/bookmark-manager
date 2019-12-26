@@ -12,3 +12,7 @@
 
 - add default shortcut
 - autofocus for search
+
+## v0.2.2 (2019/12/26)
+
+- add dark mode support (based on media query)

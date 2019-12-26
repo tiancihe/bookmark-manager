@@ -3,23 +3,13 @@ import {
     CssBaseline,
     makeStyles,
     createMuiTheme,
+    useMediaQuery,
     MuiThemeProvider
 } from "@material-ui/core"
 
 import Navbar from "./components/Navbar"
 import FolderPanel from "./components/FolderPanel"
 import SubfolderPanel from "./components/SubfolderPanel"
-
-const theme = createMuiTheme({
-    palette: {
-        primary: {
-            main: "#3367d6"
-        }
-    },
-    typography: {
-        fontSize: 12
-    }
-})
 
 const useAppStyle = makeStyles({
     container: {
@@ -49,6 +39,19 @@ const useAppStyle = makeStyles({
 
 const App: React.FC = () => {
     const classNames = useAppStyle()
+
+    const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)")
+
+    const theme = React.useMemo(() => {
+        return createMuiTheme({
+            palette: {
+                type: prefersDarkMode ? "dark" : "light",
+                primary: {
+                    main: "#3367d6"
+                }
+            }
+        })
+    }, [prefersDarkMode])
 
     return (
         <MuiThemeProvider theme={theme}>

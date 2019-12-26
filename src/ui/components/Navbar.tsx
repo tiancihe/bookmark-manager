@@ -13,6 +13,12 @@ import debounce from "lodash/debounce"
 import { useStore } from "../Store"
 
 const useNavbarStyle = makeStyles(theme => ({
+    appBar: {
+        backgroundColor:
+            theme.palette.type === "dark"
+                ? theme.palette.background.default
+                : undefined
+    },
     toolbar: {
         display: "flex",
         alignItems: "center",
@@ -88,7 +94,7 @@ const Navbar: React.FC = () => {
     }, [searchInput, search])
 
     return (
-        <AppBar position="static">
+        <AppBar className={classNames.appBar} position="static">
             <Toolbar className={classNames.toolbar}>
                 <Typography>Bookmark Manager</Typography>
                 <div className={classNames.search}>

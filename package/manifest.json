@@ -17,7 +17,7 @@
     }
   },
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["scripts/background.js"]
   },
   "permissions": ["bookmarks", "storage", "tabs"]
 }

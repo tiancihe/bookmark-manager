@@ -1,10 +1,6 @@
 const path = require("path")
 
-const webpack = require("webpack")
-
-const { NODE_ENV } = process.env
-
-const __DEV__ = NODE_ENV === "development"
+const { DefinePlugin } = require("webpack")
 
 const config = {
     entry: {
@@ -12,14 +8,13 @@ const config = {
         ui: path.join(__dirname, "src/ui/index.tsx")
     },
     output: {
-        path: path.join(__dirname, "package"),
+        path: path.join(__dirname, "package/scripts"),
         filename: "[name].js"
     },
-    stats: "minimal",
+    mode: "production",
     performance: {
         hints: false
     },
-    mode: "production",
     resolve: {
         extensions: [".js", ".ts", ".tsx"]
     },
@@ -27,22 +22,19 @@ const config = {
         rules: [
             {
                 test: /\.tsx?$/,
-                use: ["ts-loader"]
+                use: [
+                    {
+                        loader: "babel-loader"
+                    }
+                ]
             }
         ]
     },
     plugins: [
-        new webpack.DefinePlugin({
-            __DEV__
+        new DefinePlugin({
+            __DEV__: false
         })
     ]
-}
-
-if (__DEV__) {
-    config.watch = true
-    config.optimization = {
-        minimize: false
-    }
 }
 
 module.exports = config

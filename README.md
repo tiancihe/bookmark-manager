@@ -4,23 +4,20 @@ WIP: A bookmark manager extension for firefox.
 
 ## Development
 
-1. execute the following commands in your terminal (make sure nodejs is installed)
+1. install dependencies (make sure nodejs is installed)
 
    ```bash
    npm install
-   npm start
    ```
 
-1. load temporary extension in firefox
+1. start webpack-dev-server
 
-   - use web-ext package
+   ```bash
+     npm start
+   ```
 
-     ```bash
-     npx web-ext run --source-dir package
-     ```
+1. run the extension (make sure your default browser is firefox)
 
-   - load manually
-
-     1. open a new tab in firefox
-     1. go to `about:debugging#/runtime/this-firefox`
-     1. click `Load Temorary Add-on`
+   ```bash
+     npm run ext
+   ```

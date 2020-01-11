@@ -16,3 +16,7 @@
 ## v0.2.2 (2019/12/26)
 
 - add dark mode support (based on media query)
+
+## v0.2.3 (2020/1/11)
+
+- icons & title

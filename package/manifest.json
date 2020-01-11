@@ -1,12 +1,13 @@
 {
   "manifest_version": 2,
   "name": "bookmark-manager",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "icons": {
-    "48": "icon.svg"
+    "48": "icon-48x48.png",
+    "96": "icon-96x96.png"
   },
   "browser_action": {
-    "default_icon": "icon.svg"
+    "default_icon": "icon-48x48.png"
   },
   "commands": {
     "_execute_browser_action": {

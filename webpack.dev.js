@@ -14,6 +14,8 @@ const config = {
     mode: "production",
     stats: "minimal",
     devServer: {
+        hot: false,
+        inline: false,
         writeToDisk: true
     },
     performance: {

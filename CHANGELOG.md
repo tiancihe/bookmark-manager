@@ -20,3 +20,14 @@
 ## v0.2.3 (2020/1/11)
 
 - icons & title
+
+## v0.3.0 (2020/1/11)
+
+### features
+
+- drag and drop to move bookmarks and folders 🔥
+- button to switch between light mode ☀ and dark mode 🌙
+
+### fixes
+
+- larger seach input

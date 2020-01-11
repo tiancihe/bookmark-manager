@@ -1,9 +1,11 @@
-import React, { useMemo, useState } from "react"
-import { makeStyles, Theme } from "@material-ui/core"
+import React, { useMemo, useState, useRef, createRef } from "react"
+import { makeStyles, Theme, useTheme } from "@material-ui/core"
 import { ArrowRight, ArrowDropDown, FolderTwoTone } from "@material-ui/icons"
+import { useDrop, DragObjectWithType } from "react-dnd"
 
 import { BookmarkTreeNode } from "../../types"
 import { useStore } from "../Store"
+import { DNDTypes } from "../consts"
 
 const useFolderTreeItemStyle = makeStyles<
     Theme,
@@ -35,7 +37,14 @@ const FolderTreeItem: React.FC<React.PropsWithChildren<{
     level: number
     bookmarkNode: BookmarkTreeNode
 }>> = ({ level, bookmarkNode, children }) => {
-    const { activeFolderId, setActiveFolder } = useStore()
+    const {
+        activeFolderId,
+        setActiveFolder,
+        draggingNode,
+        hoverState,
+        setHoverState
+    } = useStore()
+    const theme = useTheme()
 
     const classNames = useFolderTreeItemStyle({
         level,
@@ -54,10 +63,49 @@ const FolderTreeItem: React.FC<React.PropsWithChildren<{
         [bookmarkNode]
     )
 
+    const nodeRef = useRef(createRef<HTMLDivElement>())
+
+    const [, drop] = useDrop<DragObjectWithType & { id: string }, void, void>({
+        accept: DNDTypes.BookmarkItem,
+        hover: (item, monitor) => {
+            if (!hoverState.node || hoverState.node.id !== bookmarkNode.id) {
+                setHoverState({
+                    node: bookmarkNode,
+                    area: "mid"
+                })
+            }
+        },
+        drop: (item, monitor) => {
+            if (draggingNode) {
+                browser.bookmarks.move(draggingNode.id, {
+                    parentId: bookmarkNode.id
+                })
+            }
+
+            setHoverState({
+                node: null,
+                area: null
+            })
+        }
+    })
+
+    drop(nodeRef.current)
+
+    const isHovered = hoverState.node && hoverState.node.id === bookmarkNode.id
+
     return (
         <React.Fragment>
             <div
+                ref={nodeRef.current}
                 className={classNames.container}
+                style={
+                    isHovered
+                        ? {
+                              backgroundColor: theme.palette.primary.main,
+                              color: theme.palette.primary.contrastText
+                          }
+                        : undefined
+                }
                 onClick={() =>
                     activeFolderId !== bookmarkNode.id &&
                     setActiveFolder(bookmarkNode.id)
@@ -84,7 +132,16 @@ const FolderTreeItem: React.FC<React.PropsWithChildren<{
                 <div className={classNames.icon}>
                     <FolderTwoTone />
                 </div>
-                <div className={classNames.text}>{bookmarkNode.title}</div>
+                <div
+                    className={classNames.text}
+                    style={
+                        isHovered
+                            ? { color: theme.palette.primary.contrastText }
+                            : undefined
+                    }
+                >
+                    {bookmarkNode.title}
+                </div>
             </div>
             {open && children}
         </React.Fragment>

@@ -5,9 +5,17 @@ import {
     AppBar,
     Toolbar,
     Typography,
-    InputBase
+    InputBase,
+    IconButton,
+    useTheme
 } from "@material-ui/core"
-import { Search } from "@material-ui/icons"
+import {
+    Search,
+    Brightness4,
+    Brightness5,
+    Brightness5Outlined,
+    Brightness4Outlined
+} from "@material-ui/icons"
 import debounce from "lodash/debounce"
 
 import { useStore } from "../Store"
@@ -25,6 +33,8 @@ const useNavbarStyle = makeStyles(theme => ({
         justifyContent: "space-between"
     },
     search: {
+        flex: 1,
+        maxWidth: "50%",
         position: "relative",
         borderRadius: theme.shape.borderRadius,
         backgroundColor: fade(theme.palette.common.white, 0.15),
@@ -64,6 +74,9 @@ const useNavbarStyle = makeStyles(theme => ({
 const SEARCH_INPUT_ID = "SEARCH_INPUT"
 
 const Navbar: React.FC = () => {
+    const { darkMode, toggleDarkMode } = useStore()
+    const theme = useTheme()
+
     const classNames = useNavbarStyle()
 
     const { searchInput, search } = useStore()
@@ -112,6 +125,9 @@ const Navbar: React.FC = () => {
                         defaultValue={searchInput}
                     />
                 </div>
+                <IconButton onClick={toggleDarkMode} color="inherit">
+                    {darkMode ? <Brightness5 /> : <Brightness4 />}
+                </IconButton>
             </Toolbar>
         </AppBar>
     )

@@ -7,20 +7,30 @@ import React, {
 } from "react"
 
 import { BookmarkTreeNode } from "../types"
+import { HoverState } from "./types"
 
 const INIT_STORE = {
+    darkMode: false,
     bookmarkTree: null as BookmarkTreeNode | null,
     activeFolderId: "",
-    searchInput: ""
+    searchInput: "",
+    draggingNode: null as BookmarkTreeNode | null,
+    hoverState: {} as HoverState
 }
 
 enum ActionType {
+    ToggleDarkMode = "ToggleDarkMode",
     LoadTree = "LoadTree",
     SetActiveFolder = "SetActiveFolder",
-    Search = "Search"
+    Search = "Search",
+    SetDraggingNode = "SetDraggingNode",
+    SetHoverState = "SetHoverState"
 }
 
 type Action =
+    | {
+          type: ActionType.ToggleDarkMode
+      }
     | {
           type: ActionType.LoadTree
           payload: Pick<Store, "bookmarkTree">
@@ -33,6 +43,14 @@ type Action =
           type: ActionType.Search
           payload: Pick<Store, "searchInput">
       }
+    | {
+          type: ActionType.SetDraggingNode
+          payload: Pick<Store, "draggingNode">
+      }
+    | {
+          type: ActionType.SetHoverState
+          payload: Pick<Store, "hoverState">
+      }
 
 const reducer: (store: Store, action: Action) => Store = (store, action) => {
     if (__DEV__) {
@@ -41,8 +59,15 @@ const reducer: (store: Store, action: Action) => Store = (store, action) => {
     }
 
     switch (action.type) {
+        case ActionType.ToggleDarkMode:
+            return {
+                ...store,
+                darkMode: !store.darkMode
+            }
         case ActionType.LoadTree:
         case ActionType.Search:
+        case ActionType.SetDraggingNode:
+        case ActionType.SetHoverState:
             return {
                 ...store,
                 ...action.payload
@@ -66,6 +91,9 @@ type Store = typeof INIT_STORE & {
     bookmarkList: BookmarkTreeNode[]
     searchResult: BookmarkTreeNode[]
 
+    toggleDarkMode: () => void
+    setDraggingNode: (node: BookmarkTreeNode | null) => void
+    setHoverState: (state: HoverState) => void
     setActiveFolder: (id: string) => void
     search: (search: string) => void
 }
@@ -157,9 +185,28 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
         activeFolder: bookmarkMap[store.activeFolderId],
         bookmarkMap,
         bookmarkList,
+        toggleDarkMode: () => dispatch({ type: ActionType.ToggleDarkMode }),
         setActiveFolder,
         search,
-        searchResult
+        searchResult,
+        setDraggingNode: node =>
+            dispatch({
+                type: ActionType.SetDraggingNode,
+                payload: { draggingNode: node }
+            }),
+        setHoverState: state => {
+            // only set hover state for items other than the dragging one
+            if (
+                !store.draggingNode ||
+                (state.node && state.node.id === store.draggingNode.id)
+            )
+                return
+
+            dispatch({
+                type: ActionType.SetHoverState,
+                payload: { hoverState: state }
+            })
+        }
     }
 
     if (__DEV__) {

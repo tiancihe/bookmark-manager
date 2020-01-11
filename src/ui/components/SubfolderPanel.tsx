@@ -26,22 +26,22 @@ const useSubfolderStyle = makeStyles({
 })
 
 const SubfolderPanel: React.FC<{ className?: string }> = ({ className }) => {
-    const classNames = useSubfolderStyle()
-
     const { activeFolder, searchInput, searchResult } = useStore()
+
+    const classNames = useSubfolderStyle()
 
     const [mousePosition, setMousePosition] = useState<{
         x: number
         y: number
     } | null>(null)
 
-    const [createType, setCreateType] = useState<"bookmark" | "folder" | null>(
-        null
-    )
-
     const closeContextMenu = () => {
         setMousePosition(null)
     }
+
+    const [createType, setCreateType] = useState<"bookmark" | "folder" | null>(
+        null
+    )
 
     let content: React.ReactNode = null
     if (searchInput) {

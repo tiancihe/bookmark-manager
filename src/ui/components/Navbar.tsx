@@ -6,16 +6,9 @@ import {
     Toolbar,
     Typography,
     InputBase,
-    IconButton,
-    useTheme
+    IconButton
 } from "@material-ui/core"
-import {
-    Search,
-    Brightness4,
-    Brightness5,
-    Brightness5Outlined,
-    Brightness4Outlined
-} from "@material-ui/icons"
+import { Search, Brightness4, Brightness5 } from "@material-ui/icons"
 import debounce from "lodash/debounce"
 
 import { useStore } from "../Store"
@@ -59,6 +52,7 @@ const useNavbarStyle = makeStyles(theme => ({
         justifyContent: "center"
     },
     inputRoot: {
+        width: "100%",
         color: "inherit"
     },
     inputInput: {
@@ -74,14 +68,11 @@ const useNavbarStyle = makeStyles(theme => ({
 const SEARCH_INPUT_ID = "SEARCH_INPUT"
 
 const Navbar: React.FC = () => {
-    const { darkMode, toggleDarkMode } = useStore()
-    const theme = useTheme()
+    const { searchInput, search, darkMode, toggleDarkMode } = useStore()
 
     const classNames = useNavbarStyle()
 
-    const { searchInput, search } = useStore()
-
-    // somehow, the change event' values are all null
+    // somehow, the change event's values are all null
     useEffect(() => {
         const input = document.getElementById(
             SEARCH_INPUT_ID
@@ -109,7 +100,7 @@ const Navbar: React.FC = () => {
     return (
         <AppBar className={classNames.appBar} position="static">
             <Toolbar className={classNames.toolbar}>
-                <Typography>Bookmark Manager</Typography>
+                <Typography>Bookmarks</Typography>
                 <div className={classNames.search}>
                     <div className={classNames.searchIcon}>
                         <Search />

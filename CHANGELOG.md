@@ -31,3 +31,7 @@
 ### fixes
 
 - larger seach input
+
+## v0.3.1 (2020/1/13)
+
+- fix search input not focused after click

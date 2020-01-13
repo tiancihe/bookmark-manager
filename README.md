@@ -1,6 +1,6 @@
 # Bookmark Manager
 
-WIP: A bookmark manager extension for firefox.
+A bookmark manager extension for firefox.
 
 ## Development
 

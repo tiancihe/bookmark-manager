@@ -1,6 +1,6 @@
 const path = require("path")
 
-const { DefinePlugin, HotModuleReplacementPlugin } = require("webpack")
+const { DefinePlugin } = require("webpack")
 
 const config = {
     entry: {
@@ -14,7 +14,7 @@ const config = {
     mode: "production",
     stats: "minimal",
     devServer: {
-        hot: false,
+        hot: true,
         inline: false,
         writeToDisk: true
     },
@@ -42,8 +42,7 @@ const config = {
     plugins: [
         new DefinePlugin({
             __DEV__: true
-        }),
-        new HotModuleReplacementPlugin()
+        })
     ]
 }
 

@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "start": "webpack-dev-server --config webpack.dev.js",
-    "build": "rm -r package/scripts/* && webpack",
+    "build": "node scripts/clean-up && webpack",
     "pack": "web-ext build --source-dir package",
     "ext": "web-ext run --source-dir package"
   },

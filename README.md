@@ -21,3 +21,11 @@ A bookmark manager extension for firefox.
    ```bash
      npm run ext
    ```
+
+## Production
+
+The following command will bundle the extension (zip file) under the folder `web-ext-artifacts` .
+
+```bash
+npm run pack
+```

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "webpack-dev-server --config webpack.dev.js",
     "build": "node scripts/clean-up && webpack",
-    "pack": "web-ext build --source-dir package",
+    "pack": "npm run build && web-ext build --source-dir package",
     "ext": "web-ext run --source-dir package"
   },
   "dependencies": {

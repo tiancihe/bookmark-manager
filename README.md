@@ -2,13 +2,13 @@
 
 A bookmark manager extension for firefox.
 
+First, install dependencies (make sure nodejs is installed)
+
+```bash
+npm install
+```
+
 ## Development
-
-1. install dependencies (make sure nodejs is installed)
-
-   ```bash
-   npm install
-   ```
 
 1. start webpack-dev-server
 
@@ -24,7 +24,7 @@ A bookmark manager extension for firefox.
 
 ## Production
 
-The following command will bundle the extension (zip file) under the folder `web-ext-artifacts` .
+The following command will pack the extension into a zip file under `web-ext-artifacts`.
 
 ```bash
 npm run pack

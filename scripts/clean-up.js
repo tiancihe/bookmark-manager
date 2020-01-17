@@ -26,6 +26,7 @@ const cleanUp = () => {
         console.log("Cleaning up package/scripts/* ...")
         files.forEach(removeFile)
     }
+    console.log("Cleaned up")
 }
 
 cleanUp()

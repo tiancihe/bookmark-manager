@@ -27,7 +27,7 @@ const update = () => {
     const version = process.argv[2]
 
     if (!version) {
-        console.error(`Invalid version: ${version}`)
+        console.error(`No version provided.`)
     }
 
     updateVersion(manifestFilePath, version)

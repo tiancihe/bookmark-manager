@@ -5,6 +5,7 @@ import React, {
     useEffect,
     useMemo
 } from "react"
+import qs from "query-string"
 
 import { BookmarkTreeNode } from "../types"
 import { HoverState } from "./types"
@@ -153,6 +154,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
     }, [store.bookmarkTree])
 
     const setActiveFolder = (id: BookmarkTreeNode["id"]) => {
+        location.hash = encodeURIComponent(
+            qs.stringify({
+                ...qs.parse(decodeURIComponent(location.hash)),
+                folder: id
+            })
+        )
         dispatch({
             type: ActionType.SetActiveFolder,
             payload: {
@@ -172,6 +179,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
     }, [bookmarkList, store.searchInput])
 
     const search = (title: string) => {
+        location.hash = encodeURIComponent(
+            qs.stringify({
+                ...qs.parse(decodeURIComponent(location.hash)),
+                search: title
+            })
+        )
         dispatch({
             type: ActionType.Search,
             payload: {
@@ -213,6 +226,23 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
         console.log("store:")
         console.log(resolvedStore)
     }
+
+    useEffect(() => {
+        const { search: title, folder } = qs.parse(
+            decodeURIComponent(location.hash)
+        ) as {
+            search: string
+            folder: string
+        }
+
+        if (search) {
+            search(title)
+        }
+
+        if (folder) {
+            setActiveFolder(folder)
+        }
+    }, [])
 
     return (
         <StoreContext.Provider value={resolvedStore}>

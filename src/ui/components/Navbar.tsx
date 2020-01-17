@@ -10,6 +10,7 @@ import {
 } from "@material-ui/core"
 import { Search, Brightness4, Brightness5 } from "@material-ui/icons"
 import debounce from "lodash/debounce"
+import qs from "query-string"
 
 import { useStore } from "../Store"
 
@@ -71,6 +72,17 @@ const Navbar: React.FC = () => {
     const { searchInput, search, darkMode, toggleDarkMode } = useStore()
 
     const classNames = useNavbarStyle()
+
+    useEffect(() => {
+        const { search } = qs.parse(decodeURIComponent(location.hash)) as {
+            search: string
+        }
+        if (search) {
+            ;(document.getElementById(
+                SEARCH_INPUT_ID
+            ) as HTMLInputElement).value = search
+        }
+    }, [])
 
     // somehow, the change event's values are all null
     useEffect(() => {

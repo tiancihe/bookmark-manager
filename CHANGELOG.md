@@ -1,3 +1,8 @@
+## 0.3.2 (2020/1/17)
+
+- map activeFolderId and search to location.hash
+- update some deps
+
 ## v0.2.0 (2019/12/18)
 
 - refactor store

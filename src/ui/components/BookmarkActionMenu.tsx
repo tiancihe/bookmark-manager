@@ -44,6 +44,7 @@ const BookmarkActionMenu: React.FC<{
             <IconButton
                 className={className}
                 onClick={e => setMenuAnchor(e.currentTarget)}
+                onDoubleClick={e => e.stopPropagation()}
             >
                 <MoreVert />
             </IconButton>
@@ -65,6 +66,7 @@ const BookmarkActionMenu: React.FC<{
                         setShowEditModal(true)
                         closeMenu()
                     }}
+                    onDoubleClick={e => e.stopPropagation()}
                 >
                     {bookmarkNode.type === "bookmark" ? "Edit" : "Rename"}
                 </MenuItem>

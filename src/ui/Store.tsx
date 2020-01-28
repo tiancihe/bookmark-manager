@@ -10,22 +10,18 @@ import qs from "query-string"
 import { BookmarkTreeNode } from "../types"
 import { HoverState } from "./types"
 
-const INIT_STORE = {
+const initState = {
     darkMode: false,
     bookmarkTree: null as BookmarkTreeNode | null,
     activeFolderId: "",
-    searchInput: "",
-    draggingNode: null as BookmarkTreeNode | null,
-    hoverState: {} as HoverState
+    searchInput: ""
 }
 
 enum ActionType {
     ToggleDarkMode = "ToggleDarkMode",
     LoadTree = "LoadTree",
     SetActiveFolder = "SetActiveFolder",
-    Search = "Search",
-    SetDraggingNode = "SetDraggingNode",
-    SetHoverState = "SetHoverState"
+    Search = "Search"
 }
 
 type Action =
@@ -44,21 +40,8 @@ type Action =
           type: ActionType.Search
           payload: Pick<Store, "searchInput">
       }
-    | {
-          type: ActionType.SetDraggingNode
-          payload: Pick<Store, "draggingNode">
-      }
-    | {
-          type: ActionType.SetHoverState
-          payload: Pick<Store, "hoverState">
-      }
 
 const reducer: (store: Store, action: Action) => Store = (store, action) => {
-    if (__DEV__) {
-        console.log("action:")
-        console.log(action)
-    }
-
     switch (action.type) {
         case ActionType.ToggleDarkMode:
             return {
@@ -67,8 +50,6 @@ const reducer: (store: Store, action: Action) => Store = (store, action) => {
             }
         case ActionType.LoadTree:
         case ActionType.Search:
-        case ActionType.SetDraggingNode:
-        case ActionType.SetHoverState:
             return {
                 ...store,
                 ...action.payload
@@ -86,15 +67,13 @@ const reducer: (store: Store, action: Action) => Store = (store, action) => {
 
 type BookmarkMap = { [key: string]: BookmarkTreeNode }
 
-type Store = typeof INIT_STORE & {
+type Store = typeof initState & {
     activeFolder: BookmarkTreeNode
     bookmarkMap: BookmarkMap
     bookmarkList: BookmarkTreeNode[]
     searchResult: BookmarkTreeNode[]
 
     toggleDarkMode: () => void
-    setDraggingNode: (node: BookmarkTreeNode | null) => void
-    setHoverState: (state: HoverState) => void
     setActiveFolder: (id: string) => void
     search: (search: string) => void
 }
@@ -104,7 +83,7 @@ const StoreContext = createContext({} as Store)
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
     children
 }) => {
-    const [store, dispatch] = useReducer(reducer, INIT_STORE as Store)
+    const [store, dispatch] = useReducer(reducer, initState as Store)
 
     useEffect(() => {
         const loadTree = async () => {
@@ -193,40 +172,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
         })
     }
 
-    const resolvedStore: Store = {
-        ...store,
-        activeFolder: bookmarkMap[store.activeFolderId],
-        bookmarkMap,
-        bookmarkList,
-        toggleDarkMode: () => dispatch({ type: ActionType.ToggleDarkMode }),
-        setActiveFolder,
-        search,
-        searchResult,
-        setDraggingNode: node =>
-            dispatch({
-                type: ActionType.SetDraggingNode,
-                payload: { draggingNode: node }
-            }),
-        setHoverState: state => {
-            // only set hover state for items other than the dragging one
-            if (
-                !store.draggingNode ||
-                (state.node && state.node.id === store.draggingNode.id)
-            )
-                return
-
-            dispatch({
-                type: ActionType.SetHoverState,
-                payload: { hoverState: state }
-            })
-        }
-    }
-
-    if (__DEV__) {
-        console.log("store:")
-        console.log(resolvedStore)
-    }
-
     useEffect(() => {
         const { search: title, folder } = qs.parse(
             decodeURIComponent(location.hash)
@@ -245,7 +190,19 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
     }, [])
 
     return (
-        <StoreContext.Provider value={resolvedStore}>
+        <StoreContext.Provider
+            value={{
+                ...store,
+                activeFolder: bookmarkMap[store.activeFolderId],
+                bookmarkMap,
+                bookmarkList,
+                toggleDarkMode: () =>
+                    dispatch({ type: ActionType.ToggleDarkMode }),
+                setActiveFolder,
+                search,
+                searchResult
+            }}
+        >
             {children}
         </StoreContext.Provider>
     )

@@ -1,32 +1,40 @@
-import React, { useRef, createRef } from "react"
-import { makeStyles, useTheme } from "@material-ui/core"
+import React from "react"
+import { makeStyles, useTheme, fade } from "@material-ui/core"
 import { FolderTwoTone } from "@material-ui/icons"
 import { useDrag, useDrop } from "react-dnd"
+
+import { BookmarkTreeNode } from "../../types"
 
 import BookmarkActionMenu from "./BookmarkActionMenu"
 import { getFavicon } from "../utils"
 import { useStore } from "../Store"
 import { DNDTypes } from "../consts"
-import { HoverArea } from "../types"
-import { BookmarkTreeNode } from "../../types"
+import { useDndStore, HoverArea } from "../contexts/dnd"
 
-const useBookmarkListItemStyle = makeStyles({
+const useBookmarkListItemStyle = makeStyles(theme => ({
     container: {
         display: "flex",
         alignItems: "center",
-        paddingLeft: "24px",
+        paddingLeft: theme.spacing(3),
         userSelect: "none"
     },
     icon: {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        width: "24px",
-        height: "24px"
+        width: theme.spacing(3),
+        height: theme.spacing(3)
     },
     title: {
+        flex: 2,
+        margin: theme.spacing(0, 2),
+        overflow: "hidden",
+        whiteSpace: "nowrap",
+        textOverflow: "ellipsis"
+    },
+    url: {
         flex: 1,
-        margin: "0 16px",
+        margin: theme.spacing(0, 2),
         overflow: "hidden",
         whiteSpace: "nowrap",
         textOverflow: "ellipsis"
@@ -34,33 +42,38 @@ const useBookmarkListItemStyle = makeStyles({
     actions: {
         justifySelf: "flex-end"
     }
-})
+}))
 
-const BookmarkTreeItem: React.FC<{
+export default function BookmarkTreeItem({
+    bookmarkNode
+}: {
     bookmarkNode: BookmarkTreeNode
-}> = ({ bookmarkNode }) => {
-    // console.log("render BookmarkTreeItem")
+}) {
     const isFolder = bookmarkNode.type === "folder"
     const isBookmark = bookmarkNode.type === "bookmark"
 
+    const { setActiveFolder } = useStore()
     const {
-        setActiveFolder,
-        draggingNode,
-        setDraggingNode,
-        hoverState,
-        setHoverState
-    } = useStore()
-    const theme = useTheme()
+        selectedNodes,
+        isNodeSelected,
+        setSelectedNodes,
 
-    const nodeRef = useRef(createRef<HTMLDivElement>())
+        hoverState,
+        isNodeHovered,
+        setHoverState,
+        clearHoverState
+    } = useDndStore()
+    const isSelected = isNodeSelected(bookmarkNode)
+    const isHovered = isNodeHovered(bookmarkNode)
+
+    const nodeRef = React.useRef(React.createRef<HTMLDivElement>())
 
     const [, drag] = useDrag({
         item: { type: DNDTypes.BookmarkItem },
         begin: () => {
-            setDraggingNode(bookmarkNode)
-        },
-        end: () => {
-            setDraggingNode(null)
+            if (!isSelected) {
+                setSelectedNodes([bookmarkNode])
+            }
         }
     })
 
@@ -83,19 +96,14 @@ const BookmarkTreeItem: React.FC<{
                     const topMid = rect.top + rect.height / 3
                     const midBottom = rect.bottom - rect.height / 3
 
-                    let area: HoverArea = null
-                    if (pos.y < topMid) {
-                        area = "top"
-                    } else if (pos.y < midBottom) {
-                        if (isFolder) {
-                            area = "mid"
-                        }
-                    } else {
-                        area = "bottom"
-                    }
                     setHoverState({
                         node: bookmarkNode,
-                        area
+                        area:
+                            pos.y < topMid
+                                ? HoverArea.Top
+                                : pos.y < midBottom
+                                ? HoverArea.Mid
+                                : HoverArea.Bottom
                     })
                 }
             }
@@ -103,7 +111,7 @@ const BookmarkTreeItem: React.FC<{
         drop: (item, monitor) => {
             const node = nodeRef.current.current
 
-            if (draggingNode && node && draggingNode.id !== bookmarkNode.id) {
+            if (node && !isSelected) {
                 const rect = node.getBoundingClientRect()
                 const pos = monitor.getClientOffset()
 
@@ -118,86 +126,111 @@ const BookmarkTreeItem: React.FC<{
                     const midBottom = rect.bottom - rect.height / 3
 
                     if (pos.y < topMid) {
-                        browser.bookmarks.move(draggingNode.id, {
-                            parentId: bookmarkNode.parentId,
-                            index: bookmarkNode.index
-                        })
+                        const move = async () => {
+                            for (let i = 0; i < selectedNodes.length; i++) {
+                                browser.bookmarks.move(selectedNodes[i].id, {
+                                    parentId: bookmarkNode.parentId,
+                                    index: bookmarkNode.index! + i
+                                })
+                            }
+                        }
+                        move()
                     } else if (pos.y < midBottom) {
                         if (isFolder) {
-                            browser.bookmarks.move(draggingNode.id, {
-                                parentId: bookmarkNode.id
-                            })
+                            const move = async () => {
+                                for (let i = 0; i < selectedNodes.length; i++) {
+                                    browser.bookmarks.move(
+                                        selectedNodes[i].id,
+                                        {
+                                            parentId: bookmarkNode.id
+                                        }
+                                    )
+                                }
+                            }
+                            move()
                         }
                     } else {
-                        if (draggingNode.index !== bookmarkNode.index! + 1) {
-                            browser.bookmarks.move(draggingNode.id, {
-                                parentId: bookmarkNode.parentId,
-                                index: bookmarkNode.index! + 1
-                            })
+                        const move = async () => {
+                            for (let i = 0; i < selectedNodes.length; i++) {
+                                browser.bookmarks.move(selectedNodes[i].id, {
+                                    parentId: bookmarkNode.parentId,
+                                    index: bookmarkNode.index! + 1 + i
+                                })
+                            }
                         }
+                        move()
                     }
                 }
             }
 
-            setHoverState({ node: null, area: null }) // reset hover state after drop
+            clearHoverState()
         }
     })
 
+    const theme = useTheme()
     const classNames = useBookmarkListItemStyle()
 
-    if (isFolder || isBookmark) {
-        drag(drop(nodeRef.current))
-        return (
-            <div
-                ref={nodeRef.current}
-                className={classNames.container}
-                style={
-                    hoverState.node && hoverState.node.id === bookmarkNode.id
-                        ? {
-                              borderTop:
-                                  hoverState.area === "top"
-                                      ? `1px solid ${theme.palette.primary.main}`
-                                      : undefined,
-                              borderBottom:
-                                  hoverState.area === "bottom"
-                                      ? `1px solid ${theme.palette.primary.main}`
-                                      : undefined,
-                              backgroundColor:
-                                  hoverState.area === "mid"
-                                      ? theme.palette.primary.main
-                                      : undefined
-                          }
+    if (!isFolder && !isBookmark) return null
+
+    drag(drop(nodeRef.current))
+
+    return (
+        <div
+            ref={nodeRef.current}
+            className={classNames.container}
+            style={{
+                borderTop:
+                    isHovered && hoverState!.area === HoverArea.Top
+                        ? `1px solid ${theme.palette.primary.main}`
+                        : undefined,
+                borderBottom:
+                    isHovered && hoverState!.area === HoverArea.Bottom
+                        ? `1px solid ${theme.palette.primary.main}`
+                        : undefined,
+                backgroundColor:
+                    isSelected ||
+                    (isHovered && hoverState!.area === HoverArea.Mid)
+                        ? fade(theme.palette.primary.main, 0.25)
                         : undefined
+            }}
+            onClick={e => {
+                e.stopPropagation()
+                setSelectedNodes([bookmarkNode])
+            }}
+            onDoubleClick={e => {
+                e.stopPropagation()
+
+                if (isFolder) {
+                    setActiveFolder(bookmarkNode.id)
                 }
-                onDoubleClick={() => {
-                    if (isFolder) {
-                        setActiveFolder(bookmarkNode.id)
-                    }
 
-                    if (isBookmark) {
-                        browser.tabs.create({
-                            url: bookmarkNode.url,
-                            active: true
-                        })
-                    }
-                }}
-            >
-                <div className={classNames.icon}>
-                    {isFolder && <FolderTwoTone />}
-                    {isBookmark && (
-                        <img src={getFavicon(bookmarkNode.url || "")} />
-                    )}
-                </div>
-                <div className={classNames.title}>{bookmarkNode.title}</div>
-                <BookmarkActionMenu
-                    className={classNames.actions}
-                    bookmarkNode={bookmarkNode}
-                />
+                if (isBookmark) {
+                    browser.tabs.create({
+                        url: bookmarkNode.url,
+                        active: true
+                    })
+                }
+            }}
+            onContextMenu={e => {
+                e.stopPropagation()
+            }}
+        >
+            <div className={classNames.icon}>
+                {isFolder && <FolderTwoTone />}
+                {isBookmark && <img src={getFavicon(bookmarkNode.url || "")} />}
             </div>
-        )
-    }
-
-    return null
+            <div className={classNames.title} title={bookmarkNode.title}>
+                {bookmarkNode.title}
+            </div>
+            {isSelected && (
+                <div className={classNames.url} title={bookmarkNode.url}>
+                    {bookmarkNode.url}
+                </div>
+            )}
+            <BookmarkActionMenu
+                className={classNames.actions}
+                bookmarkNode={bookmarkNode}
+            />
+        </div>
+    )
 }
-
-export default BookmarkTreeItem

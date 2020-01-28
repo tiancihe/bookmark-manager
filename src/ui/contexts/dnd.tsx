@@ -3,6 +3,9 @@ import { throttle } from "lodash"
 
 import { BookmarkTreeNode } from "../../types"
 
+import { useStore } from "./store"
+import { __MAC__ } from "../consts"
+
 export enum HoverArea {
     Top = "Top",
     Mid = "Mid",
@@ -29,6 +32,8 @@ export interface DndStore {
 const DndContext = React.createContext({} as DndStore)
 
 export function DndStoreProvider({ children }: React.PropsWithChildren<{}>) {
+    const { searchResult, activeFolder } = useStore()
+
     const [selectedNodes, _setSelectedNodes] = React.useState(
         [] as BookmarkTreeNode[]
     )
@@ -69,6 +74,29 @@ export function DndStoreProvider({ children }: React.PropsWithChildren<{}>) {
         window.addEventListener("click", reset)
         return () => window.removeEventListener("click", reset)
     }, [selectedNodes])
+
+    React.useEffect(() => {
+        // capture select all hotkey
+        const selectAll = (e: KeyboardEvent) => {
+            if (
+                e.key === "a" &&
+                ((!__MAC__ && e.ctrlKey) || (__MAC__ && e.metaKey))
+            ) {
+                if (searchResult.length) {
+                    setSelectedNodes(searchResult)
+                } else if (
+                    activeFolder &&
+                    activeFolder.children &&
+                    activeFolder.children.length
+                ) {
+                    e.preventDefault()
+                    setSelectedNodes(activeFolder.children)
+                }
+            }
+        }
+        window.addEventListener("keydown", selectAll)
+        return () => window.removeEventListener("keydown", selectAll)
+    }, [searchResult, activeFolder])
 
     return (
         <DndContext.Provider

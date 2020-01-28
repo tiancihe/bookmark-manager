@@ -1,47 +1,47 @@
-import React, { useState } from "react"
-import { makeStyles, Paper, Menu, MenuItem } from "@material-ui/core"
+import React from "react"
+import { Paper, Menu, MenuItem } from "@material-ui/core"
+import { makeStyles } from "@material-ui/core/styles"
 
-import { useStore } from "../Store"
+import { useStore } from "../contexts/store"
+import { useModalStore, BookmarkCreateType } from "../contexts/modal"
+import { useContextMenu } from "../hooks"
+
 import BookmarkTreeItem from "./BookmarkTreeItem"
-import CreateBookmarkModal from "./CreateBookmarkModal"
 
-const useSubfolderStyle = makeStyles({
+const useSubfolderStyle = makeStyles(theme => ({
     paper: {
         width: "100%",
         maxWidth: "960px",
-        padding: "8px 0",
-        margin: "auto"
+        margin: "auto",
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(3),
+        padding: theme.spacing(1, 0)
     },
     emptySearchResults: {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         height: "100%",
-        fontSize: "14px",
-        fontWeight: "bold",
+        fontSize: theme.typography.h6.fontSize,
+        fontWeight: theme.typography.h6.fontWeight,
         color: "#6e6e6e",
         userSelect: "none",
         cursor: "default"
     }
-})
+}))
 
 const SubfolderPanel: React.FC<{ className?: string }> = ({ className }) => {
     const { activeFolder, searchInput, searchResult } = useStore()
 
+    const { openBookmarkCreateModal } = useModalStore()
+
+    const {
+        contextMenuProps,
+        closeContextMenu,
+        handleContextMenuEvent
+    } = useContextMenu()
+
     const classNames = useSubfolderStyle()
-
-    const [mousePosition, setMousePosition] = useState<{
-        x: number
-        y: number
-    } | null>(null)
-
-    const closeContextMenu = () => {
-        setMousePosition(null)
-    }
-
-    const [createType, setCreateType] = useState<"bookmark" | "folder" | null>(
-        null
-    )
 
     let content: React.ReactNode = null
     if (searchInput) {
@@ -78,30 +78,14 @@ const SubfolderPanel: React.FC<{ className?: string }> = ({ className }) => {
         <div
             className={className}
             onContextMenu={e => {
-                e.preventDefault()
-                setMousePosition({
-                    x: e.clientX - 2,
-                    y: e.clientY - 4
-                })
+                handleContextMenuEvent(e)
             }}
         >
             {content}
-            <Menu
-                anchorPosition={
-                    mousePosition
-                        ? {
-                              left: mousePosition.x,
-                              top: mousePosition.y
-                          }
-                        : undefined
-                }
-                anchorReference="anchorPosition"
-                open={Boolean(mousePosition)}
-                onClose={closeContextMenu}
-            >
+            <Menu {...contextMenuProps}>
                 <MenuItem
                     onClick={() => {
-                        setCreateType("bookmark")
+                        openBookmarkCreateModal(BookmarkCreateType.Bookmark)
                         closeContextMenu()
                     }}
                 >
@@ -109,19 +93,13 @@ const SubfolderPanel: React.FC<{ className?: string }> = ({ className }) => {
                 </MenuItem>
                 <MenuItem
                     onClick={() => {
-                        setCreateType("folder")
+                        openBookmarkCreateModal(BookmarkCreateType.Folder)
                         closeContextMenu()
                     }}
                 >
                     Add new folder
                 </MenuItem>
             </Menu>
-            {createType && (
-                <CreateBookmarkModal
-                    createType={createType}
-                    onClose={() => setCreateType(null)}
-                />
-            )}
         </div>
     )
 }

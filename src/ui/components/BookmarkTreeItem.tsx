@@ -1,15 +1,19 @@
 import React from "react"
-import { makeStyles, useTheme, fade } from "@material-ui/core"
+import { Menu } from "@material-ui/core"
+import { makeStyles, useTheme, fade } from "@material-ui/core/styles"
 import { FolderTwoTone } from "@material-ui/icons"
 import { useDrag, useDrop } from "react-dnd"
 
 import { BookmarkTreeNode } from "../../types"
 
-import BookmarkActionMenu from "./BookmarkActionMenu"
-import { useStore } from "../Store"
+import { useStore } from "../contexts/store"
 import { useDndStore, HoverArea } from "../contexts/dnd"
-import { DNDTypes, __MAC__ } from "../consts"
+import { useContextMenu } from "../hooks"
 import { getFavicon } from "../utils"
+import { DNDTypes, __MAC__ } from "../consts"
+
+import BookmarkActionMenu from "./BookmarkActionMenu"
+import BookmarkActionMenuContent from "./BookmarkActionMenuContent"
 
 const useBookmarkListItemStyle = makeStyles(theme => ({
     container: {
@@ -37,7 +41,8 @@ const useBookmarkListItemStyle = makeStyles(theme => ({
         margin: theme.spacing(0, 2),
         overflow: "hidden",
         whiteSpace: "nowrap",
-        textOverflow: "ellipsis"
+        textOverflow: "ellipsis",
+        color: fade(theme.palette.text.primary, 0.55)
     },
     actions: {
         justifySelf: "flex-end"
@@ -69,7 +74,6 @@ export default function BookmarkTreeItem({
     const isHovered = isNodeHovered(bookmarkNode)
 
     const nodeRef = React.useRef(React.createRef<HTMLDivElement>())
-
     const [, drag] = useDrag({
         item: { type: DNDTypes.BookmarkItem },
         begin: () => {
@@ -78,7 +82,6 @@ export default function BookmarkTreeItem({
             }
         }
     })
-
     const [, drop] = useDrop({
         accept: DNDTypes.BookmarkItem,
         hover: (item, monitor) => {
@@ -174,106 +177,136 @@ export default function BookmarkTreeItem({
             clearHoverState()
         }
     })
-
     drag(drop(nodeRef.current))
+
+    const {
+        contextMenuProps,
+        handleContextMenuEvent,
+        closeContextMenu
+    } = useContextMenu()
 
     const theme = useTheme()
     const classNames = useBookmarkListItemStyle()
 
     return (
-        <div
-            ref={nodeRef.current}
-            className={classNames.container}
-            style={{
-                borderTop:
-                    isHovered && hoverState!.area === HoverArea.Top
-                        ? `1px solid ${theme.palette.primary.main}`
-                        : undefined,
-                borderBottom:
-                    isHovered && hoverState!.area === HoverArea.Bottom
-                        ? `1px solid ${theme.palette.primary.main}`
-                        : undefined,
-                backgroundColor:
-                    isSelected ||
-                    (isHovered && hoverState!.area === HoverArea.Mid)
-                        ? fade(theme.palette.primary.main, 0.25)
-                        : undefined
-            }}
-            onClick={e => {
-                e.stopPropagation()
+        <React.Fragment>
+            <div
+                ref={nodeRef.current}
+                className={classNames.container}
+                style={{
+                    borderTop:
+                        isHovered && hoverState!.area === HoverArea.Top
+                            ? `1px solid ${theme.palette.primary.main}`
+                            : undefined,
+                    borderBottom:
+                        isHovered && hoverState!.area === HoverArea.Bottom
+                            ? `1px solid ${theme.palette.primary.main}`
+                            : undefined,
+                    backgroundColor:
+                        isSelected ||
+                        (isHovered && hoverState!.area === HoverArea.Mid)
+                            ? fade(theme.palette.primary.main, 0.25)
+                            : undefined
+                }}
+                onClick={e => {
+                    e.stopPropagation()
 
-                if ((!__MAC__ && e.ctrlKey) || (__MAC__ && e.metaKey)) {
-                    // if ctrl is pressed (command on mac)
-                    if (!isSelected) {
-                        // and the current node is not selected, select it
-                        setSelectedNodes(selectedNodes.concat(bookmarkNode))
-                    } else {
-                        // otherwise unselect it
+                    if ((!__MAC__ && e.ctrlKey) || (__MAC__ && e.metaKey)) {
+                        // if ctrl is pressed (command on mac)
+                        if (!isSelected) {
+                            // and the current node is not selected, select it
+                            setSelectedNodes(selectedNodes.concat(bookmarkNode))
+                        } else {
+                            // otherwise unselect it
+                            setSelectedNodes(
+                                selectedNodes.filter(
+                                    node => node.id === bookmarkNode.id
+                                )
+                            )
+                        }
+                    } else if (e.shiftKey) {
+                        // if shift is pressed, select all nodes between the first node and the current node, including them
+                        // SubFolderPanel render strategy: searchResult || activeFolder.children
+
+                        const target =
+                            searchResult.length > 0
+                                ? searchResult
+                                : activeFolder!.children!
+                        const firstNodeIndex = target.findIndex(
+                            node => node.id === selectedNodes[0].id
+                        )
+                        const currentNodeIndex = target.findIndex(
+                            node => node.id === bookmarkNode.id
+                        )
                         setSelectedNodes(
-                            selectedNodes.filter(
-                                node => node.id === bookmarkNode.id
+                            target.slice(
+                                Math.min(firstNodeIndex, currentNodeIndex),
+                                Math.max(firstNodeIndex, currentNodeIndex) + 1
                             )
                         )
+                    } else {
+                        // select current node only
+                        setSelectedNodes([bookmarkNode])
                     }
-                } else if (e.shiftKey) {
-                    // if shift is pressed, select all nodes between the first node and the current node, including them
-                    // SubFolderPanel render strategy: searchResult || activeFolder.children
+                }}
+                onDoubleClick={e => {
+                    e.stopPropagation()
 
-                    const target =
-                        searchResult.length > 0
-                            ? searchResult
-                            : activeFolder!.children!
-                    const firstNodeIndex = target.findIndex(
-                        node => node.id === selectedNodes[0].id
-                    )
-                    const currentNodeIndex = target.findIndex(
-                        node => node.id === bookmarkNode.id
-                    )
-                    setSelectedNodes(
-                        target.slice(
-                            Math.min(firstNodeIndex, currentNodeIndex),
-                            Math.max(firstNodeIndex, currentNodeIndex) + 1
-                        )
-                    )
-                } else {
-                    // select current node only
-                    setSelectedNodes([bookmarkNode])
-                }
-            }}
-            onDoubleClick={e => {
-                e.stopPropagation()
+                    if (isFolder) {
+                        setActiveFolder(bookmarkNode.id)
+                    }
 
-                if (isFolder) {
-                    setActiveFolder(bookmarkNode.id)
-                }
+                    if (isBookmark) {
+                        browser.tabs.create({
+                            url: bookmarkNode.url,
+                            active: true
+                        })
+                    }
+                }}
+                onContextMenu={e => {
+                    e.stopPropagation()
 
-                if (isBookmark) {
-                    browser.tabs.create({
-                        url: bookmarkNode.url,
-                        active: true
-                    })
-                }
-            }}
-            onContextMenu={e => {
-                e.stopPropagation()
-            }}
-        >
-            <div className={classNames.icon}>
-                {isFolder && <FolderTwoTone />}
-                {isBookmark && <img src={getFavicon(bookmarkNode.url || "")} />}
-            </div>
-            <div className={classNames.title} title={bookmarkNode.title}>
-                {bookmarkNode.title}
-            </div>
-            {isSelected && (
-                <div className={classNames.url} title={bookmarkNode.url}>
-                    {bookmarkNode.url}
+                    if (!isSelected) {
+                        setSelectedNodes([bookmarkNode])
+                    }
+
+                    handleContextMenuEvent(e)
+                }}
+            >
+                <div className={classNames.icon}>
+                    {isFolder && <FolderTwoTone />}
+                    {isBookmark && (
+                        <img src={getFavicon(bookmarkNode.url || "")} />
+                    )}
                 </div>
-            )}
-            <BookmarkActionMenu
-                className={classNames.actions}
-                bookmarkNode={bookmarkNode}
-            />
-        </div>
+                <div className={classNames.title} title={bookmarkNode.title}>
+                    {bookmarkNode.title}
+                </div>
+                {isSelected && (
+                    <div className={classNames.url} title={bookmarkNode.url}>
+                        {bookmarkNode.url}
+                    </div>
+                )}
+                <BookmarkActionMenu
+                    className={classNames.actions}
+                    bookmarkNode={bookmarkNode}
+                />
+            </div>
+            <Menu
+                {...contextMenuProps}
+                onDoubleClick={e => {
+                    e.stopPropagation()
+                }}
+                onContextMenu={e => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                }}
+            >
+                <BookmarkActionMenuContent
+                    bookmarkNode={bookmarkNode}
+                    onCloseMenu={closeContextMenu}
+                />
+            </Menu>
+        </React.Fragment>
     )
 }

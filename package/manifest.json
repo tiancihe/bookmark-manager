@@ -20,5 +20,5 @@
   "background": {
     "scripts": ["scripts/background.js"]
   },
-  "permissions": ["bookmarks", "storage", "tabs"]
+  "permissions": ["bookmarks", "tabs"]
 }

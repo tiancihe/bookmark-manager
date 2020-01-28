@@ -11,7 +11,8 @@ import {
 import { Search, Brightness4, Brightness5 } from "@material-ui/icons"
 import qs from "query-string"
 
-import { useStore } from "../Store"
+import { useStore } from "../contexts/store"
+import { __MAC__ } from "../consts"
 
 const useNavbarStyle = makeStyles(theme => ({
     appBar: {
@@ -83,21 +84,15 @@ export default function Navbar() {
 
         // Capture default search hotkey
         const focus = (e: KeyboardEvent) => {
-            const input = document.getElementById(
-                SEARCH_INPUT_ID
-            ) as HTMLInputElement
-            if (e.key === "f") {
-                if (/mac/i.test(navigator.platform)) {
-                    if (e.metaKey) {
-                        e.preventDefault()
-                        input.focus()
-                    }
-                } else {
-                    if (e.ctrlKey) {
-                        e.preventDefault()
-                        input.focus()
-                    }
-                }
+            if (
+                e.key === "f" &&
+                ((!__MAC__ && e.ctrlKey) || (__MAC__ && e.metaKey))
+            ) {
+                e.preventDefault()
+                const input = document.getElementById(
+                    SEARCH_INPUT_ID
+                ) as HTMLInputElement
+                input.focus()
             }
         }
         window.addEventListener("keydown", focus)

@@ -1,43 +1,20 @@
 import React, { useState } from "react"
-import {
-    Menu,
-    MenuItem,
-    Button,
-    IconButton,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogContentText,
-    DialogActions,
-    Divider
-} from "@material-ui/core"
+import { Menu, IconButton } from "@material-ui/core"
 import { MoreVert } from "@material-ui/icons"
 
 import { BookmarkTreeNode } from "../../types"
-import BookmarkEditModal from "./BookmarkEditModal"
 
-const BookmarkActionMenu: React.FC<{
+import BookmarkActionMenuContent from "./BookmarkActionMenuContent"
+
+export default function BookmarkActionMenu({
+    bookmarkNode,
+    className
+}: {
     bookmarkNode: BookmarkTreeNode
     className?: string
-}> = ({ bookmarkNode, className }) => {
+}) {
     const [menuAnchor, setMenuAnchor] = useState<HTMLButtonElement | null>(null)
-
     const closeMenu = () => setMenuAnchor(null)
-
-    const [showEditModal, setShowEditModal] = useState(false)
-    const [showConfirmModal, setShowConfirmModal] = useState(false)
-
-    const handleDeleteNode = () => {
-        if (bookmarkNode.children && bookmarkNode.children.length) {
-            setShowConfirmModal(true)
-            return
-        }
-        browser.bookmarks.remove(bookmarkNode.id)
-    }
-
-    const handleDeleteTree = () => {
-        browser.bookmarks.removeTree(bookmarkNode.id)
-    }
 
     return (
         <React.Fragment>
@@ -60,65 +37,15 @@ const BookmarkActionMenu: React.FC<{
                     vertical: "top",
                     horizontal: "center"
                 }}
+                onDoubleClick={e => {
+                    e.stopPropagation()
+                }}
             >
-                <MenuItem
-                    onClick={() => {
-                        setShowEditModal(true)
-                        closeMenu()
-                    }}
-                    onDoubleClick={e => e.stopPropagation()}
-                >
-                    {bookmarkNode.type === "bookmark" ? "Edit" : "Rename"}
-                </MenuItem>
-                <MenuItem onClick={handleDeleteNode}>Delete</MenuItem>
-                {__DEV__ && (
-                    <React.Fragment>
-                        <Divider />
-                        <MenuItem onClick={() => console.log(bookmarkNode)}>
-                            Log This
-                        </MenuItem>
-                    </React.Fragment>
-                )}
-            </Menu>
-            {showEditModal && (
-                <BookmarkEditModal
+                <BookmarkActionMenuContent
                     bookmarkNode={bookmarkNode}
-                    onClose={() => {
-                        setShowEditModal(false)
-                    }}
+                    onCloseMenu={closeMenu}
                 />
-            )}
-            <Dialog open={showConfirmModal}>
-                <DialogTitle>Folder Not Empty!</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Are you sure you want to delete {bookmarkNode.title} ?
-                    </DialogContentText>
-                    <DialogContentText>
-                        All of its content will be deleted together!
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions style={{ justifyContent: "flex-end" }}>
-                    <Button
-                        variant="outlined"
-                        onClick={() => {
-                            setShowConfirmModal(false)
-                            closeMenu()
-                        }}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={handleDeleteTree}
-                    >
-                        Delete
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            </Menu>
         </React.Fragment>
     )
 }
-
-export default BookmarkActionMenu

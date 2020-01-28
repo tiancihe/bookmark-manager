@@ -1,7 +1,7 @@
 import React, { useMemo } from "react"
 
 import { BookmarkTreeNode } from "../../types"
-import { useStore } from "../Store"
+import { useStore } from "../contexts/store"
 import FolderTreeItem from "./FolderTreeItem"
 
 const FolderPanel: React.FC<{ className?: string }> = ({ className }) => {

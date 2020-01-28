@@ -7,7 +7,7 @@ import React, {
 } from "react"
 import qs from "query-string"
 
-import { BookmarkTreeNode } from "../types"
+import { BookmarkTreeNode } from "../../types"
 
 const initState = {
     darkMode: false,
@@ -169,7 +169,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
             })
         }
         updateSearchResult()
-    }, [store.searchInput])
+    }, [store.searchInput, store.bookmarkTree])
 
     const search = (title: string) => {
         location.hash = encodeURIComponent(

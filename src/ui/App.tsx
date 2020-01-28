@@ -12,9 +12,12 @@ import HTML5Backend from "react-dnd-html5-backend"
 import Navbar from "./components/Navbar"
 import FolderPanel from "./components/FolderPanel"
 import SubfolderPanel from "./components/SubfolderPanel"
-import { useStore } from "./Store"
+import { useStore } from "./contexts/store"
+import { useModalStore, ModalType } from "./contexts/modal"
+import BookmarkEditModal from "./components/BookmarkEditModal"
+import CreateBookmarkModal from "./components/BookmarkCreateModal"
 
-const useAppStyle = makeStyles({
+const useAppStyle = makeStyles(theme => ({
     container: {
         display: "flex",
         flexDirection: "column",
@@ -29,16 +32,16 @@ const useAppStyle = makeStyles({
     folderPanel: {
         width: "256px",
         height: "100%",
-        padding: "8px 4px 0 16px",
+        padding: theme.spacing(1, 0.5, 0, 2),
         overflow: "auto"
     },
     subfolderPanel: {
         flex: 1,
         height: "100%",
-        padding: "24px 32px 24px 16px",
+        padding: theme.spacing(0, 4, 0, 2),
         overflow: "auto"
     }
-})
+}))
 
 const App: React.FC = () => {
     const { darkMode } = useStore()
@@ -63,6 +66,8 @@ const App: React.FC = () => {
         })
     }, [darkMode])
 
+    const { modalState, closeModal } = useModalStore()
+
     return (
         <MuiThemeProvider theme={theme}>
             <div className={classNames.container}>
@@ -75,6 +80,20 @@ const App: React.FC = () => {
                     </div>
                 </DndProvider>
             </div>
+            {modalState !== null &&
+                modalState.modalType === ModalType.BookmarkEdit && (
+                    <BookmarkEditModal
+                        bookmarkNode={modalState.bookmarkNode!}
+                        onClose={closeModal}
+                    />
+                )}
+            {modalState !== null &&
+                modalState.modalType === ModalType.BookmarkCreate && (
+                    <CreateBookmarkModal
+                        createType={modalState.createType!}
+                        onClose={closeModal}
+                    />
+                )}
         </MuiThemeProvider>
     )
 }

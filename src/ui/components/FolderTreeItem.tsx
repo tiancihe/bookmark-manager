@@ -5,7 +5,7 @@ import { useDrop } from "react-dnd"
 
 import { BookmarkTreeNode } from "../../types"
 
-import { useStore } from "../Store"
+import { useStore } from "../contexts/store"
 import { DNDTypes } from "../consts"
 import { useDndStore, HoverArea } from "../contexts/dnd"
 

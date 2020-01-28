@@ -8,20 +8,21 @@ import React, {
 import qs from "query-string"
 
 import { BookmarkTreeNode } from "../types"
-import { HoverState } from "./types"
 
 const initState = {
     darkMode: false,
     bookmarkTree: null as BookmarkTreeNode | null,
     activeFolderId: "",
-    searchInput: ""
+    searchInput: "",
+    searchResult: [] as BookmarkTreeNode[]
 }
 
 enum ActionType {
     ToggleDarkMode = "ToggleDarkMode",
     LoadTree = "LoadTree",
     SetActiveFolder = "SetActiveFolder",
-    Search = "Search"
+    Search = "Search",
+    SetSearchResult = "SetSearchResult"
 }
 
 type Action =
@@ -40,6 +41,10 @@ type Action =
           type: ActionType.Search
           payload: Pick<Store, "searchInput">
       }
+    | {
+          type: ActionType.SetSearchResult
+          payload: Pick<Store, "searchResult">
+      }
 
 const reducer: (store: Store, action: Action) => Store = (store, action) => {
     switch (action.type) {
@@ -50,6 +55,7 @@ const reducer: (store: Store, action: Action) => Store = (store, action) => {
             }
         case ActionType.LoadTree:
         case ActionType.Search:
+        case ActionType.SetSearchResult:
             return {
                 ...store,
                 ...action.payload
@@ -147,15 +153,23 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
         })
     }
 
-    const searchResult = useMemo(() => {
-        if (!store.searchInput) {
-            return []
+    React.useEffect(() => {
+        const updateSearchResult = async () => {
+            let result = [] as BookmarkTreeNode[]
+            if (store.searchInput) {
+                result = await browser.bookmarks.search({
+                    query: store.searchInput
+                })
+            }
+            dispatch({
+                type: ActionType.SetSearchResult,
+                payload: {
+                    searchResult: result
+                }
+            })
         }
-
-        const reg = new RegExp(store.searchInput, "gi")
-
-        return bookmarkList.filter(bookmark => reg.test(bookmark.title))
-    }, [bookmarkList, store.searchInput])
+        updateSearchResult()
+    }, [store.searchInput])
 
     const search = (title: string) => {
         location.hash = encodeURIComponent(
@@ -199,8 +213,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({
                 toggleDarkMode: () =>
                     dispatch({ type: ActionType.ToggleDarkMode }),
                 setActiveFolder,
-                search,
-                searchResult
+                search
             }}
         >
             {children}

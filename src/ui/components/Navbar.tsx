@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React from "react"
 import {
     makeStyles,
     fade,
@@ -9,7 +9,6 @@ import {
     IconButton
 } from "@material-ui/core"
 import { Search, Brightness4, Brightness5 } from "@material-ui/icons"
-import debounce from "lodash/debounce"
 import qs from "query-string"
 
 import { useStore } from "../Store"
@@ -68,46 +67,51 @@ const useNavbarStyle = makeStyles(theme => ({
 
 const SEARCH_INPUT_ID = "SEARCH_INPUT"
 
-const Navbar: React.FC = () => {
+export default function Navbar() {
     const { searchInput, search, darkMode, toggleDarkMode } = useStore()
 
-    const classNames = useNavbarStyle()
+    const [input, setInput] = React.useState(searchInput)
 
-    useEffect(() => {
+    React.useEffect(() => {
+        // Sync search value from location.hash after mount
         const { search } = qs.parse(decodeURIComponent(location.hash)) as {
             search: string
         }
         if (search) {
-            ;(document.getElementById(
-                SEARCH_INPUT_ID
-            ) as HTMLInputElement).value = search
+            setInput(search)
         }
-    }, [])
 
-    // somehow, the change event's values are all null
-    useEffect(() => {
-        const input = document.getElementById(
-            SEARCH_INPUT_ID
-        ) as HTMLInputElement
-
-        const handleChange = debounce(() => {
-            search(input.value)
-        }, 500)
-
-        const handleEnter = (e: HTMLElementEventMap["keydown"]) => {
-            if (e.key === "Enter") {
-                handleChange()
+        // Capture default search hotkey
+        const focus = (e: KeyboardEvent) => {
+            const input = document.getElementById(
+                SEARCH_INPUT_ID
+            ) as HTMLInputElement
+            if (e.key === "f") {
+                if (/mac/i.test(navigator.platform)) {
+                    if (e.metaKey) {
+                        e.preventDefault()
+                        input.focus()
+                    }
+                } else {
+                    if (e.ctrlKey) {
+                        e.preventDefault()
+                        input.focus()
+                    }
+                }
             }
         }
+        window.addEventListener("keydown", focus)
+        return () => window.removeEventListener("keydown", focus)
+    }, [])
 
-        input.addEventListener("change", handleChange)
-        input.addEventListener("keydown", handleEnter)
-
-        return () => {
-            input.removeEventListener("change", handleChange)
-            input.removeEventListener("keydown", handleEnter)
+    // Sync local input state with global store
+    React.useEffect(() => {
+        if (input !== searchInput) {
+            setInput(searchInput)
         }
-    }, [searchInput, search])
+    }, [searchInput])
+
+    const classNames = useNavbarStyle()
 
     return (
         <AppBar className={classNames.appBar} position="static">
@@ -125,7 +129,15 @@ const Navbar: React.FC = () => {
                             root: classNames.inputRoot,
                             input: classNames.inputInput
                         }}
-                        defaultValue={searchInput}
+                        value={input}
+                        onChange={e => {
+                            setInput(e.target.value)
+                        }}
+                        onKeyDown={e => {
+                            if (e.key === "Enter") {
+                                search(input)
+                            }
+                        }}
                     />
                 </div>
                 <IconButton onClick={toggleDarkMode} color="inherit">
@@ -135,5 +147,3 @@ const Navbar: React.FC = () => {
         </AppBar>
     )
 }
-
-export default Navbar

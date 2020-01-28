@@ -1,3 +1,16 @@
+## 0.4.0 (2020/1/29)
+
+- items are now selectable (also support multiple select)
+- items now display its url (if any) when selected
+- open action menu by right click
+- add Open in new tab and Open in new window
+- hotkey support
+- better search
+
+### bug fixes
+
+- unintentional double click
+
 ## 0.3.2 (2020/1/17)
 
 - map activeFolderId and search to location.hash

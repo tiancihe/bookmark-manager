@@ -6,10 +6,10 @@ import { useDrag, useDrop } from "react-dnd"
 import { BookmarkTreeNode } from "../../types"
 
 import BookmarkActionMenu from "./BookmarkActionMenu"
-import { getFavicon } from "../utils"
 import { useStore } from "../Store"
-import { DNDTypes } from "../consts"
 import { useDndStore, HoverArea } from "../contexts/dnd"
+import { DNDTypes, __MAC__ } from "../consts"
+import { getFavicon } from "../utils"
 
 const useBookmarkListItemStyle = makeStyles(theme => ({
     container: {
@@ -52,7 +52,9 @@ export default function BookmarkTreeItem({
     const isFolder = bookmarkNode.type === "folder"
     const isBookmark = bookmarkNode.type === "bookmark"
 
-    const { setActiveFolder } = useStore()
+    if (!isFolder && !isBookmark) return null
+
+    const { searchResult, activeFolder, setActiveFolder } = useStore()
     const {
         selectedNodes,
         isNodeSelected,
@@ -128,10 +130,13 @@ export default function BookmarkTreeItem({
                     if (pos.y < topMid) {
                         const move = async () => {
                             for (let i = 0; i < selectedNodes.length; i++) {
-                                browser.bookmarks.move(selectedNodes[i].id, {
-                                    parentId: bookmarkNode.parentId,
-                                    index: bookmarkNode.index! + i
-                                })
+                                await browser.bookmarks.move(
+                                    selectedNodes[i].id,
+                                    {
+                                        parentId: bookmarkNode.parentId,
+                                        index: bookmarkNode.index! + i
+                                    }
+                                )
                             }
                         }
                         move()
@@ -139,7 +144,7 @@ export default function BookmarkTreeItem({
                         if (isFolder) {
                             const move = async () => {
                                 for (let i = 0; i < selectedNodes.length; i++) {
-                                    browser.bookmarks.move(
+                                    await browser.bookmarks.move(
                                         selectedNodes[i].id,
                                         {
                                             parentId: bookmarkNode.id
@@ -152,10 +157,13 @@ export default function BookmarkTreeItem({
                     } else {
                         const move = async () => {
                             for (let i = 0; i < selectedNodes.length; i++) {
-                                browser.bookmarks.move(selectedNodes[i].id, {
-                                    parentId: bookmarkNode.parentId,
-                                    index: bookmarkNode.index! + 1 + i
-                                })
+                                await browser.bookmarks.move(
+                                    selectedNodes[i].id,
+                                    {
+                                        parentId: bookmarkNode.parentId,
+                                        index: bookmarkNode.index! + 1 + i
+                                    }
+                                )
                             }
                         }
                         move()
@@ -167,12 +175,10 @@ export default function BookmarkTreeItem({
         }
     })
 
+    drag(drop(nodeRef.current))
+
     const theme = useTheme()
     const classNames = useBookmarkListItemStyle()
-
-    if (!isFolder && !isBookmark) return null
-
-    drag(drop(nodeRef.current))
 
     return (
         <div
@@ -195,7 +201,44 @@ export default function BookmarkTreeItem({
             }}
             onClick={e => {
                 e.stopPropagation()
-                setSelectedNodes([bookmarkNode])
+
+                if ((!__MAC__ && e.ctrlKey) || (__MAC__ && e.metaKey)) {
+                    // if ctrl is pressed (command on mac)
+                    if (!isSelected) {
+                        // and the current node is not selected, select it
+                        setSelectedNodes(selectedNodes.concat(bookmarkNode))
+                    } else {
+                        // otherwise unselect it
+                        setSelectedNodes(
+                            selectedNodes.filter(
+                                node => node.id === bookmarkNode.id
+                            )
+                        )
+                    }
+                } else if (e.shiftKey) {
+                    // if shift is pressed, select all nodes between the first node and the current node, including them
+                    // SubFolderPanel render strategy: searchResult || activeFolder.children
+
+                    const target =
+                        searchResult.length > 0
+                            ? searchResult
+                            : activeFolder!.children!
+                    const firstNodeIndex = target.findIndex(
+                        node => node.id === selectedNodes[0].id
+                    )
+                    const currentNodeIndex = target.findIndex(
+                        node => node.id === bookmarkNode.id
+                    )
+                    setSelectedNodes(
+                        target.slice(
+                            Math.min(firstNodeIndex, currentNodeIndex),
+                            Math.max(firstNodeIndex, currentNodeIndex) + 1
+                        )
+                    )
+                } else {
+                    // select current node only
+                    setSelectedNodes([bookmarkNode])
+                }
             }}
             onDoubleClick={e => {
                 e.stopPropagation()

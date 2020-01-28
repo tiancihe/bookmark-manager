@@ -46,14 +46,11 @@ export default function FolderTreeItem({
     const { activeFolderId, setActiveFolder } = useStore()
     const {
         selectedNodes,
-        isNodeSelected,
-
         hoverState,
         isNodeHovered,
         setHoverState,
         clearHoverState
     } = useDndStore()
-    const isSelected = isNodeSelected(bookmarkNode)
     const isHovered = isNodeHovered(bookmarkNode)
 
     const [open, setOpen] = React.useState(false)
@@ -81,7 +78,7 @@ export default function FolderTreeItem({
         drop: (item, monitor) => {
             const move = async () => {
                 for (let i = 0; i < selectedNodes.length; i++) {
-                    browser.bookmarks.move(selectedNodes[i].id, {
+                    await browser.bookmarks.move(selectedNodes[i].id, {
                         parentId: bookmarkNode.id
                     })
                 }

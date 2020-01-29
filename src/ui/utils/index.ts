@@ -1,7 +1,8 @@
-export const getFavicon = (url: string): string => {
+/** Resolves website favicon url using google's service */
+export function getFavicon(url: string) {
     if (!url) return url
-    if (navigator.userAgent.toLowerCase().includes("chrome")) {
-        return "chrome://favicon/" + url
-    }
-    return "http://www.google.com/s2/favicons?domain_url=" + url
+    return (
+        "http://www.google.com/s2/favicons?domain_url=" +
+        encodeURIComponent(url)
+    )
 }

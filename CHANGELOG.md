@@ -1,3 +1,7 @@
+## 0.4.1 (2020/1/29)
+
+- doc `getFavicon` util function
+
 ## 0.4.0 (2020/1/29)
 
 - items are now selectable (also support multiple select)

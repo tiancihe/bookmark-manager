@@ -1,3 +1,7 @@
+## 0.4.2 (2020/1/29)
+
+- `getFavicon` only resolves domain
+
 ## 0.4.1 (2020/1/29)
 
 - doc `getFavicon` util function

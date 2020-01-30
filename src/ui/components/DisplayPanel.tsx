@@ -5,11 +5,12 @@ import { makeStyles } from "@material-ui/core/styles"
 
 import { openBookmarkCreateModal } from "../store/modal"
 import { RootState, BookmarkNodeType } from "../types"
+import { isNodeHovered } from "../utils"
 import useContextMenu from "../hooks/useContextMenu"
 
 import BookmarkTreeItem from "./BookmarkTreeItem"
 
-const useSubfolderStyle = makeStyles(theme => ({
+const useStyle = makeStyles(theme => ({
     paper: {
         width: "100%",
         maxWidth: "960px",
@@ -31,7 +32,7 @@ const useSubfolderStyle = makeStyles(theme => ({
     }
 }))
 
-export default function SubfolderPanel({ className }: { className?: string }) {
+export default function DisplayPanel({ className }: { className?: string }) {
     const activeFolder = useSelector(
         (state: RootState) => state.bookmark.activeFolder
     )
@@ -39,7 +40,20 @@ export default function SubfolderPanel({ className }: { className?: string }) {
     const searchResult = useSelector(
         (state: RootState) => state.bookmark.searchResult
     )
+    const hoverState = useSelector((state: RootState) => state.dnd.hoverState)
     const dispatch = useDispatch()
+
+    const activeFolderChildren = React.useMemo(() => {
+        return activeFolder !== null &&
+            Array.isArray(activeFolder.children) &&
+            activeFolder.children.length > 0
+            ? activeFolder.children.filter(
+                  child =>
+                      child.type === BookmarkNodeType.Bookmark ||
+                      child.type === BookmarkNodeType.Folder
+              )
+            : null
+    }, [activeFolder])
 
     const {
         contextMenuProps,
@@ -47,7 +61,7 @@ export default function SubfolderPanel({ className }: { className?: string }) {
         handleContextMenuEvent
     } = useContextMenu()
 
-    const classNames = useSubfolderStyle()
+    const classNames = useStyle()
 
     return (
         <div
@@ -57,12 +71,16 @@ export default function SubfolderPanel({ className }: { className?: string }) {
             }}
         >
             {search ? (
-                searchResult.length > 0 ? (
+                searchResult.length ? (
                     <Paper className={classNames.paper} elevation={3}>
                         {searchResult.map(child => (
                             <BookmarkTreeItem
                                 key={child.id}
                                 bookmarkNode={child}
+                                isHovered={isNodeHovered(child, hoverState)}
+                                hoverArea={
+                                    hoverState ? hoverState.area : undefined
+                                }
                             />
                         ))}
                     </Paper>
@@ -71,22 +89,16 @@ export default function SubfolderPanel({ className }: { className?: string }) {
                         No search results found
                     </div>
                 )
-            ) : activeFolder !== null &&
-              Array.isArray(activeFolder.children) &&
-              activeFolder.children.length > 0 ? (
+            ) : activeFolderChildren ? (
                 <Paper className={classNames.paper} elevation={3}>
-                    {activeFolder.children
-                        .filter(
-                            child =>
-                                child.type === BookmarkNodeType.Bookmark ||
-                                child.type === BookmarkNodeType.Folder
-                        )
-                        .map(child => (
-                            <BookmarkTreeItem
-                                key={child.id}
-                                bookmarkNode={child}
-                            />
-                        ))}
+                    {activeFolderChildren.map(child => (
+                        <BookmarkTreeItem
+                            key={child.id}
+                            bookmarkNode={child}
+                            isHovered={isNodeHovered(child, hoverState)}
+                            hoverArea={hoverState ? hoverState.area : undefined}
+                        />
+                    ))}
                 </Paper>
             ) : null}
             <Menu {...contextMenuProps}>

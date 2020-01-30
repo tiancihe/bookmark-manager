@@ -21,7 +21,7 @@ import { __MAC__ } from "./consts"
 
 import Navbar from "./components/Navbar"
 import FolderPanel from "./components/FolderPanel"
-import SubfolderPanel from "./components/SubfolderPanel"
+import DisplayPanel from "./components/DisplayPanel"
 import BookmarkEditModal from "./components/BookmarkEditModal"
 import BookmarkCreateModal from "./components/BookmarkCreateModal"
 
@@ -43,7 +43,7 @@ const useAppStyle = makeStyles(theme => ({
         padding: theme.spacing(1, 0.5, 0, 2),
         overflow: "auto"
     },
-    subfolderPanel: {
+    displayPanel: {
         flex: 1,
         height: "100%",
         padding: theme.spacing(0, 4, 0, 2),
@@ -86,7 +86,6 @@ export default function App() {
     React.useEffect(() => {
         if (bookmarkTree) {
             once(() => {
-                console.log("search bookmark onDidMount")
                 // if search param exists, search bookmark onDidMount
                 // this is due to the fact that browser.bookmarks.search is an async function
                 // and we want to search the bookmark after the bookmarkTree loads
@@ -165,7 +164,7 @@ export default function App() {
                 <DndProvider backend={HTML5Backend}>
                     <div className={classNames.mainContent}>
                         <FolderPanel className={classNames.folderPanel} />
-                        <SubfolderPanel className={classNames.subfolderPanel} />
+                        <DisplayPanel className={classNames.displayPanel} />
                     </div>
                 </DndProvider>
             </div>

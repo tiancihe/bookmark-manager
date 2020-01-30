@@ -56,10 +56,14 @@ const useBookmarkListItemStyle = makeStyles(theme => ({
     }
 }))
 
-export default function BookmarkTreeItem({
-    bookmarkNode
+const BookmarkTreeItem = React.memo(function BookmarkTreeItem({
+    bookmarkNode,
+    isHovered,
+    hoverArea
 }: {
     bookmarkNode: BookmarkTreeNode
+    isHovered: boolean
+    hoverArea?: HoverArea
 }) {
     const isFolder = bookmarkNode.type === BookmarkNodeType.Folder
     const isBookmark = bookmarkNode.type === BookmarkNodeType.Bookmark
@@ -67,21 +71,13 @@ export default function BookmarkTreeItem({
     const activeFolder = useSelector(
         (state: RootState) => state.bookmark.activeFolder
     )
-
     const searchResult = useSelector(
         (state: RootState) => state.bookmark.searchResult
     )
-
     const selectedNodes = useSelector(
         (state: RootState) => state.dnd.selectedNodes
-    ) 
+    )
     const isSelected = isNodeSelected(bookmarkNode, selectedNodes)
-
-    const hoverState = useSelector(
-        (state: RootState) => state.dnd.hoverState
-    ) 
-    const isHovered = isNodeHovered(bookmarkNode, hoverState)
-
     const dispatch = useDispatch()
 
     const nodeRef = React.useRef(React.createRef<HTMLDivElement>())
@@ -212,16 +208,15 @@ export default function BookmarkTreeItem({
                 className={classNames.container}
                 style={{
                     borderTop:
-                        isHovered && hoverState!.area === HoverArea.Top
+                        isHovered && hoverArea === HoverArea.Top
                             ? `1px solid ${theme.palette.primary.main}`
                             : undefined,
                     borderBottom:
-                        isHovered && hoverState!.area === HoverArea.Bottom
+                        isHovered && hoverArea === HoverArea.Bottom
                             ? `1px solid ${theme.palette.primary.main}`
                             : undefined,
                     backgroundColor:
-                        isSelected ||
-                        (isHovered && hoverState!.area === HoverArea.Mid)
+                        isSelected || (isHovered && hoverArea === HoverArea.Mid)
                             ? fade(theme.palette.primary.main, 0.25)
                             : undefined
                 }}
@@ -247,7 +242,7 @@ export default function BookmarkTreeItem({
                         }
                     } else if (e.shiftKey) {
                         // if shift is pressed, select all nodes between the first node and the current node, including them
-                        // SubFolderPanel render strategy: searchResult || activeFolder.children
+                        // display strategy: searchResult || activeFolder.children
 
                         const target =
                             searchResult.length > 0
@@ -333,4 +328,6 @@ export default function BookmarkTreeItem({
             </Menu>
         </React.Fragment>
     )
-}
+})
+
+export default BookmarkTreeItem

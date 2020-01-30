@@ -9,13 +9,8 @@ import {
 } from "@material-ui/core"
 import { DndProvider } from "react-dnd"
 import HTML5Backend from "react-dnd-html5-backend"
-import qs from "query-string"
 
-import {
-    loadBookmarkTree,
-    searchBookmark,
-    setActiveFolder
-} from "./store/bookmark"
+import { loadBookmarkTree } from "./store/bookmark"
 import { selectNodes, resetDndState } from "./store/dnd"
 import { closeModal } from "./store/modal"
 import { toggleDarkMode } from "./store/setting"
@@ -55,6 +50,9 @@ const useAppStyle = makeStyles(theme => ({
 }))
 
 export default function App() {
+    const bookmarkTree = useSelector(
+        (state: RootState) => state.bookmark.bookmarkTree
+    )
     const activeFolder = useSelector(
         (state: RootState) => state.bookmark.activeFolder
     )
@@ -67,28 +65,6 @@ export default function App() {
     const dispatch = useDispatch()
 
     React.useEffect(() => {
-        const initFromHashParams = async () => {
-            const { search, folder } = qs.parse(
-                decodeURIComponent(location.hash)
-            ) as {
-                search: string
-                folder: string
-            }
-
-            if (search) {
-                dispatch(searchBookmark(search))
-            }
-
-            const activeFolder = folder
-                ? (await browser.bookmarks.get(folder))[0]
-                : null
-
-            if (activeFolder) {
-                dispatch(setActiveFolder(activeFolder))
-            }
-        }
-        initFromHashParams()
-
         const loadTree = () => dispatch(loadBookmarkTree())
         loadTree()
 

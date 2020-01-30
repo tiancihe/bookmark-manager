@@ -8,11 +8,9 @@ import { throttle } from "lodash"
 
 import { BookmarkTreeNode } from "../../types"
 import { RootState, HoverArea, BookmarkNodeType } from "../types"
-import { getFavicon } from "../utils"
+import { getFavicon, isNodeSelected, isNodeHovered } from "../utils"
 import { DNDTypes, __MAC__ } from "../consts"
 import useContextMenu from "../hooks/useContextMenu"
-import useSelectedNodes from "../hooks/useSelectedNodes"
-import useHoverState from "../hooks/useHoverState"
 import {
     selectNodes,
     selectNode,
@@ -74,11 +72,15 @@ export default function BookmarkTreeItem({
         (state: RootState) => state.bookmark.searchResult
     )
 
-    const { selectedNodes, isNodeSelected } = useSelectedNodes()
-    const isSelected = isNodeSelected(bookmarkNode)
+    const selectedNodes = useSelector(
+        (state: RootState) => state.dnd.selectedNodes
+    ) 
+    const isSelected = isNodeSelected(bookmarkNode, selectedNodes)
 
-    const { hoverState, isNodeHovered } = useHoverState()
-    const isHovered = isNodeHovered(bookmarkNode)
+    const hoverState = useSelector(
+        (state: RootState) => state.dnd.hoverState
+    ) 
+    const isHovered = isNodeHovered(bookmarkNode, hoverState)
 
     const dispatch = useDispatch()
 
@@ -275,7 +277,7 @@ export default function BookmarkTreeItem({
                     e.stopPropagation()
 
                     if (isFolder) {
-                        dispatch(setActiveFolder(bookmarkNode))
+                        dispatch(setActiveFolder({ id: bookmarkNode.id }))
                     }
 
                     if (isBookmark) {

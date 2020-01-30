@@ -9,8 +9,7 @@ import { RootState, HoverArea } from "../types"
 import { DNDTypes } from "../consts"
 import { setHoverState, clearHoverState } from "../store/dnd"
 import { setActiveFolder } from "../store/bookmark"
-import useSelectedNodes from "../hooks/useSelectedNodes"
-import useHoverState from "../hooks/useHoverState"
+import { isNodeHovered } from "../utils"
 
 const useFolderTreeItemStyle = makeStyles<
     Theme,
@@ -52,10 +51,12 @@ export default function FolderTreeItem({
     const isActive =
         activeFolder !== null && activeFolder.id === bookmarkNode.id
 
-    const { selectedNodes } = useSelectedNodes()
+    const selectedNodes = useSelector(
+        (state: RootState) => state.dnd.selectedNodes
+    )
 
-    const { hoverState, isNodeHovered } = useHoverState()
-    const isHovered = isNodeHovered(bookmarkNode)
+    const hoverState = useSelector((state: RootState) => state.dnd.hoverState)
+    const isHovered = isNodeHovered(bookmarkNode, hoverState)
 
     const dispatch = useDispatch()
 
@@ -97,7 +98,7 @@ export default function FolderTreeItem({
     const theme = useTheme()
     const classNames = useFolderTreeItemStyle({
         level,
-        active: activeFolder !== null && activeFolder.id === bookmarkNode.id
+        active: isActive
     })
 
     return (
@@ -113,7 +114,7 @@ export default function FolderTreeItem({
                 onClick={e => {
                     e.stopPropagation()
                     if (!isActive) {
-                        dispatch(setActiveFolder(bookmarkNode))
+                        dispatch(setActiveFolder({ id: bookmarkNode.id }))
                     }
                 }}
             >

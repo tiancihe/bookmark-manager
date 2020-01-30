@@ -1,4 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+import { batch } from "react-redux"
+import qs from "query-string"
 
 import { BookmarkTreeNode } from "../../types"
 import { AppThunkAction } from "../types"
@@ -8,6 +10,8 @@ const slice = createSlice({
     name: "bookmark",
     initialState: {
         bookmarkTree: null as BookmarkTreeNode | null,
+        bookmarkMap: {} as Record<string, BookmarkTreeNode>,
+        bookmarkList: [] as BookmarkTreeNode[],
         activeFolder: null as BookmarkTreeNode | null,
         search: "",
         searchResult: [] as BookmarkTreeNode[]
@@ -17,33 +21,67 @@ const slice = createSlice({
             state,
             { payload }: PayloadAction<BookmarkTreeNode>
         ) => {
+            const map: Record<string, BookmarkTreeNode> = {}
+            const list: BookmarkTreeNode[] = []
+            if (payload) {
+                const iterate = (node: BookmarkTreeNode) => {
+                    if (node) {
+                        map[node.id] = node
+                        list.push(node)
+
+                        if (node.children) {
+                            node.children.forEach(iterate)
+                        }
+                    }
+                }
+                iterate(payload)
+            }
             state.bookmarkTree = payload
+            state.bookmarkMap = map
+            state.bookmarkList = list
+
+            const { search, folder } = qs.parse(
+                decodeURIComponent(location.hash)
+            ) as {
+                search: string
+                folder: string
+            }
+            if (search) {
+                state.searchResult = state.searchResult.map(
+                    node => state.bookmarkMap[node.id]
+                )
+            }
+            if (folder) {
+                state.activeFolder = state.bookmarkMap[folder]
+            }
         },
         setActiveFolder: (
             state,
-            { payload }: PayloadAction<BookmarkTreeNode>
+            { payload }: PayloadAction<{ id: string; isUserAction?: boolean }>
         ) => {
-            state.activeFolder = payload
-            setHashParam({ folder: payload.id })
+            const { id, isUserAction = true } = payload
+            setHashParam({ folder: id })
+            state.activeFolder = state.bookmarkMap[id]
+            if (isUserAction) {
+                state.search = ""
+                state.searchResult = []
+            }
         },
-        setSearch: (state, { payload }: PayloadAction<string>) => {
-            state.search = payload
-        },
-        setSearchResult: (
+        setSearch: (
             state,
-            { payload }: PayloadAction<BookmarkTreeNode[]>
+            {
+                payload
+            }: PayloadAction<{ search: string; result: BookmarkTreeNode[] }>
         ) => {
-            state.searchResult = payload
+            state.search = payload.search
+            state.searchResult = payload.result.map(
+                node => state.bookmarkMap[node.id]
+            )
         }
     }
 })
 
-export const {
-    setBookmarkTree,
-    setActiveFolder,
-    setSearch,
-    setSearchResult
-} = slice.actions
+export const { setBookmarkTree, setActiveFolder, setSearch } = slice.actions
 
 export const bookmark = slice.reducer
 
@@ -55,12 +93,12 @@ export function loadBookmarkTree(): AppThunkAction {
 
 export function searchBookmark(search: string): AppThunkAction {
     return async function(dispatch) {
-        dispatch(setSearch(search))
         setHashParam({ search })
         dispatch(
-            setSearchResult(
-                search ? await browser.bookmarks.search(search) : []
-            )
+            setSearch({
+                search,
+                result: search ? await browser.bookmarks.search(search) : []
+            })
         )
     }
 }

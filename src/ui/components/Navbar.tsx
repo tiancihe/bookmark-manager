@@ -120,6 +120,9 @@ export default function Navbar() {
                             input: classNames.inputInput
                         }}
                         value={input}
+                        onClick={e => {
+                            e.stopPropagation()
+                        }}
                         onChange={e => {
                             e.stopPropagation()
                             setInput(e.target.value)

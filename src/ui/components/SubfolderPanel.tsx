@@ -1,10 +1,11 @@
 import React from "react"
+import { useSelector, useDispatch } from "react-redux"
 import { Paper, Menu, MenuItem } from "@material-ui/core"
 import { makeStyles } from "@material-ui/core/styles"
 
-import { useStore } from "../contexts/store"
-import { useModalStore, BookmarkCreateType } from "../contexts/modal"
-import { useContextMenu } from "../hooks"
+import { openBookmarkCreateModal } from "../store/modal"
+import { RootState, BookmarkNodeType } from "../types"
+import useContextMenu from "../hooks/useContextMenu"
 
 import BookmarkTreeItem from "./BookmarkTreeItem"
 
@@ -30,10 +31,15 @@ const useSubfolderStyle = makeStyles(theme => ({
     }
 }))
 
-const SubfolderPanel: React.FC<{ className?: string }> = ({ className }) => {
-    const { activeFolder, searchInput, searchResult } = useStore()
-
-    const { openBookmarkCreateModal } = useModalStore()
+export default function SubfolderPanel({ className }: { className?: string }) {
+    const activeFolder = useSelector(
+        (state: RootState) => state.bookmark.activeFolder
+    )
+    const search = useSelector((state: RootState) => state.bookmark.search)
+    const searchResult = useSelector(
+        (state: RootState) => state.bookmark.searchResult
+    )
+    const dispatch = useDispatch()
 
     const {
         contextMenuProps,
@@ -43,37 +49,6 @@ const SubfolderPanel: React.FC<{ className?: string }> = ({ className }) => {
 
     const classNames = useSubfolderStyle()
 
-    let content: React.ReactNode = null
-    if (searchInput) {
-        if (searchResult.length) {
-            content = (
-                <Paper className={classNames.paper} elevation={3}>
-                    {searchResult.map(child => (
-                        <BookmarkTreeItem key={child.id} bookmarkNode={child} />
-                    ))}
-                </Paper>
-            )
-        } else {
-            content = (
-                <div className={classNames.emptySearchResults}>
-                    No search results found
-                </div>
-            )
-        }
-    } else if (
-        activeFolder &&
-        activeFolder.children &&
-        activeFolder.children.length
-    ) {
-        content = (
-            <Paper className={classNames.paper} elevation={3}>
-                {activeFolder.children.map(child => (
-                    <BookmarkTreeItem key={child.id} bookmarkNode={child} />
-                ))}
-            </Paper>
-        )
-    }
-
     return (
         <div
             className={className}
@@ -81,11 +56,45 @@ const SubfolderPanel: React.FC<{ className?: string }> = ({ className }) => {
                 handleContextMenuEvent(e)
             }}
         >
-            {content}
+            {search ? (
+                searchResult.length > 0 ? (
+                    <Paper className={classNames.paper} elevation={3}>
+                        {searchResult.map(child => (
+                            <BookmarkTreeItem
+                                key={child.id}
+                                bookmarkNode={child}
+                            />
+                        ))}
+                    </Paper>
+                ) : (
+                    <div className={classNames.emptySearchResults}>
+                        No search results found
+                    </div>
+                )
+            ) : activeFolder !== null &&
+              Array.isArray(activeFolder.children) &&
+              activeFolder.children.length > 0 ? (
+                <Paper className={classNames.paper} elevation={3}>
+                    {activeFolder.children
+                        .filter(
+                            child =>
+                                child.type === BookmarkNodeType.Bookmark ||
+                                child.type === BookmarkNodeType.Folder
+                        )
+                        .map(child => (
+                            <BookmarkTreeItem
+                                key={child.id}
+                                bookmarkNode={child}
+                            />
+                        ))}
+                </Paper>
+            ) : null}
             <Menu {...contextMenuProps}>
                 <MenuItem
                     onClick={() => {
-                        openBookmarkCreateModal(BookmarkCreateType.Bookmark)
+                        dispatch(
+                            openBookmarkCreateModal(BookmarkNodeType.Bookmark)
+                        )
                         closeContextMenu()
                     }}
                 >
@@ -93,7 +102,9 @@ const SubfolderPanel: React.FC<{ className?: string }> = ({ className }) => {
                 </MenuItem>
                 <MenuItem
                     onClick={() => {
-                        openBookmarkCreateModal(BookmarkCreateType.Folder)
+                        dispatch(
+                            openBookmarkCreateModal(BookmarkNodeType.Folder)
+                        )
                         closeContextMenu()
                     }}
                 >
@@ -103,5 +114,3 @@ const SubfolderPanel: React.FC<{ className?: string }> = ({ className }) => {
         </div>
     )
 }
-
-export default SubfolderPanel

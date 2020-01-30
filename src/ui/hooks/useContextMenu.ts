@@ -1,7 +1,7 @@
 import React from "react"
 import { MenuProps } from "@material-ui/core"
 
-export function useContextMenu() {
+export default function useContextMenu() {
     const [mousePosition, setMousePosition] = React.useState<{
         x: number
         y: number

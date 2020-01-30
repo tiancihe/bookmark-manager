@@ -1,21 +1,16 @@
 import React from "react"
 import ReactDOM from "react-dom"
+import { Provider } from "react-redux"
 
+import store from "./store"
 import App from "./App"
-import { StoreProvider } from "./contexts/store"
-import { DndStoreProvider } from "./contexts/dnd"
-import { ModalStoreProvider } from "./contexts/modal"
 
 const ROOT_NODE = document.createElement("div")
 document.body.appendChild(ROOT_NODE)
 
 ReactDOM.render(
-    <StoreProvider>
-        <DndStoreProvider>
-            <ModalStoreProvider>
-                <App />
-            </ModalStoreProvider>
-        </DndStoreProvider>
-    </StoreProvider>,
+    <Provider store={store}>
+        <App />
+    </Provider>,
     ROOT_NODE
 )

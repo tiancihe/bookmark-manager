@@ -1,4 +1,5 @@
 import React from "react"
+import { useSelector, useDispatch } from "react-redux"
 import { Menu } from "@material-ui/core"
 import { makeStyles, useTheme, fade } from "@material-ui/core/styles"
 import { FolderTwoTone } from "@material-ui/icons"
@@ -6,12 +7,19 @@ import { useDrag, useDrop } from "react-dnd"
 import { throttle } from "lodash"
 
 import { BookmarkTreeNode } from "../../types"
-
-import { useStore } from "../contexts/store"
-import { useDndStore, HoverArea } from "../contexts/dnd"
-import { useContextMenu } from "../hooks"
+import { RootState, HoverArea, BookmarkNodeType } from "../types"
 import { getFavicon } from "../utils"
 import { DNDTypes, __MAC__ } from "../consts"
+import useContextMenu from "../hooks/useContextMenu"
+import useSelectedNodes from "../hooks/useSelectedNodes"
+import useHoverState from "../hooks/useHoverState"
+import {
+    selectNodes,
+    selectNode,
+    setHoverState,
+    clearHoverState
+} from "../store/dnd"
+import { setActiveFolder } from "../store/bookmark"
 
 import BookmarkActionMenu from "./BookmarkActionMenu"
 import BookmarkActionMenuContent from "./BookmarkActionMenuContent"
@@ -55,31 +63,31 @@ export default function BookmarkTreeItem({
 }: {
     bookmarkNode: BookmarkTreeNode
 }) {
-    const isFolder = bookmarkNode.type === "folder"
-    const isBookmark = bookmarkNode.type === "bookmark"
+    const isFolder = bookmarkNode.type === BookmarkNodeType.Folder
+    const isBookmark = bookmarkNode.type === BookmarkNodeType.Bookmark
 
-    if (!isFolder && !isBookmark) return null
+    const activeFolder = useSelector(
+        (state: RootState) => state.bookmark.activeFolder
+    )
 
-    const { searchResult, activeFolder, setActiveFolder } = useStore()
-    const {
-        selectedNodes,
-        isNodeSelected,
-        setSelectedNodes,
+    const searchResult = useSelector(
+        (state: RootState) => state.bookmark.searchResult
+    )
 
-        hoverState,
-        isNodeHovered,
-        setHoverState,
-        clearHoverState
-    } = useDndStore()
+    const { selectedNodes, isNodeSelected } = useSelectedNodes()
     const isSelected = isNodeSelected(bookmarkNode)
+
+    const { hoverState, isNodeHovered } = useHoverState()
     const isHovered = isNodeHovered(bookmarkNode)
+
+    const dispatch = useDispatch()
 
     const nodeRef = React.useRef(React.createRef<HTMLDivElement>())
     const [, drag] = useDrag({
         item: { type: DNDTypes.BookmarkItem },
         begin: () => {
             if (!isSelected) {
-                setSelectedNodes([bookmarkNode])
+                dispatch(selectNode(bookmarkNode))
             }
         }
     })
@@ -103,15 +111,17 @@ export default function BookmarkTreeItem({
                         const topMid = rect.top + rect.height / 3
                         const midBottom = rect.bottom - rect.height / 3
 
-                        setHoverState({
-                            node: bookmarkNode,
-                            area:
-                                pos.y < topMid
-                                    ? HoverArea.Top
-                                    : pos.y < midBottom
-                                    ? HoverArea.Mid
-                                    : HoverArea.Bottom
-                        })
+                        dispatch(
+                            setHoverState({
+                                node: bookmarkNode,
+                                area:
+                                    pos.y < topMid
+                                        ? HoverArea.Top
+                                        : pos.y < midBottom
+                                        ? HoverArea.Mid
+                                        : HoverArea.Bottom
+                            })
+                        )
                     }
                 }
             },
@@ -179,7 +189,7 @@ export default function BookmarkTreeItem({
                 }
             }
 
-            clearHoverState()
+            dispatch(clearHoverState())
         }
     })
     drag(drop(nodeRef.current))
@@ -220,12 +230,16 @@ export default function BookmarkTreeItem({
                         // if ctrl is pressed (command on mac)
                         if (!isSelected) {
                             // and the current node is not selected, select it
-                            setSelectedNodes(selectedNodes.concat(bookmarkNode))
+                            dispatch(
+                                selectNodes(selectedNodes.concat(bookmarkNode))
+                            )
                         } else {
                             // otherwise unselect it
-                            setSelectedNodes(
-                                selectedNodes.filter(
-                                    node => node.id === bookmarkNode.id
+                            dispatch(
+                                selectNodes(
+                                    selectedNodes.filter(
+                                        node => node.id === bookmarkNode.id
+                                    )
                                 )
                             )
                         }
@@ -243,22 +257,25 @@ export default function BookmarkTreeItem({
                         const currentNodeIndex = target.findIndex(
                             node => node.id === bookmarkNode.id
                         )
-                        setSelectedNodes(
-                            target.slice(
-                                Math.min(firstNodeIndex, currentNodeIndex),
-                                Math.max(firstNodeIndex, currentNodeIndex) + 1
+                        dispatch(
+                            selectNodes(
+                                target.slice(
+                                    Math.min(firstNodeIndex, currentNodeIndex),
+                                    Math.max(firstNodeIndex, currentNodeIndex) +
+                                        1
+                                )
                             )
                         )
                     } else {
                         // select current node only
-                        setSelectedNodes([bookmarkNode])
+                        dispatch(selectNode(bookmarkNode))
                     }
                 }}
                 onDoubleClick={e => {
                     e.stopPropagation()
 
                     if (isFolder) {
-                        setActiveFolder(bookmarkNode.id)
+                        dispatch(setActiveFolder(bookmarkNode))
                     }
 
                     if (isBookmark) {
@@ -272,7 +289,7 @@ export default function BookmarkTreeItem({
                     e.stopPropagation()
 
                     if (!isSelected) {
-                        setSelectedNodes([bookmarkNode])
+                        dispatch(selectNode(bookmarkNode))
                     }
 
                     handleContextMenuEvent(e)

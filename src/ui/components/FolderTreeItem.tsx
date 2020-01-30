@@ -1,13 +1,16 @@
 import React from "react"
+import { useSelector, useDispatch } from "react-redux"
 import { makeStyles, Theme, useTheme, fade } from "@material-ui/core"
 import { ArrowRight, ArrowDropDown, FolderTwoTone } from "@material-ui/icons"
 import { useDrop } from "react-dnd"
 
 import { BookmarkTreeNode } from "../../types"
-
-import { useStore } from "../contexts/store"
+import { RootState, HoverArea } from "../types"
 import { DNDTypes } from "../consts"
-import { useDndStore, HoverArea } from "../contexts/dnd"
+import { setHoverState, clearHoverState } from "../store/dnd"
+import { setActiveFolder } from "../store/bookmark"
+import useSelectedNodes from "../hooks/useSelectedNodes"
+import useHoverState from "../hooks/useHoverState"
 
 const useFolderTreeItemStyle = makeStyles<
     Theme,
@@ -43,25 +46,26 @@ export default function FolderTreeItem({
     level: number
     bookmarkNode: BookmarkTreeNode
 }>) {
-    const { activeFolderId, setActiveFolder } = useStore()
-    const {
-        selectedNodes,
-        hoverState,
-        isNodeHovered,
-        setHoverState,
-        clearHoverState
-    } = useDndStore()
+    const activeFolder = useSelector(
+        (state: RootState) => state.bookmark.activeFolder
+    )
+    const isActive =
+        activeFolder !== null && activeFolder.id === bookmarkNode.id
+
+    const { selectedNodes } = useSelectedNodes()
+
+    const { hoverState, isNodeHovered } = useHoverState()
     const isHovered = isNodeHovered(bookmarkNode)
+
+    const dispatch = useDispatch()
 
     const [open, setOpen] = React.useState(false)
 
     const hasSubfolders = React.useMemo(
         () =>
             Array.isArray(bookmarkNode.children) &&
-            Boolean(
-                bookmarkNode.children.filter(node => node.type === "folder")
-                    .length
-            ),
+            bookmarkNode.children.filter(node => node.type === "folder")
+                .length > 0,
         [bookmarkNode]
     )
 
@@ -69,10 +73,12 @@ export default function FolderTreeItem({
         accept: DNDTypes.BookmarkItem,
         hover: (item, monitor) => {
             if (!hoverState || !isHovered) {
-                setHoverState({
-                    node: bookmarkNode,
-                    area: HoverArea.Mid
-                })
+                dispatch(
+                    setHoverState({
+                        node: bookmarkNode,
+                        area: HoverArea.Mid
+                    })
+                )
             }
         },
         drop: (item, monitor) => {
@@ -84,14 +90,14 @@ export default function FolderTreeItem({
                 }
             }
             move()
-            clearHoverState()
+            dispatch(clearHoverState())
         }
     })
 
     const theme = useTheme()
     const classNames = useFolderTreeItemStyle({
         level,
-        active: activeFolderId === bookmarkNode.id
+        active: activeFolder !== null && activeFolder.id === bookmarkNode.id
     })
 
     return (
@@ -104,10 +110,12 @@ export default function FolderTreeItem({
                         ? fade(theme.palette.primary.main, 0.25)
                         : undefined
                 }}
-                onClick={() =>
-                    activeFolderId !== bookmarkNode.id &&
-                    setActiveFolder(bookmarkNode.id)
-                }
+                onClick={e => {
+                    e.stopPropagation()
+                    if (!isActive) {
+                        dispatch(setActiveFolder(bookmarkNode))
+                    }
+                }}
             >
                 <div className={classNames.icon}>
                     {hasSubfolders &&

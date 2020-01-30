@@ -1,15 +1,19 @@
-import React, { useMemo } from "react"
+import React from "react"
+import { useSelector } from "react-redux"
 
 import { BookmarkTreeNode } from "../../types"
-import { useStore } from "../contexts/store"
+import { RootState } from "../types"
+
 import FolderTreeItem from "./FolderTreeItem"
 
-const FolderPanel: React.FC<{ className?: string }> = ({ className }) => {
-    const { bookmarkTree } = useStore()
+export default function FolderPanel({ className }: { className?: string }) {
+    const bookmarkTree = useSelector(
+        (state: RootState) => state.bookmark.bookmarkTree
+    )
 
-    if (!bookmarkTree) return null
+    const folderTree = React.useMemo(() => {
+        if (!bookmarkTree) return null
 
-    const folderTree = useMemo(() => {
         let renderResult = null as React.ReactElement | null
 
         const renderFolder = (
@@ -46,5 +50,3 @@ const FolderPanel: React.FC<{ className?: string }> = ({ className }) => {
 
     return <div className={className}>{folderTree}</div>
 }
-
-export default FolderPanel

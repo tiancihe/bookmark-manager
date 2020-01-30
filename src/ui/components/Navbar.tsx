@@ -1,4 +1,5 @@
 import React from "react"
+import { useSelector, useDispatch } from "react-redux"
 import {
     makeStyles,
     fade,
@@ -9,9 +10,10 @@ import {
     IconButton
 } from "@material-ui/core"
 import { Search, Brightness4, Brightness5 } from "@material-ui/icons"
-import qs from "query-string"
 
-import { useStore } from "../contexts/store"
+import { searchBookmark } from "../store/bookmark"
+import { toggleDarkMode } from "../store/setting"
+import { RootState } from "../types"
 import { __MAC__ } from "../consts"
 
 const useNavbarStyle = makeStyles(theme => ({
@@ -69,20 +71,20 @@ const useNavbarStyle = makeStyles(theme => ({
 const SEARCH_INPUT_ID = "SEARCH_INPUT"
 
 export default function Navbar() {
-    const { searchInput, search, darkMode, toggleDarkMode } = useStore()
+    const search = useSelector((state: RootState) => state.bookmark.search)
+    const darkMode = useSelector((state: RootState) => state.setting.darkMode)
+    const dispatch = useDispatch()
 
-    const [input, setInput] = React.useState(searchInput)
-
+    const [input, setInput] = React.useState(search)
+    // sync input with global search state
     React.useEffect(() => {
-        // Sync search value from location.hash after mount
-        const { search } = qs.parse(decodeURIComponent(location.hash)) as {
-            search: string
-        }
-        if (search) {
+        if (input !== search) {
             setInput(search)
         }
+    }, [search])
 
-        // Capture default search hotkey
+    React.useEffect(() => {
+        // capture search hotkey
         const focus = (e: KeyboardEvent) => {
             if (
                 e.key === "f" &&
@@ -98,13 +100,6 @@ export default function Navbar() {
         window.addEventListener("keydown", focus)
         return () => window.removeEventListener("keydown", focus)
     }, [])
-
-    // Sync local input state with global store
-    React.useEffect(() => {
-        if (input !== searchInput) {
-            setInput(searchInput)
-        }
-    }, [searchInput])
 
     const classNames = useNavbarStyle()
 
@@ -126,16 +121,24 @@ export default function Navbar() {
                         }}
                         value={input}
                         onChange={e => {
+                            e.stopPropagation()
                             setInput(e.target.value)
                         }}
                         onKeyDown={e => {
+                            e.stopPropagation()
                             if (e.key === "Enter") {
-                                search(input)
+                                dispatch(searchBookmark(input))
                             }
                         }}
                     />
                 </div>
-                <IconButton onClick={toggleDarkMode} color="inherit">
+                <IconButton
+                    color="inherit"
+                    onClick={e => {
+                        e.stopPropagation()
+                        dispatch(toggleDarkMode())
+                    }}
+                >
                     {darkMode ? <Brightness5 /> : <Brightness4 />}
                 </IconButton>
             </Toolbar>

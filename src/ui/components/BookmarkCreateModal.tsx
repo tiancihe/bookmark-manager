@@ -1,4 +1,5 @@
-import React, { useState } from "react"
+import React from "react"
+import { useSelector } from "react-redux"
 import {
     makeStyles,
     Modal,
@@ -12,8 +13,7 @@ import {
     Snackbar
 } from "@material-ui/core"
 
-import { useStore } from "../contexts/store"
-import { BookmarkCreateType } from "../contexts/modal"
+import { RootState, BookmarkNodeType } from "../types"
 
 type CreateDetails = browser.bookmarks.CreateDetails
 
@@ -35,50 +35,25 @@ export default function CreateBookmarkModal({
     createType,
     onClose
 }: {
-    createType: BookmarkCreateType
+    createType: BookmarkNodeType
     onClose: () => void
 }) {
-    const { activeFolderId } = useStore()
+    const activeFolder = useSelector(
+        (state: RootState) => state.bookmark.activeFolder
+    )
+
+    const [title, setTitle] = React.useState("")
+    const [url, setUrl] = React.useState("")
+    // only validates url, title can be empty
+    const [urlValidationError, setUrlValidationError] = React.useState<
+        string | null
+    >(null)
+    const [
+        showNoActiveFolderError,
+        setShowNoActiveFolderError
+    ] = React.useState(false)
 
     const classNames = useCreateBookmarkModalStyle()
-
-    const [title, setTitle] = useState("")
-    const [url, setUrl] = useState("")
-
-    // only validates url, title can be empty
-    const [urlValidationError, setUrlValidationError] = useState<string | null>(
-        null
-    )
-
-    const [showNoActiveFolderError, setShowNoActiveFolderError] = useState(
-        false
-    )
-
-    const handleSubmit = async () => {
-        if (activeFolderId) {
-            if (createType === BookmarkCreateType.Bookmark && !url) {
-                setUrlValidationError("Url is required")
-                return
-            }
-
-            const detail: CreateDetails = {
-                parentId: activeFolderId,
-                title,
-                url,
-                type: createType
-            }
-
-            if (createType === BookmarkCreateType.Folder) {
-                delete detail.url
-            }
-
-            await browser.bookmarks.create(detail)
-
-            onClose()
-        } else {
-            setShowNoActiveFolderError(true)
-        }
-    }
 
     return (
         <Modal
@@ -97,7 +72,7 @@ export default function CreateBookmarkModal({
                         value={title}
                         onChange={e => setTitle(e.target.value)}
                     />
-                    {createType === BookmarkCreateType.Bookmark && (
+                    {createType === BookmarkNodeType.Bookmark && (
                         <TextField
                             label="URL"
                             fullWidth
@@ -118,7 +93,35 @@ export default function CreateBookmarkModal({
                     <Button
                         variant="contained"
                         color="primary"
-                        onClick={handleSubmit}
+                        onClick={async e => {
+                            e.stopPropagation()
+                            if (activeFolder !== null) {
+                                if (
+                                    createType === BookmarkNodeType.Bookmark &&
+                                    !url
+                                ) {
+                                    setUrlValidationError("Url is required")
+                                    return
+                                }
+
+                                const detail: CreateDetails = {
+                                    parentId: activeFolder.id,
+                                    title,
+                                    url,
+                                    type: createType
+                                }
+
+                                if (createType === BookmarkNodeType.Folder) {
+                                    delete detail.url
+                                }
+
+                                await browser.bookmarks.create(detail)
+
+                                onClose()
+                            } else {
+                                setShowNoActiveFolderError(true)
+                            }
+                        }}
                     >
                         Save
                     </Button>

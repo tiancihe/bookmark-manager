@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React from "react"
 import {
     makeStyles,
     Modal,
@@ -12,6 +12,7 @@ import {
 } from "@material-ui/core"
 
 import { BookmarkTreeNode } from "../../types"
+import { BookmarkNodeType } from "../types"
 
 const useStyle = makeStyles({
     modal: {
@@ -27,16 +28,17 @@ const useStyle = makeStyles({
     }
 })
 
-const BookmarkEditModal: React.FC<{
+export default function BookmarkEditModal({
+    bookmarkNode,
+    onClose
+}: {
     bookmarkNode: BookmarkTreeNode
     onClose: () => void
-}> = ({ bookmarkNode, onClose }) => {
-    const classNames = useStyle()
+}) {
+    const [title, setTitle] = React.useState(bookmarkNode.title)
+    const [url, setUrl] = React.useState(bookmarkNode.url)
 
-    const [title, setTitle] = useState(bookmarkNode.title)
-    const [url, setUrl] = useState(bookmarkNode.url)
-
-    const isBookmark = bookmarkNode.type === "bookmark"
+    const isBookmark = bookmarkNode.type === BookmarkNodeType.Bookmark
 
     const handleSubmit = async () => {
         const payload: Partial<Pick<BookmarkTreeNode, "title" | "url">> = {
@@ -54,6 +56,8 @@ const BookmarkEditModal: React.FC<{
             console.error(err)
         }
     }
+
+    const classNames = useStyle()
 
     return (
         <Modal
@@ -99,5 +103,3 @@ const BookmarkEditModal: React.FC<{
         </Modal>
     )
 }
-
-export default BookmarkEditModal

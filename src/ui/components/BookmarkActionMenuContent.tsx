@@ -1,4 +1,5 @@
 import React from "react"
+import { useDispatch } from "react-redux"
 import {
     MenuItem,
     Divider,
@@ -11,8 +12,8 @@ import {
 } from "@material-ui/core"
 
 import { BookmarkTreeNode } from "../../types"
-
-import { useModalStore } from "../contexts/modal"
+import { BookmarkNodeType } from "../types"
+import { openBookmarkEditModal } from "../store/modal"
 
 export default function BookmarkActionMenuContent({
     bookmarkNode,
@@ -21,7 +22,7 @@ export default function BookmarkActionMenuContent({
     bookmarkNode: BookmarkTreeNode
     onCloseMenu: () => void
 }) {
-    const { openBookmarkEditModal } = useModalStore()
+    const dispatch = useDispatch()
 
     const [showConfirmModal, setShowConfirmModal] = React.useState(false)
 
@@ -30,11 +31,13 @@ export default function BookmarkActionMenuContent({
             <MenuItem
                 onClick={e => {
                     e.stopPropagation()
-                    openBookmarkEditModal(bookmarkNode)
+                    dispatch(openBookmarkEditModal(bookmarkNode))
                     onCloseMenu()
                 }}
             >
-                {bookmarkNode.type === "bookmark" ? "Edit" : "Rename"}
+                {bookmarkNode.type === BookmarkNodeType.Bookmark
+                    ? "Edit"
+                    : "Rename"}
             </MenuItem>
             <MenuItem
                 onClick={e => {

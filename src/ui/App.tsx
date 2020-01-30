@@ -1,4 +1,5 @@
-import React, { useEffect } from "react"
+import React from "react"
+import { useSelector, useDispatch } from "react-redux"
 import {
     CssBaseline,
     makeStyles,
@@ -8,14 +9,24 @@ import {
 } from "@material-ui/core"
 import { DndProvider } from "react-dnd"
 import HTML5Backend from "react-dnd-html5-backend"
+import qs from "query-string"
+
+import {
+    loadBookmarkTree,
+    searchBookmark,
+    setActiveFolder
+} from "./store/bookmark"
+import { selectNodes, resetDndState } from "./store/dnd"
+import { closeModal } from "./store/modal"
+import { toggleDarkMode } from "./store/setting"
+import { RootState, ModalType } from "./types"
+import { __MAC__ } from "./consts"
 
 import Navbar from "./components/Navbar"
 import FolderPanel from "./components/FolderPanel"
 import SubfolderPanel from "./components/SubfolderPanel"
-import { useStore } from "./contexts/store"
-import { useModalStore, ModalType } from "./contexts/modal"
 import BookmarkEditModal from "./components/BookmarkEditModal"
-import CreateBookmarkModal from "./components/BookmarkCreateModal"
+import BookmarkCreateModal from "./components/BookmarkCreateModal"
 
 const useAppStyle = makeStyles(theme => ({
     container: {
@@ -43,18 +54,100 @@ const useAppStyle = makeStyles(theme => ({
     }
 }))
 
-const App: React.FC = () => {
-    const { darkMode } = useStore()
+export default function App() {
+    const activeFolder = useSelector(
+        (state: RootState) => state.bookmark.activeFolder
+    )
+    const searchResult = useSelector(
+        (state: RootState) => state.bookmark.searchResult
+    )
+    const selectedNodes = useSelector(
+        (state: RootState) => state.dnd.selectedNodes
+    )
+    const dispatch = useDispatch()
 
-    const classNames = useAppStyle()
+    React.useEffect(() => {
+        const initFromHashParams = async () => {
+            const { search, folder } = qs.parse(
+                decodeURIComponent(location.hash)
+            ) as {
+                search: string
+                folder: string
+            }
 
+            if (search) {
+                dispatch(searchBookmark(search))
+            }
+
+            const activeFolder = folder
+                ? (await browser.bookmarks.get(folder))[0]
+                : null
+
+            if (activeFolder) {
+                dispatch(setActiveFolder(activeFolder))
+            }
+        }
+        initFromHashParams()
+
+        const loadTree = () => dispatch(loadBookmarkTree())
+        loadTree()
+
+        browser.bookmarks.onCreated.addListener(loadTree)
+        browser.bookmarks.onChanged.addListener(loadTree)
+        browser.bookmarks.onRemoved.addListener(loadTree)
+        browser.bookmarks.onMoved.addListener(loadTree)
+
+        return () => {
+            browser.bookmarks.onCreated.removeListener(loadTree)
+            browser.bookmarks.onChanged.removeListener(loadTree)
+            browser.bookmarks.onRemoved.removeListener(loadTree)
+            browser.bookmarks.onMoved.removeListener(loadTree)
+        }
+    }, [])
+
+    React.useEffect(() => {
+        // reset dndState when user clicks away
+        const reset = () => dispatch(resetDndState())
+        window.addEventListener("click", reset)
+        return () => window.removeEventListener("click", reset)
+    }, [selectedNodes])
+
+    React.useEffect(() => {
+        // capture select all hotkey
+        const selectAll = (e: KeyboardEvent) => {
+            if (
+                e.key === "a" &&
+                ((!__MAC__ && e.ctrlKey) || (__MAC__ && e.metaKey))
+            ) {
+                if (searchResult.length) {
+                    dispatch(selectNodes(searchResult))
+                } else if (
+                    activeFolder &&
+                    activeFolder.children &&
+                    activeFolder.children.length
+                ) {
+                    e.preventDefault()
+                    dispatch(selectNodes(activeFolder.children))
+                }
+            }
+        }
+        window.addEventListener("keydown", selectAll)
+        return () => window.removeEventListener("keydown", selectAll)
+    }, [searchResult, activeFolder])
+
+    const modalType = useSelector((state: RootState) => state.modal.modalType)
+    const bookmarkNode = useSelector(
+        (state: RootState) => state.modal.bookmarkNode
+    )
+    const createType = useSelector((state: RootState) => state.modal.createType)
+
+    const darkMode = useSelector((state: RootState) => state.setting.darkMode)
     const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)")
-
-    useEffect(() => {
+    React.useEffect(() => {
         if (darkMode !== prefersDarkMode) {
+            dispatch(toggleDarkMode())
         }
     }, [prefersDarkMode])
-
     const theme = React.useMemo(() => {
         return createMuiTheme({
             palette: {
@@ -65,8 +158,7 @@ const App: React.FC = () => {
             }
         })
     }, [darkMode])
-
-    const { modalState, closeModal } = useModalStore()
+    const classNames = useAppStyle()
 
     return (
         <MuiThemeProvider theme={theme}>
@@ -80,22 +172,18 @@ const App: React.FC = () => {
                     </div>
                 </DndProvider>
             </div>
-            {modalState !== null &&
-                modalState.modalType === ModalType.BookmarkEdit && (
-                    <BookmarkEditModal
-                        bookmarkNode={modalState.bookmarkNode!}
-                        onClose={closeModal}
-                    />
-                )}
-            {modalState !== null &&
-                modalState.modalType === ModalType.BookmarkCreate && (
-                    <CreateBookmarkModal
-                        createType={modalState.createType!}
-                        onClose={closeModal}
-                    />
-                )}
+            {modalType === ModalType.BookmarkEdit && (
+                <BookmarkEditModal
+                    bookmarkNode={bookmarkNode!}
+                    onClose={() => dispatch(closeModal())}
+                />
+            )}
+            {modalType === ModalType.BookmarkCreate && (
+                <BookmarkCreateModal
+                    createType={createType!}
+                    onClose={() => dispatch(closeModal())}
+                />
+            )}
         </MuiThemeProvider>
     )
 }
-
-export default App

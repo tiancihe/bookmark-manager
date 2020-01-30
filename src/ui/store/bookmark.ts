@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { batch } from "react-redux"
 import qs from "query-string"
 
 import { BookmarkTreeNode } from "../../types"
@@ -47,6 +46,7 @@ const slice = createSlice({
                 folder: string
             }
             if (search) {
+                state.search = search
                 state.searchResult = state.searchResult.map(
                     node => state.bookmarkMap[node.id]
                 )
@@ -65,6 +65,7 @@ const slice = createSlice({
             if (isUserAction) {
                 state.search = ""
                 state.searchResult = []
+                setHashParam({ search: "" })
             }
         },
         setSearch: (

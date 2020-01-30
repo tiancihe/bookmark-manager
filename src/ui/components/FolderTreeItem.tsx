@@ -1,7 +1,12 @@
 import React from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { makeStyles, Theme, useTheme, fade } from "@material-ui/core"
-import { ArrowRight, ArrowDropDown, FolderTwoTone } from "@material-ui/icons"
+import { makeStyles, Theme, useTheme, fade } from "@material-ui/core/styles"
+import {
+    ArrowRight,
+    ArrowDropDown,
+    FolderTwoTone,
+    FolderOpenTwoTone
+} from "@material-ui/icons"
 import { useDrop } from "react-dnd"
 
 import { BookmarkTreeNode } from "../../types"
@@ -40,10 +45,12 @@ const useFolderTreeItemStyle = makeStyles<
 export default function FolderTreeItem({
     level,
     bookmarkNode,
+    defaultOpen,
     children
 }: React.PropsWithChildren<{
     level: number
     bookmarkNode: BookmarkTreeNode
+    defaultOpen?: boolean
 }>) {
     const activeFolder = useSelector(
         (state: RootState) => state.bookmark.activeFolder
@@ -60,7 +67,7 @@ export default function FolderTreeItem({
 
     const dispatch = useDispatch()
 
-    const [open, setOpen] = React.useState(false)
+    const [open, setOpen] = React.useState(defaultOpen)
 
     const hasSubfolders = React.useMemo(
         () =>
@@ -137,7 +144,7 @@ export default function FolderTreeItem({
                         ))}
                 </div>
                 <div className={classNames.icon}>
-                    <FolderTwoTone />
+                    {open ? <FolderOpenTwoTone /> : <FolderTwoTone />}
                 </div>
                 <div className={classNames.text}>{bookmarkNode.title}</div>
             </div>

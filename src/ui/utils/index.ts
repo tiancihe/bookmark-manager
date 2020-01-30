@@ -3,10 +3,14 @@ import qs from "query-string"
 import { BookmarkTreeNode } from "../../types"
 import { HoverState } from "../types"
 
+export function getHashParams() {
+    return qs.parse(decodeURIComponent(location.hash))
+}
+
 export function setHashParam(payload: Record<string, string>) {
     location.hash = encodeURIComponent(
         qs.stringify({
-            ...qs.parse(decodeURIComponent(location.hash)),
+            ...getHashParams(),
             ...payload
         })
     )

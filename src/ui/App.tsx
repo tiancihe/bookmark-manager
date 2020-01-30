@@ -9,12 +9,14 @@ import {
 } from "@material-ui/core"
 import { DndProvider } from "react-dnd"
 import HTML5Backend from "react-dnd-html5-backend"
+import { once } from "lodash"
 
-import { loadBookmarkTree } from "./store/bookmark"
+import { loadBookmarkTree, searchBookmark } from "./store/bookmark"
 import { selectNodes, resetDndState } from "./store/dnd"
 import { closeModal } from "./store/modal"
 import { toggleDarkMode } from "./store/setting"
 import { RootState, ModalType } from "./types"
+import { getHashParams } from "./utils"
 import { __MAC__ } from "./consts"
 
 import Navbar from "./components/Navbar"
@@ -82,8 +84,27 @@ export default function App() {
     }, [])
 
     React.useEffect(() => {
+        if (bookmarkTree) {
+            once(() => {
+                console.log("search bookmark onDidMount")
+                // if search param exists, search bookmark onDidMount
+                // this is due to the fact that browser.bookmarks.search is an async function
+                // and we want to search the bookmark after the bookmarkTree loads
+                const { search } = getHashParams() as { search: string }
+                if (search) {
+                    dispatch(searchBookmark(search))
+                }
+            })()
+        }
+    }, [bookmarkTree])
+
+    React.useEffect(() => {
         // reset dndState when user clicks away
-        const reset = () => dispatch(resetDndState())
+        const reset = () => {
+            if (selectedNodes.length) {
+                dispatch(resetDndState())
+            }
+        }
         window.addEventListener("click", reset)
         return () => window.removeEventListener("click", reset)
     }, [selectedNodes])

@@ -9,7 +9,7 @@ import {
     InputBase,
     IconButton
 } from "@material-ui/core"
-import { Search, Brightness4, Brightness5 } from "@material-ui/icons"
+import { Search, Clear, Brightness4, Brightness5 } from "@material-ui/icons"
 
 import { searchBookmark } from "../store/bookmark"
 import { toggleDarkMode } from "../store/setting"
@@ -28,42 +28,40 @@ const useNavbarStyle = makeStyles(theme => ({
         alignItems: "center",
         justifyContent: "space-between"
     },
-    search: {
+    searchContainer: {
         flex: 1,
+        display: "flex",
+        alignItems: "center",
         maxWidth: "50%",
-        position: "relative",
         borderRadius: theme.shape.borderRadius,
         backgroundColor: fade(theme.palette.common.white, 0.15),
         "&:hover": {
             backgroundColor: fade(theme.palette.common.white, 0.25)
-        },
-        marginRight: theme.spacing(2),
-        marginLeft: 0,
-        width: "100%",
-        [theme.breakpoints.up("sm")]: {
-            marginLeft: theme.spacing(3),
-            width: "auto"
         }
     },
-    searchIcon: {
-        width: theme.spacing(7),
-        height: "100%",
-        position: "absolute",
-        pointerEvents: "none",
+    searchIconContainer: {
         display: "flex",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        width: theme.spacing(5),
+        cursor: "pointer"
+    },
+    clearIconContainer: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: theme.spacing(5),
+        cursor: "pointer"
     },
     inputRoot: {
-        width: "100%",
+        flex: 1,
         color: "inherit"
     },
     inputInput: {
-        padding: theme.spacing(1, 1, 1, 7),
-        transition: theme.transitions.create("width"),
+        padding: theme.spacing(1),
         width: "100%",
         [theme.breakpoints.up("md")]: {
-            width: 200
+            width: "200px"
         }
     }
 }))
@@ -107,9 +105,14 @@ export default function Navbar() {
         <AppBar className={classNames.appBar} position="static">
             <Toolbar className={classNames.toolbar}>
                 <Typography>Bookmarks</Typography>
-                <div className={classNames.search}>
-                    <div className={classNames.searchIcon}>
-                        <Search />
+                <div className={classNames.searchContainer}>
+                    <div className={classNames.searchIconContainer}>
+                        <Search
+                            onClick={e => {
+                                e.stopPropagation()
+                                dispatch(searchBookmark(input))
+                            }}
+                        />
                     </div>
                     <InputBase
                         autoFocus
@@ -134,6 +137,16 @@ export default function Navbar() {
                             }
                         }}
                     />
+                    {search ? (
+                        <div className={classNames.clearIconContainer}>
+                            <Clear
+                                onClick={e => {
+                                    e.stopPropagation()
+                                    dispatch(searchBookmark(""))
+                                }}
+                            />
+                        </div>
+                    ) : null}
                 </div>
                 <IconButton
                     color="inherit"

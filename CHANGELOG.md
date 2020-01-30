@@ -1,3 +1,7 @@
+## 0.4.3 (2020/1/30)
+
+- small performance boost
+
 ## 0.4.2 (2020/1/29)
 
 - `getFavicon` only resolves domain

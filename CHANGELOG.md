@@ -1,3 +1,15 @@
+## 0.5.0 (2020/1/31)
+
+- improve drag and drop performance
+- add clear icon to clear search state
+- clicks search icon now triggers search action
+
+### bug fixes
+
+- correctly show active folder
+- immediately display folder according to user action (clear search state)
+- clicks search input does not unselect current selected nodes
+
 ## 0.4.3 (2020/1/30)
 
 - small performance boost

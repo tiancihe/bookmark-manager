@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "bookmark-manager",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "icons": {
     "48": "icon-48x48.png",
     "96": "icon-96x96.png"

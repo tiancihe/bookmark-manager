@@ -73,7 +73,7 @@ export default function FolderPanel({ className }: { className?: string }) {
         renderFolder(bookmarkTree, renderResult, -1)
 
         return renderResult
-    }, [bookmarkTree])
+    }, [bookmarkTree, defaultOpenFolders])
 
     return <div className={className}>{folderTree}</div>
 }

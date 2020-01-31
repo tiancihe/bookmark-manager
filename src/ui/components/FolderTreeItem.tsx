@@ -69,6 +69,12 @@ export default function FolderTreeItem({
 
     const [open, setOpen] = React.useState(defaultOpen)
 
+    React.useEffect(() => {
+        if (defaultOpen && !open) {
+            setOpen(true)
+        }
+    }, [defaultOpen])
+
     const hasSubfolders = React.useMemo(
         () =>
             Array.isArray(bookmarkNode.children) &&

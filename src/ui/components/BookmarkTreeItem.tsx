@@ -91,41 +91,37 @@ const BookmarkTreeItem = React.memo(function BookmarkTreeItem({
     })
     const [, drop] = useDrop({
         accept: DNDTypes.BookmarkItem,
-        hover: throttle(
-            (item, monitor) => {
-                const node = nodeRef.current.current
+        hover: throttle((item, monitor) => {
+            const node = nodeRef.current.current
 
-                if (node) {
-                    const rect = node.getBoundingClientRect()
-                    const pos = monitor.getClientOffset()
+            if (node) {
+                const rect = node.getBoundingClientRect()
+                const pos = monitor.getClientOffset()
 
-                    if (
-                        pos &&
-                        pos.x > rect.left &&
-                        pos.x < rect.right &&
-                        pos.y > rect.top &&
-                        pos.y < rect.bottom
-                    ) {
-                        const topMid = rect.top + rect.height / 3
-                        const midBottom = rect.bottom - rect.height / 3
+                if (
+                    pos &&
+                    pos.x > rect.left &&
+                    pos.x < rect.right &&
+                    pos.y > rect.top &&
+                    pos.y < rect.bottom
+                ) {
+                    const topMid = rect.top + rect.height / 3
+                    const midBottom = rect.bottom - rect.height / 3
 
-                        dispatch(
-                            setHoverState({
-                                node: bookmarkNode,
-                                area:
-                                    pos.y < topMid
-                                        ? HoverArea.Top
-                                        : pos.y < midBottom
-                                        ? HoverArea.Mid
-                                        : HoverArea.Bottom
-                            })
-                        )
-                    }
+                    dispatch(
+                        setHoverState({
+                            node: bookmarkNode,
+                            area:
+                                pos.y < topMid
+                                    ? HoverArea.Top
+                                    : pos.y < midBottom
+                                    ? HoverArea.Mid
+                                    : HoverArea.Bottom
+                        })
+                    )
                 }
-            },
-            10,
-            { trailing: true }
-        ),
+            }
+        }, 10),
         drop: (item, monitor) => {
             const node = nodeRef.current.current
 

@@ -8,6 +8,7 @@
     "build": "node scripts/clean-up && webpack",
     "pack": "npm run build && web-ext build -s package -o",
     "ver": "node scripts/update-version",
+    "zip-src": "node scripts/zip-source",
     "ext": "web-ext run -s package"
   },
   "dependencies": {

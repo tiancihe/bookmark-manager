@@ -1,3 +1,7 @@
+## 0.5.1 (2020/2/3)
+
+- sync search and current folder with url in real time
+
 ## 0.5.0 (2020/1/31)
 
 - improve drag and drop performance

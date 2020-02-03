@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node scripts/clean-up && webpack-dev-server --config webpack.dev.js",
     "build": "node scripts/clean-up && webpack",
-    "pack": "npm run build && web-ext build -s package -o",
+    "pack": "npm run build && web-ext build -s package -o && npm run zip-src",
     "ver": "node scripts/update-version",
     "zip-src": "node scripts/zip-source",
     "ext": "web-ext run -s package"

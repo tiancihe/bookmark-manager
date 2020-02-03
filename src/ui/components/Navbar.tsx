@@ -1,19 +1,18 @@
 import React from "react"
 import { useSelector, useDispatch } from "react-redux"
 import {
-    makeStyles,
-    fade,
     AppBar,
     Toolbar,
     Typography,
     InputBase,
     IconButton
 } from "@material-ui/core"
+import { makeStyles, fade } from "@material-ui/core/styles"
 import { Search, Clear, Brightness4, Brightness5 } from "@material-ui/icons"
 
-import { searchBookmark } from "../store/bookmark"
-import { toggleDarkMode } from "../store/setting"
 import { RootState } from "../types"
+import { toggleDarkMode } from "../store/setting"
+import { setHashParam } from "../utils"
 import { __MAC__ } from "../consts"
 
 const useNavbarStyle = makeStyles(theme => ({
@@ -27,6 +26,9 @@ const useNavbarStyle = makeStyles(theme => ({
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between"
+    },
+    title: {
+        cursor: "pointer"
     },
     searchContainer: {
         flex: 1,
@@ -66,33 +68,31 @@ const useNavbarStyle = makeStyles(theme => ({
     }
 }))
 
-const SEARCH_INPUT_ID = "SEARCH_INPUT"
-
 export default function Navbar() {
     const search = useSelector((state: RootState) => state.bookmark.search)
     const darkMode = useSelector((state: RootState) => state.setting.darkMode)
     const dispatch = useDispatch()
 
     const [input, setInput] = React.useState(search)
+    const inputRef = React.useRef(React.createRef<HTMLInputElement>())
     // sync input with global search state
     React.useEffect(() => {
         if (input !== search) {
             setInput(search)
         }
     }, [search])
-
     React.useEffect(() => {
-        // capture search hotkey
+        // capture search hotkey to focus on input
         const focus = (e: KeyboardEvent) => {
             if (
                 e.key === "f" &&
                 ((!__MAC__ && e.ctrlKey) || (__MAC__ && e.metaKey))
             ) {
                 e.preventDefault()
-                const input = document.getElementById(
-                    SEARCH_INPUT_ID
-                ) as HTMLInputElement
-                input.focus()
+                const input = inputRef.current.current
+                if (input) {
+                    input.focus()
+                }
             }
         }
         window.addEventListener("keydown", focus)
@@ -104,24 +104,32 @@ export default function Navbar() {
     return (
         <AppBar className={classNames.appBar} position="static">
             <Toolbar className={classNames.toolbar}>
-                <Typography>Bookmarks</Typography>
+                <Typography
+                    className={classNames.title}
+                    onClick={e => {
+                        e.stopPropagation()
+                        setHashParam({ search: undefined, folder: undefined })
+                    }}
+                >
+                    Bookmarks
+                </Typography>
                 <div className={classNames.searchContainer}>
                     <div className={classNames.searchIconContainer}>
                         <Search
                             onClick={e => {
                                 e.stopPropagation()
-                                dispatch(searchBookmark(input))
+                                setHashParam({ search: input })
                             }}
                         />
                     </div>
                     <InputBase
                         autoFocus
-                        id={SEARCH_INPUT_ID}
                         placeholder="Search here"
                         classes={{
                             root: classNames.inputRoot,
                             input: classNames.inputInput
                         }}
+                        inputRef={inputRef.current}
                         value={input}
                         onClick={e => {
                             e.stopPropagation()
@@ -133,7 +141,7 @@ export default function Navbar() {
                         onKeyDown={e => {
                             e.stopPropagation()
                             if (e.key === "Enter") {
-                                dispatch(searchBookmark(input))
+                                setHashParam({ search: input })
                             }
                         }}
                     />
@@ -142,7 +150,7 @@ export default function Navbar() {
                             <Clear
                                 onClick={e => {
                                     e.stopPropagation()
-                                    dispatch(searchBookmark(""))
+                                    setHashParam({ search: undefined })
                                 }}
                             />
                         </div>

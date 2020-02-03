@@ -28,3 +28,8 @@ export enum ModalType {
     BookmarkEdit = "BookmarkEdit",
     BookmarkCreate = "BookmarkCreate"
 }
+
+export interface HashParams {
+    search?: string
+    folder?: string
+}

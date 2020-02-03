@@ -9,14 +9,15 @@ import {
 } from "@material-ui/core"
 import { DndProvider } from "react-dnd"
 import HTML5Backend from "react-dnd-html5-backend"
-import { once } from "lodash"
 
-import { loadBookmarkTree, searchBookmark } from "./store/bookmark"
+import {
+    loadBookmarkTree,
+    syncBookmarkStateFromHashParams
+} from "./store/bookmark"
 import { selectNodes, resetDndState } from "./store/dnd"
 import { closeModal } from "./store/modal"
 import { toggleDarkMode } from "./store/setting"
 import { RootState, ModalType } from "./types"
-import { getHashParams } from "./utils"
 import { __MAC__ } from "./consts"
 
 import Navbar from "./components/Navbar"
@@ -68,32 +69,35 @@ export default function App() {
 
     React.useEffect(() => {
         const loadTree = () => dispatch(loadBookmarkTree())
+        // initialize bookmarkTree
         loadTree()
 
+        // reloads bookmarkTree when user changes any bookmarks
         browser.bookmarks.onCreated.addListener(loadTree)
         browser.bookmarks.onChanged.addListener(loadTree)
         browser.bookmarks.onRemoved.addListener(loadTree)
         browser.bookmarks.onMoved.addListener(loadTree)
+
+        const hashChangeListener = () =>
+            dispatch(syncBookmarkStateFromHashParams())
+        window.addEventListener("hashchange", hashChangeListener)
 
         return () => {
             browser.bookmarks.onCreated.removeListener(loadTree)
             browser.bookmarks.onChanged.removeListener(loadTree)
             browser.bookmarks.onRemoved.removeListener(loadTree)
             browser.bookmarks.onMoved.removeListener(loadTree)
+
+            window.removeEventListener("hashchange", hashChangeListener)
         }
     }, [])
 
+    // when bookmarkTree changes, sync bookmark search and activeFolder state from hash params
+    // this is because searchResult and activeFolder are all refs to the current bookmark nodes
+    // which will change when bookmarkTree changes
     React.useEffect(() => {
         if (bookmarkTree) {
-            once(() => {
-                // if search param exists, search bookmark onDidMount
-                // this is due to the fact that browser.bookmarks.search is an async function
-                // and we want to search the bookmark after the bookmarkTree loads
-                const { search } = getHashParams() as { search: string }
-                if (search) {
-                    dispatch(searchBookmark(search))
-                }
-            })()
+            dispatch(syncBookmarkStateFromHashParams())
         }
     }, [bookmarkTree])
 
@@ -109,7 +113,7 @@ export default function App() {
     }, [selectedNodes])
 
     React.useEffect(() => {
-        // capture select all hotkey
+        // capture select all hotkey to select all bookmark nodes that are currently displayed
         const selectAll = (e: KeyboardEvent) => {
             if (
                 e.key === "a" &&

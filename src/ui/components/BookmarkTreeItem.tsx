@@ -8,7 +8,7 @@ import { throttle } from "lodash"
 
 import { BookmarkTreeNode } from "../../types"
 import { RootState, HoverArea, BookmarkNodeType } from "../types"
-import { getFavicon, isNodeSelected, isNodeHovered } from "../utils"
+import { getFavicon, isNodeSelected, setHashParam } from "../utils"
 import { DNDTypes, __MAC__ } from "../consts"
 import useContextMenu from "../hooks/useContextMenu"
 import {
@@ -17,7 +17,6 @@ import {
     setHoverState,
     clearHoverState
 } from "../store/dnd"
-import { setActiveFolder } from "../store/bookmark"
 
 import BookmarkActionMenu from "./BookmarkActionMenu"
 import BookmarkActionMenuContent from "./BookmarkActionMenuContent"
@@ -268,7 +267,10 @@ const BookmarkTreeItem = React.memo(function BookmarkTreeItem({
                     e.stopPropagation()
 
                     if (isFolder) {
-                        dispatch(setActiveFolder({ id: bookmarkNode.id }))
+                        setHashParam({
+                            folder: bookmarkNode.id,
+                            search: undefined
+                        })
                     }
 
                     if (isBookmark) {

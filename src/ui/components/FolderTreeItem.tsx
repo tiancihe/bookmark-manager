@@ -13,8 +13,7 @@ import { BookmarkTreeNode } from "../../types"
 import { RootState, HoverArea } from "../types"
 import { DNDTypes } from "../consts"
 import { setHoverState, clearHoverState } from "../store/dnd"
-import { setActiveFolder } from "../store/bookmark"
-import { isNodeHovered } from "../utils"
+import { isNodeHovered, setHashParam } from "../utils"
 
 const useFolderTreeItemStyle = makeStyles<
     Theme,
@@ -55,8 +54,11 @@ export default function FolderTreeItem({
     const activeFolder = useSelector(
         (state: RootState) => state.bookmark.activeFolder
     )
+    const search = useSelector((state: RootState) => state.bookmark.search)
+    // if search state is true, all folder items should stay inactive
+    // user should be able to click any folder to active it and clear search state in the mean time
     const isActive =
-        activeFolder !== null && activeFolder.id === bookmarkNode.id
+        !search && activeFolder !== null && activeFolder.id === bookmarkNode.id
 
     const selectedNodes = useSelector(
         (state: RootState) => state.dnd.selectedNodes
@@ -127,7 +129,17 @@ export default function FolderTreeItem({
                 onClick={e => {
                     e.stopPropagation()
                     if (!isActive) {
-                        dispatch(setActiveFolder({ id: bookmarkNode.id }))
+                        // there are two cases when isActive is false:
+                        if (search) {
+                            // 1: search state is not empty
+                            setHashParam({
+                                folder: bookmarkNode.id,
+                                search: undefined
+                            })
+                        } else {
+                            // 2: search state is empty and there is no active folder
+                            setHashParam({ folder: bookmarkNode.id })
+                        }
                     }
                 }}
             >

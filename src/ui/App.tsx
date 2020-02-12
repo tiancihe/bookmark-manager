@@ -14,7 +14,7 @@ import {
     loadBookmarkTree,
     syncBookmarkStateFromHashParams
 } from "./store/bookmark"
-import { selectNodes, resetDndState } from "./store/dnd"
+import { resetDndState } from "./store/dnd"
 import { closeModal } from "./store/modal"
 import { toggleDarkMode } from "./store/setting"
 import { RootState, ModalType } from "./types"
@@ -111,29 +111,6 @@ export default function App() {
         window.addEventListener("click", reset)
         return () => window.removeEventListener("click", reset)
     }, [selectedNodes])
-
-    React.useEffect(() => {
-        // capture select all hotkey to select all bookmark nodes that are currently displayed
-        const selectAll = (e: KeyboardEvent) => {
-            if (
-                e.key === "a" &&
-                ((!__MAC__ && e.ctrlKey) || (__MAC__ && e.metaKey))
-            ) {
-                if (searchResult.length) {
-                    dispatch(selectNodes(searchResult))
-                } else if (
-                    activeFolder &&
-                    activeFolder.children &&
-                    activeFolder.children.length
-                ) {
-                    e.preventDefault()
-                    dispatch(selectNodes(activeFolder.children))
-                }
-            }
-        }
-        window.addEventListener("keydown", selectAll)
-        return () => window.removeEventListener("keydown", selectAll)
-    }, [searchResult, activeFolder])
 
     const modalType = useSelector((state: RootState) => state.modal.modalType)
     const bookmarkNode = useSelector(

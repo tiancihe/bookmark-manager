@@ -99,6 +99,39 @@ export default function Navbar() {
         return () => window.removeEventListener("keydown", focus)
     }, [])
 
+    const [isInputFocused, setIsInputFocused] = React.useState(false)
+    React.useEffect(() => {
+        if (inputRef.current && inputRef.current.current) {
+            const input = inputRef.current.current
+
+            const inputFocusListener = () => {
+                setIsInputFocused(true)
+            }
+            input.addEventListener("focus", inputFocusListener)
+
+            const inputBlurListener = () => {
+                setIsInputFocused(false)
+            }
+            input.addEventListener("blur", inputBlurListener)
+
+            const escapeKeyListener = (e: KeyboardEvent) => {
+                if (e.key === "Escape") {
+                    if (isInputFocused && search) {
+                        e.stopPropagation()
+                        setHashParam({ search: undefined })
+                    }
+                }
+            }
+            input.addEventListener("keydown", escapeKeyListener)
+
+            return () => {
+                input.removeEventListener("focus", inputFocusListener)
+                input.removeEventListener("blur", inputBlurListener)
+                input.removeEventListener("keydown", escapeKeyListener)
+            }
+        }
+    }, [inputRef.current, isInputFocused, search])
+
     const classNames = useNavbarStyle()
 
     return (

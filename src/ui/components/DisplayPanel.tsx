@@ -4,8 +4,10 @@ import { Paper, Menu, MenuItem } from "@material-ui/core"
 import { makeStyles } from "@material-ui/core/styles"
 
 import { openBookmarkCreateModal } from "../store/modal"
+import { selectNodes, clearSelectedNodes } from "../store/dnd"
 import { RootState, BookmarkNodeType } from "../types"
 import { isNodeHovered } from "../utils"
+import { __MAC__ } from "../consts"
 import useContextMenu from "../hooks/useContextMenu"
 
 import BookmarkTreeItem from "./BookmarkTreeItem"
@@ -40,6 +42,9 @@ export default function DisplayPanel({ className }: { className?: string }) {
     const searchResult = useSelector(
         (state: RootState) => state.bookmark.searchResult
     )
+    const selectedNodes = useSelector(
+        (state: RootState) => state.dnd.selectedNodes
+    )
     const hoverState = useSelector((state: RootState) => state.dnd.hoverState)
     const dispatch = useDispatch()
 
@@ -54,6 +59,48 @@ export default function DisplayPanel({ className }: { className?: string }) {
               )
             : null
     }, [activeFolder])
+
+    // capture select all hotkey to select all bookmark nodes that are currently displayed
+    React.useEffect(() => {
+        const selectAllListener = (e: KeyboardEvent) => {
+            if (
+                e.key === "a" &&
+                ((!__MAC__ && e.ctrlKey) || (__MAC__ && e.metaKey))
+            ) {
+                if (searchResult.length) {
+                    e.preventDefault()
+                    dispatch(selectNodes(searchResult))
+                    return
+                }
+                if (
+                    activeFolder &&
+                    activeFolder.children &&
+                    activeFolder.children.length
+                ) {
+                    e.preventDefault()
+                    dispatch(selectNodes(activeFolder.children))
+                    return
+                }
+            }
+        }
+        window.addEventListener("keydown", selectAllListener)
+        return () => window.removeEventListener("keydown", selectAllListener)
+    }, [searchResult, activeFolder])
+
+    // capture escape keyboard event to clear selected nodes
+    React.useEffect(() => {
+        const escapeListener = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                if (selectedNodes.length) {
+                    dispatch(clearSelectedNodes())
+                }
+            }
+        }
+        window.addEventListener("keydown", escapeListener)
+        return () => {
+            window.removeEventListener("keydown", escapeListener)
+        }
+    }, [selectedNodes])
 
     const {
         contextMenuProps,

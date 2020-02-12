@@ -2,6 +2,7 @@ import React from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Paper, Menu, MenuItem } from "@material-ui/core"
 import { makeStyles } from "@material-ui/core/styles"
+import copy from "copy-to-clipboard"
 
 import { openBookmarkCreateModal } from "../store/modal"
 import { selectNodes, clearSelectedNodes } from "../store/dnd"
@@ -11,6 +12,7 @@ import { __MAC__ } from "../consts"
 import useContextMenu from "../hooks/useContextMenu"
 
 import BookmarkTreeItem from "./BookmarkTreeItem"
+import { setCopiedNodes } from "../store/cnp"
 
 const useStyle = makeStyles(theme => ({
     paper: {
@@ -46,6 +48,7 @@ export default function DisplayPanel({ className }: { className?: string }) {
         (state: RootState) => state.dnd.selectedNodes
     )
     const hoverState = useSelector((state: RootState) => state.dnd.hoverState)
+    const copiedNodes = useSelector((state: RootState) => state.cnp.copied)
     const dispatch = useDispatch()
 
     const activeFolderChildren = React.useMemo(() => {
@@ -97,10 +100,67 @@ export default function DisplayPanel({ className }: { className?: string }) {
             }
         }
         window.addEventListener("keydown", escapeListener)
-        return () => {
-            window.removeEventListener("keydown", escapeListener)
-        }
+        return () => window.removeEventListener("keydown", escapeListener)
     }, [selectedNodes])
+
+    // copy and paste selected nodes
+    React.useEffect(() => {
+        const copyListener = (e: KeyboardEvent) => {
+            if (
+                e.key === "c" &&
+                ((__MAC__ && e.metaKey) || (!__MAC__ && e.ctrlKey))
+            ) {
+                if (selectedNodes.length) {
+                    e.preventDefault()
+                    dispatch(setCopiedNodes([...selectedNodes]))
+                    copy(selectedNodes.map(node => node.url).join("\t\n"))
+                }
+            }
+        }
+        window.addEventListener("keydown", copyListener)
+
+        const pasteListener = async (e: KeyboardEvent) => {
+            if (
+                e.key === "v" &&
+                ((__MAC__ && e.metaKey) || (!__MAC__ && e.ctrlKey))
+            ) {
+                if (copiedNodes.length) {
+                    e.preventDefault()
+                    // only paste when not searching and a folder opened
+                    if (!search && activeFolder) {
+                        // paste copied nodes after the last of the selected nodes or append in the children of the current folder
+                        for (let i = 0; i < copiedNodes.length; i++) {
+                            const node = copiedNodes[i]
+                            if (selectedNodes.length) {
+                                const target =
+                                    selectedNodes[selectedNodes.length - 1]
+                                await browser.bookmarks.create({
+                                    parentId: target.parentId,
+                                    index: target.index! + 1 + i,
+                                    title: node.title,
+                                    url: node.url,
+                                    type: "bookmark"
+                                })
+                            } else {
+                                await browser.bookmarks.create({
+                                    parentId: activeFolder.id,
+                                    title: node.title,
+                                    url: node.url,
+                                    type: "bookmark"
+                                })
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        window.addEventListener("keydown", pasteListener)
+
+        return () => {
+            window.removeEventListener("keydown", copyListener)
+            window.removeEventListener("keydown", pasteListener)
+        }
+    }, [selectedNodes, copiedNodes])
 
     const {
         contextMenuProps,

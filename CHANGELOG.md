@@ -1,3 +1,10 @@
+## 0.6.0 (2020/2/14)
+
+- copy and paste bookmarks
+- hotkeys support
+- context menu works for multiple selections
+- bug fixes
+
 ## 0.5.1 (2020/2/3)
 
 - sync search and current folder with url in real time

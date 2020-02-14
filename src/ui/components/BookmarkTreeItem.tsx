@@ -230,7 +230,7 @@ const BookmarkTreeItem = React.memo(function BookmarkTreeItem({
                             dispatch(
                                 selectNodes(
                                     selectedNodes.filter(
-                                        node => node.id === bookmarkNode.id
+                                        node => node.id !== bookmarkNode.id
                                     )
                                 )
                             )

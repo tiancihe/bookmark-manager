@@ -6,13 +6,13 @@ import copy from "copy-to-clipboard"
 
 import { openBookmarkCreateModal } from "../store/modal"
 import { selectNodes, clearSelectedNodes } from "../store/dnd"
+import { setCopiedNodes } from "../store/cnp"
 import { RootState, BookmarkNodeType } from "../types"
 import { isNodeHovered } from "../utils"
 import { __MAC__ } from "../consts"
 import useContextMenu from "../hooks/useContextMenu"
 
 import BookmarkTreeItem from "./BookmarkTreeItem"
-import { setCopiedNodes } from "../store/cnp"
 
 const useStyle = makeStyles(theme => ({
     paper: {
@@ -36,7 +36,7 @@ const useStyle = makeStyles(theme => ({
     }
 }))
 
-export default function DisplayPanel({ className }: { className?: string }) {
+export default function BookmarkPanel({ className }: { className?: string }) {
     const activeFolder = useSelector(
         (state: RootState) => state.bookmark.activeFolder
     )

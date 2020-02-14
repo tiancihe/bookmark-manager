@@ -22,7 +22,7 @@ import { __MAC__ } from "./consts"
 
 import Navbar from "./components/Navbar"
 import FolderPanel from "./components/FolderPanel"
-import DisplayPanel from "./components/DisplayPanel"
+import BookmarkPanel from "./components/BookmarkPanel"
 import BookmarkEditModal from "./components/BookmarkEditModal"
 import BookmarkCreateModal from "./components/BookmarkCreateModal"
 
@@ -145,7 +145,7 @@ export default function App() {
                 <DndProvider backend={HTML5Backend}>
                     <div className={classNames.mainContent}>
                         <FolderPanel className={classNames.folderPanel} />
-                        <DisplayPanel className={classNames.displayPanel} />
+                        <BookmarkPanel className={classNames.displayPanel} />
                     </div>
                 </DndProvider>
             </div>

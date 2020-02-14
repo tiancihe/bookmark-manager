@@ -319,10 +319,7 @@ const BookmarkTreeItem = React.memo(function BookmarkTreeItem({
                     e.stopPropagation()
                 }}
             >
-                <BookmarkActionMenuContent
-                    bookmarkNode={bookmarkNode}
-                    onCloseMenu={closeContextMenu}
-                />
+                <BookmarkActionMenuContent onCloseMenu={closeContextMenu} />
             </Menu>
         </React.Fragment>
     )

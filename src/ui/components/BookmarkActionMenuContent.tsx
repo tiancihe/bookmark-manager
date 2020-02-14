@@ -1,52 +1,48 @@
 import React from "react"
-import { useDispatch } from "react-redux"
-import {
-    MenuItem,
-    Divider,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogContentText,
-    DialogActions,
-    Button
-} from "@material-ui/core"
+import { useSelector, useDispatch } from "react-redux"
+import { MenuItem, Divider } from "@material-ui/core"
 
-import { BookmarkTreeNode } from "../../types"
-import { BookmarkNodeType } from "../types"
+import { BookmarkNodeType, RootState } from "../types"
+import { clearSelectedNodes } from "../store/dnd"
 import { openBookmarkEditModal } from "../store/modal"
 
 export default function BookmarkActionMenuContent({
-    bookmarkNode,
     onCloseMenu
 }: {
-    bookmarkNode: BookmarkTreeNode
     onCloseMenu: () => void
 }) {
+    const selectedNodes = useSelector(
+        (state: RootState) => state.dnd.selectedNodes
+    )
     const dispatch = useDispatch()
-
-    const [showConfirmModal, setShowConfirmModal] = React.useState(false)
 
     return (
         <React.Fragment>
+            {selectedNodes.length === 1 && (
+                <MenuItem
+                    onClick={e => {
+                        e.stopPropagation()
+                        dispatch(openBookmarkEditModal(selectedNodes[0]))
+                        onCloseMenu()
+                    }}
+                >
+                    {selectedNodes[0].type === BookmarkNodeType.Bookmark
+                        ? "Edit"
+                        : "Rename"}
+                </MenuItem>
+            )}
             <MenuItem
                 onClick={e => {
                     e.stopPropagation()
-                    dispatch(openBookmarkEditModal(bookmarkNode))
-                    onCloseMenu()
-                }}
-            >
-                {bookmarkNode.type === BookmarkNodeType.Bookmark
-                    ? "Edit"
-                    : "Rename"}
-            </MenuItem>
-            <MenuItem
-                onClick={e => {
-                    e.stopPropagation()
-                    if (bookmarkNode.children && bookmarkNode.children.length) {
-                        setShowConfirmModal(true)
-                    } else {
-                        browser.bookmarks.remove(bookmarkNode.id)
+                    const removeSelectedNodes = async () => {
+                        await Promise.all(
+                            selectedNodes.map(node =>
+                                browser.bookmarks.remove(node.id)
+                            )
+                        )
+                        dispatch(clearSelectedNodes())
                     }
+                    removeSelectedNodes()
                 }}
             >
                 Delete
@@ -55,25 +51,38 @@ export default function BookmarkActionMenuContent({
             <MenuItem
                 onClick={e => {
                     e.stopPropagation()
-                    browser.tabs.create({
-                        url: bookmarkNode.url
-                        // active: true
-                    })
+                    selectedNodes
+                        .filter(node => node.type === BookmarkNodeType.Bookmark)
+                        .forEach(node => {
+                            browser.tabs.create({
+                                url: node.url
+                                // active: true
+                            })
+                        })
                     onCloseMenu()
                 }}
             >
-                Open in new tab
+                {selectedNodes.length > 1
+                    ? "Open all in new tab"
+                    : "Open in new tab"}
             </MenuItem>
             <MenuItem
                 onClick={e => {
                     e.stopPropagation()
+
                     browser.windows.create({
-                        url: bookmarkNode.url
+                        url: selectedNodes
+                            .filter(
+                                node => node.type === BookmarkNodeType.Bookmark
+                            )
+                            .map(node => node.url!)
                     })
                     onCloseMenu()
                 }}
             >
-                Open in new window
+                {selectedNodes.length > 1
+                    ? "Open all in new window"
+                    : "Open in new window"}
             </MenuItem>
             {/** @todo Error: Extension does not have permission for incognito mode */}
             {/* <MenuItem
@@ -88,48 +97,6 @@ export default function BookmarkActionMenuContent({
                 >
                     Open in incognito window
                 </MenuItem> */}
-            {__DEV__ && (
-                <React.Fragment>
-                    <Divider />
-                    <MenuItem onClick={() => console.log(bookmarkNode)}>
-                        Log
-                    </MenuItem>
-                </React.Fragment>
-            )}
-            <Dialog open={showConfirmModal}>
-                <DialogTitle>Folder Not Empty!</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Are you sure you want to delete {bookmarkNode.title} ?
-                    </DialogContentText>
-                    <DialogContentText>
-                        All of its content will be deleted together!
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions style={{ justifyContent: "flex-end" }}>
-                    <Button
-                        variant="outlined"
-                        onClick={e => {
-                            e.stopPropagation()
-                            setShowConfirmModal(false)
-                            onCloseMenu()
-                        }}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={e => {
-                            e.stopPropagation()
-                            browser.bookmarks.removeTree(bookmarkNode.id)
-                            onCloseMenu()
-                        }}
-                    >
-                        Delete
-                    </Button>
-                </DialogActions>
-            </Dialog>
         </React.Fragment>
     )
 }

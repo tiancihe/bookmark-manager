@@ -41,10 +41,7 @@ export default function BookmarkActionMenu({
                     e.stopPropagation()
                 }}
             >
-                <BookmarkActionMenuContent
-                    bookmarkNode={bookmarkNode}
-                    onCloseMenu={closeMenu}
-                />
+                <BookmarkActionMenuContent onCloseMenu={closeMenu} />
             </Menu>
         </React.Fragment>
     )

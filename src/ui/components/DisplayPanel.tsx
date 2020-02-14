@@ -67,6 +67,7 @@ export default function DisplayPanel({ className }: { className?: string }) {
     React.useEffect(() => {
         const selectAllListener = (e: KeyboardEvent) => {
             if (
+                e.target === document.body && // only captures events fired globally
                 e.key === "a" &&
                 ((!__MAC__ && e.ctrlKey) || (__MAC__ && e.metaKey))
             ) {
@@ -93,7 +94,7 @@ export default function DisplayPanel({ className }: { className?: string }) {
     // capture escape keyboard event to clear selected nodes
     React.useEffect(() => {
         const escapeListener = (e: KeyboardEvent) => {
-            if (e.key === "Escape") {
+            if (e.target === document.body && e.key === "Escape") {
                 if (selectedNodes.length) {
                     dispatch(clearSelectedNodes())
                 }
@@ -107,6 +108,7 @@ export default function DisplayPanel({ className }: { className?: string }) {
     React.useEffect(() => {
         const copyListener = (e: KeyboardEvent) => {
             if (
+                e.target === document.body &&
                 e.key === "c" &&
                 ((__MAC__ && e.metaKey) || (!__MAC__ && e.ctrlKey))
             ) {
@@ -121,6 +123,7 @@ export default function DisplayPanel({ className }: { className?: string }) {
 
         const pasteListener = async (e: KeyboardEvent) => {
             if (
+                e.target === document.body &&
                 e.key === "v" &&
                 ((__MAC__ && e.metaKey) || (!__MAC__ && e.ctrlKey))
             ) {

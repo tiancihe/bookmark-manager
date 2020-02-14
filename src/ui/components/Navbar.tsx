@@ -85,6 +85,7 @@ export default function Navbar() {
         // capture search hotkey to focus on input
         const focus = (e: KeyboardEvent) => {
             if (
+                e.target === document.body &&
                 e.key === "f" &&
                 ((!__MAC__ && e.ctrlKey) || (__MAC__ && e.metaKey))
             ) {

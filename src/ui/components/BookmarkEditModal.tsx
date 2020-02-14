@@ -66,7 +66,10 @@ export default function BookmarkEditModal({
             onClose={onClose}
             BackdropComponent={Backdrop}
         >
-            <Card className={classNames.content}>
+            <Card
+                className={classNames.content}
+                onClick={e => e.stopPropagation()}
+            >
                 <CardHeader
                     title={isBookmark ? "Edit Bookmark" : "Rename Folder"}
                 />
@@ -77,6 +80,11 @@ export default function BookmarkEditModal({
                         label="Title"
                         value={title}
                         onChange={e => setTitle(e.target.value)}
+                        onKeyDown={e => {
+                            if (e.key === "Enter") {
+                                handleSubmit()
+                            }
+                        }}
                     />
                     {isBookmark && (
                         <TextField
@@ -84,6 +92,11 @@ export default function BookmarkEditModal({
                             label="URL"
                             value={url}
                             onChange={e => setUrl(e.target.value)}
+                            onKeyDown={e => {
+                                if (e.key === "Enter") {
+                                    handleSubmit()
+                                }
+                            }}
                         />
                     )}
                 </CardContent>

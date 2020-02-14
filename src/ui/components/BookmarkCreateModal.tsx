@@ -62,7 +62,10 @@ export default function CreateBookmarkModal({
             onClose={onClose}
             BackdropComponent={Backdrop}
         >
-            <Card className={classNames.content}>
+            <Card
+                className={classNames.content}
+                onClick={e => e.stopPropagation()}
+            >
                 <CardHeader title={`Add ${createType}`} />
                 <CardContent>
                     <TextField

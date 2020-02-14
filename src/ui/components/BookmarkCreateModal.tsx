@@ -55,6 +55,32 @@ export default function CreateBookmarkModal({
 
     const classNames = useCreateBookmarkModalStyle()
 
+    const handleSubmit = async () => {
+        if (activeFolder !== null) {
+            if (createType === BookmarkNodeType.Bookmark && !url) {
+                setUrlValidationError("Url is required")
+                return
+            }
+
+            const detail: CreateDetails = {
+                parentId: activeFolder.id,
+                title,
+                url,
+                type: createType
+            }
+
+            if (createType === BookmarkNodeType.Folder) {
+                delete detail.url
+            }
+
+            await browser.bookmarks.create(detail)
+
+            onClose()
+        } else {
+            setShowNoActiveFolderError(true)
+        }
+    }
+
     return (
         <Modal
             className={classNames.modal}
@@ -65,6 +91,7 @@ export default function CreateBookmarkModal({
             <Card
                 className={classNames.content}
                 onClick={e => e.stopPropagation()}
+                onDoubleClick={e => e.stopPropagation()}
             >
                 <CardHeader title={`Add ${createType}`} />
                 <CardContent>
@@ -74,6 +101,11 @@ export default function CreateBookmarkModal({
                         autoFocus
                         value={title}
                         onChange={e => setTitle(e.target.value)}
+                        onKeyDown={e => {
+                            if (e.key === "Enter") {
+                                handleSubmit()
+                            }
+                        }}
                     />
                     {createType === BookmarkNodeType.Bookmark && (
                         <TextField
@@ -82,6 +114,11 @@ export default function CreateBookmarkModal({
                             helperText={urlValidationError}
                             value={url}
                             onChange={e => setUrl(e.target.value)}
+                            onKeyDown={e => {
+                                if (e.key === "Enter") {
+                                    handleSubmit()
+                                }
+                            }}
                         />
                     )}
                 </CardContent>
@@ -96,35 +133,7 @@ export default function CreateBookmarkModal({
                     <Button
                         variant="contained"
                         color="primary"
-                        onClick={async e => {
-                            e.stopPropagation()
-                            if (activeFolder !== null) {
-                                if (
-                                    createType === BookmarkNodeType.Bookmark &&
-                                    !url
-                                ) {
-                                    setUrlValidationError("Url is required")
-                                    return
-                                }
-
-                                const detail: CreateDetails = {
-                                    parentId: activeFolder.id,
-                                    title,
-                                    url,
-                                    type: createType
-                                }
-
-                                if (createType === BookmarkNodeType.Folder) {
-                                    delete detail.url
-                                }
-
-                                await browser.bookmarks.create(detail)
-
-                                onClose()
-                            } else {
-                                setShowNoActiveFolderError(true)
-                            }
-                        }}
+                        onClick={handleSubmit}
                     >
                         Save
                     </Button>

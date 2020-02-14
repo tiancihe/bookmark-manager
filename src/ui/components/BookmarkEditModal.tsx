@@ -69,6 +69,7 @@ export default function BookmarkEditModal({
             <Card
                 className={classNames.content}
                 onClick={e => e.stopPropagation()}
+                onDoubleClick={e => e.stopPropagation()}
             >
                 <CardHeader
                     title={isBookmark ? "Edit Bookmark" : "Rename Folder"}

@@ -3,6 +3,7 @@ import { useSelector } from "react-redux"
 
 import { BookmarkTreeNode } from "../../types"
 import { RootState } from "../types"
+import { isNodeFolder } from "../utils"
 
 import FolderTreeItem from "./FolderTreeItem"
 
@@ -54,7 +55,7 @@ export default function FolderPanel({ className }: { className?: string }) {
 
             if (bookmarkNode.children) {
                 bookmarkNode.children
-                    .filter(child => child.type === "folder")
+                    .filter(isNodeFolder)
                     .forEach(child => renderFolder(child, elm, level + 1))
             }
 

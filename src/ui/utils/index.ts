@@ -1,7 +1,7 @@
 import qs from "query-string"
 
 import { BookmarkTreeNode } from "../../types"
-import { HoverState, HashParams } from "../types"
+import { HoverState, HashParams, BookmarkNodeType } from "../types"
 
 export function getHashParams() {
     return qs.parse(decodeURIComponent(location.hash)) as HashParams
@@ -37,4 +37,12 @@ export function isNodeHovered(
     hoverState: HoverState | null
 ) {
     return hoverState !== null && node.id === hoverState.node.id
+}
+
+export function isNodeBookmark(node: BookmarkTreeNode) {
+    return node.type === BookmarkNodeType.Bookmark
+}
+
+export function isNodeFolder(node: BookmarkTreeNode) {
+    return node.type === BookmarkNodeType.Folder
 }

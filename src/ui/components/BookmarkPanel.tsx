@@ -4,11 +4,12 @@ import { Paper, Menu, MenuItem } from "@material-ui/core"
 import { makeStyles } from "@material-ui/core/styles"
 import copy from "copy-to-clipboard"
 
+import { BookmarkTreeNode } from "../../types"
 import { openBookmarkCreateModal } from "../store/modal"
 import { selectNodes, clearSelectedNodes } from "../store/dnd"
 import { setCopiedNodes } from "../store/cnp"
 import { RootState, BookmarkNodeType } from "../types"
-import { isNodeHovered } from "../utils"
+import { isNodeHovered, isNodeBookmark, isNodeFolder } from "../utils"
 import { __MAC__ } from "../consts"
 import useContextMenu from "../hooks/useContextMenu"
 
@@ -91,7 +92,7 @@ export default function BookmarkPanel({ className }: { className?: string }) {
         return () => window.removeEventListener("keydown", selectAllListener)
     }, [searchResult, activeFolder])
 
-    // capture escape keyboard event to clear selected nodes
+    // capture escape key to clear selected nodes
     React.useEffect(() => {
         const escapeListener = (e: KeyboardEvent) => {
             if (e.target === document.body && e.key === "Escape") {
@@ -104,7 +105,7 @@ export default function BookmarkPanel({ className }: { className?: string }) {
         return () => window.removeEventListener("keydown", escapeListener)
     }, [selectedNodes])
 
-    // copy and paste selected nodes
+    // copy and paste bookmarks
     React.useEffect(() => {
         const copyListener = (e: KeyboardEvent) => {
             if (
@@ -115,7 +116,12 @@ export default function BookmarkPanel({ className }: { className?: string }) {
                 if (selectedNodes.length) {
                     e.preventDefault()
                     dispatch(setCopiedNodes([...selectedNodes]))
-                    copy(selectedNodes.map(node => node.url).join("\t\n"))
+                    copy(
+                        selectedNodes
+                            .filter(isNodeBookmark)
+                            .map(node => node.url)
+                            .join("\t\n")
+                    )
                 }
             }
         }
@@ -132,26 +138,16 @@ export default function BookmarkPanel({ className }: { className?: string }) {
                     // only paste when not searching and a folder opened
                     if (!search && activeFolder) {
                         // paste copied nodes after the last of the selected nodes or append in the children of the current folder
+                        const target = selectedNodes[selectedNodes.length - 1]
                         for (let i = 0; i < copiedNodes.length; i++) {
                             const node = copiedNodes[i]
-                            if (selectedNodes.length) {
-                                const target =
-                                    selectedNodes[selectedNodes.length - 1]
-                                await browser.bookmarks.create({
-                                    parentId: target.parentId,
-                                    index: target.index! + 1 + i,
-                                    title: node.title,
-                                    url: node.url,
-                                    type: "bookmark"
-                                })
-                            } else {
-                                await browser.bookmarks.create({
-                                    parentId: activeFolder.id,
-                                    title: node.title,
-                                    url: node.url,
-                                    type: "bookmark"
-                                })
-                            }
+                            await copyNode({
+                                src: node,
+                                dest: activeFolder,
+                                destIndex: target
+                                    ? target.index! + 1 + i
+                                    : undefined
+                            })
                         }
                     }
                 }
@@ -235,4 +231,45 @@ export default function BookmarkPanel({ className }: { className?: string }) {
             </Menu>
         </div>
     )
+}
+
+interface CopyNodeSpec {
+    src: BookmarkTreeNode
+    /** must be a node whose type is "folder" */
+    dest: BookmarkTreeNode
+    /** the index to paste under dest */
+    destIndex?: number
+}
+
+async function copyNode(spec: CopyNodeSpec) {
+    if (isNodeBookmark(spec.src)) {
+        await browser.bookmarks.create({
+            type: spec.src.type,
+            parentId: spec.dest.id,
+            index: spec.destIndex,
+            title: spec.src.title,
+            url: spec.src.url
+        })
+        return
+    }
+
+    if (isNodeFolder(spec.src)) {
+        const newFolder = await browser.bookmarks.create({
+            type: spec.src.type,
+            parentId: spec.dest.id,
+            index: spec.dest.index,
+            title: spec.src.title
+        })
+
+        if (spec.src.children) {
+            for (let i = 0; i < spec.src.children.length; i++) {
+                const child = spec.src.children[i]
+                await copyNode({
+                    src: child,
+                    dest: newFolder,
+                    destIndex: child.index
+                })
+            }
+        }
+    }
 }

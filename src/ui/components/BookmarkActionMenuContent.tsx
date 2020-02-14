@@ -5,6 +5,7 @@ import { MenuItem, Divider } from "@material-ui/core"
 import { BookmarkNodeType, RootState } from "../types"
 import { clearSelectedNodes } from "../store/dnd"
 import { openBookmarkEditModal } from "../store/modal"
+import { isNodeBookmark, isNodeFolder } from "../utils"
 
 export default function BookmarkActionMenuContent({
     onCloseMenu
@@ -36,9 +37,14 @@ export default function BookmarkActionMenuContent({
                     e.stopPropagation()
                     const removeSelectedNodes = async () => {
                         await Promise.all(
-                            selectedNodes.map(node =>
-                                browser.bookmarks.remove(node.id)
-                            )
+                            selectedNodes.map(node => {
+                                if (isNodeBookmark(node)) {
+                                    browser.bookmarks.remove(node.id)
+                                }
+                                if (isNodeFolder(node)) {
+                                    browser.bookmarks.removeTree(node.id)
+                                }
+                            })
                         )
                         dispatch(clearSelectedNodes())
                     }
@@ -51,14 +57,11 @@ export default function BookmarkActionMenuContent({
             <MenuItem
                 onClick={e => {
                     e.stopPropagation()
-                    selectedNodes
-                        .filter(node => node.type === BookmarkNodeType.Bookmark)
-                        .forEach(node => {
-                            browser.tabs.create({
-                                url: node.url
-                                // active: true
-                            })
+                    selectedNodes.filter(isNodeBookmark).forEach(node => {
+                        browser.tabs.create({
+                            url: node.url
                         })
+                    })
                     onCloseMenu()
                 }}
             >
@@ -72,9 +75,7 @@ export default function BookmarkActionMenuContent({
 
                     browser.windows.create({
                         url: selectedNodes
-                            .filter(
-                                node => node.type === BookmarkNodeType.Bookmark
-                            )
+                            .filter(isNodeBookmark)
                             .map(node => node.url!)
                     })
                     onCloseMenu()

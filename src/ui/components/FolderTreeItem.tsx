@@ -13,7 +13,7 @@ import { BookmarkTreeNode } from "../../types"
 import { RootState, HoverArea } from "../types"
 import { DNDTypes } from "../consts"
 import { setHoverState, clearHoverState } from "../store/dnd"
-import { isNodeHovered, setHashParam } from "../utils"
+import { isNodeHovered, setHashParam, isNodeFolder } from "../utils"
 
 const useFolderTreeItemStyle = makeStyles<
     Theme,
@@ -80,8 +80,7 @@ export default function FolderTreeItem({
     const hasSubfolders = React.useMemo(
         () =>
             Array.isArray(bookmarkNode.children) &&
-            bookmarkNode.children.filter(node => node.type === "folder")
-                .length > 0,
+            bookmarkNode.children.filter(isNodeFolder).length > 0,
         [bookmarkNode]
     )
 

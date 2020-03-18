@@ -18,7 +18,7 @@ import { resetDndState } from "./store/dnd"
 import { closeModal } from "./store/modal"
 import { toggleDarkMode } from "./store/setting"
 import { RootState, ModalType } from "./types"
-import { __MAC__ } from "./consts"
+import { __MAC__, InternalGlobals } from "./consts"
 
 import Navbar from "./components/Navbar"
 import FolderPanel from "./components/FolderPanel"
@@ -56,19 +56,16 @@ export default function App() {
     const bookmarkTree = useSelector(
         (state: RootState) => state.bookmark.bookmarkTree
     )
-    const activeFolder = useSelector(
-        (state: RootState) => state.bookmark.activeFolder
-    )
-    const searchResult = useSelector(
-        (state: RootState) => state.bookmark.searchResult
-    )
     const selectedNodes = useSelector(
         (state: RootState) => state.dnd.selectedNodes
     )
     const dispatch = useDispatch()
 
     React.useEffect(() => {
-        const loadTree = () => dispatch(loadBookmarkTree())
+        const loadTree = () => {
+            if (InternalGlobals.isBatchingUpdate) return
+            dispatch(loadBookmarkTree())
+        }
         // initialize bookmarkTree
         loadTree()
 

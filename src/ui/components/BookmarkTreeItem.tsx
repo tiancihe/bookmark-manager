@@ -9,7 +9,7 @@ import { throttle } from "lodash"
 import { BookmarkTreeNode } from "../../types"
 import { RootState, HoverArea, BookmarkNodeType } from "../types"
 import { getFavicon, isNodeSelected, setHashParam } from "../utils"
-import { DNDTypes, __MAC__ } from "../consts"
+import { DNDTypes, __MAC__, InternalGlobals } from "../consts"
 import useContextMenu from "../hooks/useContextMenu"
 import {
     selectNodes,
@@ -140,7 +140,13 @@ const BookmarkTreeItem = React.memo(function BookmarkTreeItem({
 
                     if (pos.y < topMid) {
                         const move = async () => {
+                            InternalGlobals.isBatchingUpdate = true
                             for (let i = 0; i < selectedNodes.length; i++) {
+                                // toggle back to normal batching state just before the last update
+                                if (i === selectedNodes.length - 1) {
+                                    InternalGlobals.isBatchingUpdate = false
+                                }
+
                                 await browser.bookmarks.move(
                                     selectedNodes[i].id,
                                     {
@@ -154,7 +160,13 @@ const BookmarkTreeItem = React.memo(function BookmarkTreeItem({
                     } else if (pos.y < midBottom) {
                         if (isFolder) {
                             const move = async () => {
+                                InternalGlobals.isBatchingUpdate = true
                                 for (let i = 0; i < selectedNodes.length; i++) {
+                                    // toggle back to normal batching state just before the last update
+                                    if (i === selectedNodes.length - 1) {
+                                        InternalGlobals.isBatchingUpdate = false
+                                    }
+
                                     await browser.bookmarks.move(
                                         selectedNodes[i].id,
                                         {
@@ -167,7 +179,13 @@ const BookmarkTreeItem = React.memo(function BookmarkTreeItem({
                         }
                     } else {
                         const move = async () => {
+                            InternalGlobals.isBatchingUpdate = true
                             for (let i = 0; i < selectedNodes.length; i++) {
+                                // toggle back to normal batching state just before the last update
+                                if (i === selectedNodes.length - 1) {
+                                    InternalGlobals.isBatchingUpdate = false
+                                }
+
                                 await browser.bookmarks.move(
                                     selectedNodes[i].id,
                                     {

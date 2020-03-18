@@ -11,7 +11,7 @@ import { useDrop } from "react-dnd"
 
 import { BookmarkTreeNode } from "../../types"
 import { RootState, HoverArea } from "../types"
-import { DNDTypes } from "../consts"
+import { DNDTypes, InternalGlobals } from "../consts"
 import { setHoverState, clearHoverState } from "../store/dnd"
 import { isNodeHovered, setHashParam, isNodeFolder } from "../utils"
 
@@ -98,7 +98,13 @@ export default function FolderTreeItem({
         },
         drop: (item, monitor) => {
             const move = async () => {
+                InternalGlobals.isBatchingUpdate = true
                 for (let i = 0; i < selectedNodes.length; i++) {
+                    // toggle back to normal batching state just before the last update
+                    if (i === selectedNodes.length - 1) {
+                        InternalGlobals.isBatchingUpdate = false
+                    }
+
                     await browser.bookmarks.move(selectedNodes[i].id, {
                         parentId: bookmarkNode.id
                     })

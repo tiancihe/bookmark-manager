@@ -1,3 +1,8 @@
+## 0.6.1 (2020/3/18)
+
+- change extension name
+- minor performance patch
+
 ## 0.6.0 (2020/2/14)
 
 - copy and paste bookmarks

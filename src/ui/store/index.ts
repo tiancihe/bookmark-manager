@@ -1,6 +1,5 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit"
 import thunk from "redux-thunk"
-import logger from "redux-logger"
 
 import { bookmark } from "./bookmark"
 import { dnd } from "./dnd"
@@ -17,13 +16,14 @@ export const reducer = combineReducers({
 })
 
 const middleware = [thunk]
-if (__DEV__) {
-    middleware.push(logger)
-}
 
 const store = configureStore({
     reducer,
     middleware
 })
+
+if (__DEV__) {
+    window.__REDUX_STORE__ = store
+}
 
 export default store

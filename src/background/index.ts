@@ -1,19 +1,13 @@
 const openUI = async () => {
     const url = browser.extension.getURL("ui.html")
-
-    const tabs = await browser.tabs.query({})
-
-    let tabId = null
-
-    for (const tab of tabs) {
-        if (tab.url === url) {
-            tabId = tab.id
-            break
-        }
-    }
-
-    if (tabId) {
-        browser.tabs.update(tabId, { active: true })
+    const tabs = (await browser.tabs.query({}))
+        .map(tab => {
+            tab.url = tab.url!.split("#")[0]
+            return tab
+        })
+        .filter(tab => tab.url === url)
+    if (tabs.length) {
+        browser.tabs.update(tabs[0].id!, { active: true })
     } else {
         browser.tabs.create({ url })
     }

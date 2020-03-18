@@ -4,7 +4,7 @@ const { version } = require("../package.json")
 
 try {
     cp.execSync(
-        `git archive master --format zip --output web-ext-artifacts/bookmark-manager-${version}-source.zip`
+        `git archive master --format zip --output web-ext-artifacts/bookmark_manager-${version}-source.zip`
     )
     console.log("zip source code succeeded")
 } catch (err) {

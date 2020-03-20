@@ -1,3 +1,7 @@
+## 0.6.2 (2020/3/20)
+
+- using hotkey CTRL + ALT + B (CTRL + COMMAND + B on Mac) will now correctly activate existing tab then fall back to create a new one
+
 ## 0.6.1 (2020/3/18)
 
 - change extension name

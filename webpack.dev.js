@@ -1,4 +1,9 @@
-const { DefinePlugin, HotModuleReplacementPlugin } = require("webpack")
+const path = require("path")
+const {
+    DefinePlugin,
+    DllReferencePlugin,
+    HotModuleReplacementPlugin
+} = require("webpack")
 
 const common = require("./webpack.common")
 
@@ -16,6 +21,12 @@ const config = {
     plugins: [
         new DefinePlugin({
             __DEV__: true
+        }),
+        new DllReferencePlugin({
+            manifest: path.join(
+                __dirname,
+                "package/scripts/vendors-dll-manifest.json"
+            )
         }),
         new HotModuleReplacementPlugin()
     ]

@@ -4,9 +4,10 @@
   "description": "Chrome Bookmark Manager for Firefox",
   "private": true,
   "scripts": {
-    "start": "node scripts/clean-up && webpack-dev-server --config webpack.dev.js",
+    "start": "node scripts/clean-up && npm run build:dll && webpack-dev-server --config webpack.dev.js",
     "build": "node scripts/clean-up && webpack",
-    "pack": "npm run build && web-ext build -s package -o && npm run zip-src",
+    "build:dll": "webpack --config webpack.dll.js",
+    "pack": "npm run build && web-ext build -s package -o -i ui-dev.html && npm run zip-src",
     "ver": "node scripts/update-version",
     "zip-src": "node scripts/zip-source",
     "ext": "web-ext run -s package"

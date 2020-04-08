@@ -1,5 +1,5 @@
 const openUI = async () => {
-    const url = browser.extension.getURL("ui.html")
+    const url = browser.extension.getURL(__DEV__ ? "ui-dev.html" : "ui.html")
     const tabs = (await browser.tabs.query({}))
         .map(tab => {
             tab.url = tab.url!.split("#")[0]

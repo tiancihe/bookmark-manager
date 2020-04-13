@@ -293,9 +293,26 @@ const BookmarkTreeItem = React.memo(function BookmarkTreeItem({
 
                     if (isBookmark) {
                         browser.tabs.create({
-                            url: bookmarkNode.url,
-                            active: true
+                            url: bookmarkNode.url
                         })
+                    }
+                }}
+                onMouseDown={e => {
+                    // in chrome (version: 81) bookmark manager, if user clicks a bookmark using middle mouse button
+                    // a new tab will be opened in backgroud (not immediately active)
+                    // that bookmark will get selected state exclusively (other selected tabs will be unselected)
+                    if (e.button === 1) {
+                        // middle mouse button clicked
+                        e.preventDefault()
+
+                        if (isBookmark) {
+                            browser.tabs.create({
+                                url: bookmarkNode.url,
+                                active: false
+                            })
+                        }
+
+                        dispatch(selectNode(bookmarkNode))
                     }
                 }}
                 onContextMenu={e => {

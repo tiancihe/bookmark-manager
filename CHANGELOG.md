@@ -1,3 +1,8 @@
+## 0.6.3 (2020/4/13)
+
+- middle mouse button click a bookmark will open a new tab in background
+- open all will open selected bookmarks in background by default
+
 ## 0.6.2 (2020/3/20)
 
 - using hotkey CTRL + ALT + B (CTRL + COMMAND + B on Mac) will now correctly activate existing tab then fall back to create a new one
@@ -60,28 +65,9 @@
 - map activeFolderId and search to location.hash
 - update some deps
 
-## v0.2.0 (2019/12/18)
+## v0.3.1 (2020/1/13)
 
-- refactor store
-- fix seach results update issue
-- fix edit modal not closed after edited issue
-- add subfolder item double click feature
-- add empty search results placeholder
-- create modal now shows a help message if create option failed
-- search now triggers on empty seach input
-
-## v0.2.1 (2019/12/25)
-
-- add default shortcut
-- autofocus for search
-
-## v0.2.2 (2019/12/26)
-
-- add dark mode support (based on media query)
-
-## v0.2.3 (2020/1/11)
-
-- icons & title
+- fix search input not focused after click
 
 ## v0.3.0 (2020/1/11)
 
@@ -94,6 +80,25 @@
 
 - larger seach input
 
-## v0.3.1 (2020/1/13)
+## v0.2.3 (2020/1/11)
 
-- fix search input not focused after click
+- icons & title
+
+## v0.2.2 (2019/12/26)
+
+- add dark mode support (based on media query)
+
+## v0.2.1 (2019/12/25)
+
+- add default shortcut
+- autofocus for search
+
+## v0.2.0 (2019/12/18)
+
+- refactor store
+- fix seach results update issue
+- fix edit modal not closed after edited issue
+- add subfolder item double click feature
+- add empty search results placeholder
+- create modal now shows a help message if create option failed
+- search now triggers on empty seach input

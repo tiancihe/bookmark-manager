@@ -59,7 +59,10 @@ export default function BookmarkActionMenuContent({
                     e.stopPropagation()
                     selectedNodes.filter(isNodeBookmark).forEach(node => {
                         browser.tabs.create({
-                            url: node.url
+                            url: node.url,
+                            // should open in background by default
+                            // this is the default behaviour in chrome's bookmark manager
+                            active: false
                         })
                     })
                     onCloseMenu()

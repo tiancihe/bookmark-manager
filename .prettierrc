@@ -4,7 +4,9 @@
       "files": ["*.js", "*.ts", "*.tsx"],
       "options": {
         "tabWidth": 4,
-        "semi": false
+        "semi": false,
+        "printWidth": 120,
+        "arrowParens": "avoid"
       }
     }
   ]

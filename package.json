@@ -1,6 +1,6 @@
 {
   "name": "bookmark-manager",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "Chrome Bookmark Manager for Firefox",
   "private": true,
   "scripts": {

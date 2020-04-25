@@ -1,24 +1,19 @@
 import React from "react"
 import { useSelector, useDispatch } from "react-redux"
+import { Menu } from "@material-ui/core"
 import { makeStyles, Theme, useTheme, fade } from "@material-ui/core/styles"
-import {
-    ArrowRight,
-    ArrowDropDown,
-    FolderTwoTone,
-    FolderOpenTwoTone
-} from "@material-ui/icons"
+import { ArrowRight, ArrowDropDown, FolderTwoTone, FolderOpenTwoTone } from "@material-ui/icons"
 import { useDrop } from "react-dnd"
 
+import useContextMenu from "../hooks/useContextMenu"
+import FolderTreeItemContextMenuContent from "./FolderTreeItemContextMenuContent"
+import { setHoverState, clearHoverState } from "../store/dnd"
 import { BookmarkTreeNode } from "../../types"
 import { RootState, HoverArea } from "../types"
 import { DNDTypes, InternalGlobals } from "../consts"
-import { setHoverState, clearHoverState } from "../store/dnd"
 import { isNodeHovered, setHashParam, isNodeFolder } from "../utils"
 
-const useFolderTreeItemStyle = makeStyles<
-    Theme,
-    { level: number; active: boolean }
->(theme => ({
+const useFolderTreeItemStyle = makeStyles<Theme, { level: number; active: boolean }>(theme => ({
     container: {
         display: "flex",
         alignItems: "center",
@@ -34,10 +29,7 @@ const useFolderTreeItemStyle = makeStyles<
     },
     text: {
         paddingLeft: "8px",
-        color: props =>
-            props.active
-                ? theme.palette.primary.main
-                : theme.palette.text.primary
+        color: props => (props.active ? theme.palette.primary.main : theme.palette.text.primary)
     }
 }))
 
@@ -51,18 +43,13 @@ export default function FolderTreeItem({
     bookmarkNode: BookmarkTreeNode
     defaultOpen?: boolean
 }>) {
-    const activeFolder = useSelector(
-        (state: RootState) => state.bookmark.activeFolder
-    )
+    const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
     const search = useSelector((state: RootState) => state.bookmark.search)
     // if search state is true, all folder items should stay inactive
     // user should be able to click any folder to active it and clear search state in the mean time
-    const isActive =
-        !search && activeFolder !== null && activeFolder.id === bookmarkNode.id
+    const isActive = !search && activeFolder !== null && activeFolder.id === bookmarkNode.id
 
-    const selectedNodes = useSelector(
-        (state: RootState) => state.dnd.selectedNodes
-    )
+    const selectedNodes = useSelector((state: RootState) => state.dnd.selectedNodes)
 
     const hoverState = useSelector((state: RootState) => state.dnd.hoverState)
     const isHovered = isNodeHovered(bookmarkNode, hoverState)
@@ -78,9 +65,7 @@ export default function FolderTreeItem({
     }, [defaultOpen])
 
     const hasSubfolders = React.useMemo(
-        () =>
-            Array.isArray(bookmarkNode.children) &&
-            bookmarkNode.children.filter(isNodeFolder).length > 0,
+        () => Array.isArray(bookmarkNode.children) && bookmarkNode.children.filter(isNodeFolder).length > 0,
         [bookmarkNode]
     )
 
@@ -121,15 +106,15 @@ export default function FolderTreeItem({
         active: isActive
     })
 
+    const { contextMenuProps, handleContextMenuEvent, closeContextMenu } = useContextMenu()
+
     return (
         <React.Fragment>
             <div
                 ref={drop}
                 className={classNames.container}
                 style={{
-                    backgroundColor: isHovered
-                        ? fade(theme.palette.primary.main, 0.25)
-                        : undefined
+                    backgroundColor: isHovered ? fade(theme.palette.primary.main, 0.25) : undefined
                 }}
                 onClick={e => {
                     e.stopPropagation()
@@ -146,6 +131,11 @@ export default function FolderTreeItem({
                             setHashParam({ folder: bookmarkNode.id })
                         }
                     }
+                }}
+                onContextMenu={e => {
+                    e.preventDefault()
+                    setHashParam({ folder: bookmarkNode.id })
+                    handleContextMenuEvent(e)
                 }}
             >
                 <div className={classNames.icon}>
@@ -166,11 +156,21 @@ export default function FolderTreeItem({
                             />
                         ))}
                 </div>
-                <div className={classNames.icon}>
-                    {open ? <FolderOpenTwoTone /> : <FolderTwoTone />}
-                </div>
+                <div className={classNames.icon}>{open ? <FolderOpenTwoTone /> : <FolderTwoTone />}</div>
                 <div className={classNames.text}>{bookmarkNode.title}</div>
             </div>
+            <Menu
+                {...contextMenuProps}
+                // onDoubleClick={e => {
+                //     e.stopPropagation()
+                // }}
+                // onContextMenu={e => {
+                //     e.preventDefault()
+                //     e.stopPropagation()
+                // }}
+            >
+                <FolderTreeItemContextMenuContent bookmarkNode={bookmarkNode} onClose={closeContextMenu} />
+            </Menu>
             {open && children}
         </React.Fragment>
     )

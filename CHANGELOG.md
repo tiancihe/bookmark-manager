@@ -1,3 +1,7 @@
+## 0.6.4 (2020/4/26)
+
+- add context menu for folders on the left panel
+
 ## 0.6.3 (2020/4/13)
 
 - middle mouse button click a bookmark will open a new tab in background

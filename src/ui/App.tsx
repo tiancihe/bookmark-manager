@@ -1,19 +1,10 @@
 import React from "react"
 import { useSelector, useDispatch } from "react-redux"
-import {
-    CssBaseline,
-    makeStyles,
-    createMuiTheme,
-    useMediaQuery,
-    MuiThemeProvider
-} from "@material-ui/core"
+import { CssBaseline, makeStyles, createMuiTheme, useMediaQuery, MuiThemeProvider, Snackbar } from "@material-ui/core"
 import { DndProvider } from "react-dnd"
 import HTML5Backend from "react-dnd-html5-backend"
 
-import {
-    loadBookmarkTree,
-    syncBookmarkStateFromHashParams
-} from "./store/bookmark"
+import { loadBookmarkTree, syncBookmarkStateFromHashParams } from "./store/bookmark"
 import { resetDndState } from "./store/dnd"
 import { closeModal } from "./store/modal"
 import { toggleDarkMode } from "./store/setting"
@@ -53,12 +44,8 @@ const useAppStyle = makeStyles(theme => ({
 }))
 
 export default function App() {
-    const bookmarkTree = useSelector(
-        (state: RootState) => state.bookmark.bookmarkTree
-    )
-    const selectedNodes = useSelector(
-        (state: RootState) => state.dnd.selectedNodes
-    )
+    const bookmarkTree = useSelector((state: RootState) => state.bookmark.bookmarkTree)
+    const selectedNodes = useSelector((state: RootState) => state.dnd.selectedNodes)
     const dispatch = useDispatch()
 
     React.useEffect(() => {
@@ -75,8 +62,7 @@ export default function App() {
         browser.bookmarks.onRemoved.addListener(loadTree)
         browser.bookmarks.onMoved.addListener(loadTree)
 
-        const hashChangeListener = () =>
-            dispatch(syncBookmarkStateFromHashParams())
+        const hashChangeListener = () => dispatch(syncBookmarkStateFromHashParams())
         window.addEventListener("hashchange", hashChangeListener)
 
         return () => {
@@ -110,9 +96,8 @@ export default function App() {
     }, [selectedNodes])
 
     const modalType = useSelector((state: RootState) => state.modal.modalType)
-    const bookmarkNode = useSelector(
-        (state: RootState) => state.modal.bookmarkNode
-    )
+    const snackbarState = useSelector((state: RootState) => state.snackbar)
+    const bookmarkNode = useSelector((state: RootState) => state.modal.bookmarkNode)
     const createType = useSelector((state: RootState) => state.modal.createType)
 
     const darkMode = useSelector((state: RootState) => state.setting.darkMode)
@@ -147,17 +132,19 @@ export default function App() {
                 </DndProvider>
             </div>
             {modalType === ModalType.BookmarkEdit && (
-                <BookmarkEditModal
-                    bookmarkNode={bookmarkNode!}
-                    onClose={() => dispatch(closeModal())}
-                />
+                <BookmarkEditModal bookmarkNode={bookmarkNode!} onClose={() => dispatch(closeModal())} />
             )}
             {modalType === ModalType.BookmarkCreate && (
-                <BookmarkCreateModal
-                    createType={createType!}
-                    onClose={() => dispatch(closeModal())}
-                />
+                <BookmarkCreateModal createType={createType!} onClose={() => dispatch(closeModal())} />
             )}
+            <Snackbar
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left"
+                }}
+                open={snackbarState.visible}
+                message={snackbarState.message}
+            />
         </MuiThemeProvider>
     )
 }

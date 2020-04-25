@@ -5,6 +5,7 @@ import { bookmark } from "./bookmark"
 import { dnd } from "./dnd"
 import { cnp } from "./cnp"
 import { modal } from "./modal"
+import { snackbar } from "./snackbar"
 import { setting } from "./setting"
 
 export const reducer = combineReducers({
@@ -12,6 +13,7 @@ export const reducer = combineReducers({
     dnd,
     cnp,
     modal,
+    snackbar,
     setting
 })
 

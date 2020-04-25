@@ -79,9 +79,7 @@ export function syncBookmarkStateFromHashParams(): AppThunkAction {
     return async function(dispatch) {
         const { search = "", folder } = getHashParams()
 
-        const searchResult = search
-            ? await browser.bookmarks.search(search)
-            : []
+        const searchResult = search ? await browser.bookmarks.search(search) : []
 
         dispatch(
             setState({

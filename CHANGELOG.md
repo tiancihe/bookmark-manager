@@ -1,3 +1,14 @@
+## 0.7.0 (2020/4/26)
+
+- add copy and paste context menu items
+- add experimental sort functionality
+- add bookmarks count in context menu
+- adjust copy behaviour
+  - folders: title
+  - bookmarks: url with title as an alternative if url is not present
+- adjust open all bookmarks behaviour
+  - bookmarks in subfolders will also be opened
+
 ## 0.6.4 (2020/4/26)
 
 - add context menu for folders on the left panel

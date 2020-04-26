@@ -2,16 +2,16 @@ import React from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Paper, Menu, MenuItem } from "@material-ui/core"
 import { makeStyles } from "@material-ui/core/styles"
-import copy from "copy-to-clipboard"
+import copyToClipboard from "copy-to-clipboard"
 
-import { BookmarkTreeNode } from "../../types"
+import useContextMenu from "../hooks/useContextMenu"
 import { openBookmarkCreateModal } from "../store/modal"
 import { selectNodes, clearSelectedNodes } from "../store/dnd"
 import { setCopiedNodes } from "../store/cnp"
+import { showSnackbar } from "../store/snackbar"
+import { isNodeHovered, pasteNodes } from "../utils"
 import { RootState, BookmarkNodeType } from "../types"
-import { isNodeHovered, isNodeBookmark, isNodeFolder } from "../utils"
 import { __MAC__ } from "../consts"
-import useContextMenu from "../hooks/useContextMenu"
 
 import BookmarkTreeItem from "./BookmarkTreeItem"
 
@@ -38,28 +38,18 @@ const useStyle = makeStyles(theme => ({
 }))
 
 export default function BookmarkPanel({ className }: { className?: string }) {
-    const activeFolder = useSelector(
-        (state: RootState) => state.bookmark.activeFolder
-    )
+    const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
     const search = useSelector((state: RootState) => state.bookmark.search)
-    const searchResult = useSelector(
-        (state: RootState) => state.bookmark.searchResult
-    )
-    const selectedNodes = useSelector(
-        (state: RootState) => state.dnd.selectedNodes
-    )
+    const searchResult = useSelector((state: RootState) => state.bookmark.searchResult)
+    const selectedNodes = useSelector((state: RootState) => state.dnd.selectedNodes)
     const hoverState = useSelector((state: RootState) => state.dnd.hoverState)
     const copiedNodes = useSelector((state: RootState) => state.cnp.copied)
     const dispatch = useDispatch()
 
     const activeFolderChildren = React.useMemo(() => {
-        return activeFolder !== null &&
-            Array.isArray(activeFolder.children) &&
-            activeFolder.children.length > 0
+        return activeFolder !== null && Array.isArray(activeFolder.children) && activeFolder.children.length > 0
             ? activeFolder.children.filter(
-                  child =>
-                      child.type === BookmarkNodeType.Bookmark ||
-                      child.type === BookmarkNodeType.Folder
+                  child => child.type === BookmarkNodeType.Bookmark || child.type === BookmarkNodeType.Folder
               )
             : null
     }, [activeFolder])
@@ -77,11 +67,7 @@ export default function BookmarkPanel({ className }: { className?: string }) {
                     dispatch(selectNodes(searchResult))
                     return
                 }
-                if (
-                    activeFolder &&
-                    activeFolder.children &&
-                    activeFolder.children.length
-                ) {
+                if (activeFolder && activeFolder.children && activeFolder.children.length) {
                     e.preventDefault()
                     dispatch(selectNodes(activeFolder.children))
                     return
@@ -108,47 +94,30 @@ export default function BookmarkPanel({ className }: { className?: string }) {
     // copy and paste bookmarks
     React.useEffect(() => {
         const copyListener = (e: KeyboardEvent) => {
-            if (
-                e.target === document.body &&
-                e.key === "c" &&
-                ((__MAC__ && e.metaKey) || (!__MAC__ && e.ctrlKey))
-            ) {
+            if (e.target === document.body && e.key === "c" && ((__MAC__ && e.metaKey) || (!__MAC__ && e.ctrlKey))) {
                 if (selectedNodes.length) {
                     e.preventDefault()
                     dispatch(setCopiedNodes([...selectedNodes]))
-                    copy(
-                        selectedNodes
-                            .filter(isNodeBookmark)
-                            .map(node => node.url)
-                            .join("\t\n")
-                    )
+                    copyToClipboard(selectedNodes.map(node => node.url ?? node.title).join("\t\n"))
+                    dispatch(showSnackbar({ message: `Copied ${selectedNodes.length} items` }))
                 }
             }
         }
         window.addEventListener("keydown", copyListener)
 
         const pasteListener = async (e: KeyboardEvent) => {
-            if (
-                e.target === document.body &&
-                e.key === "v" &&
-                ((__MAC__ && e.metaKey) || (!__MAC__ && e.ctrlKey))
-            ) {
+            if (e.target === document.body && e.key === "v" && ((__MAC__ && e.metaKey) || (!__MAC__ && e.ctrlKey))) {
                 if (copiedNodes.length) {
                     e.preventDefault()
                     // only paste when not searching and a folder opened
                     if (!search && activeFolder) {
                         // paste copied nodes after the last of the selected nodes or append in the children of the current folder
                         const target = selectedNodes[selectedNodes.length - 1]
-                        for (let i = 0; i < copiedNodes.length; i++) {
-                            const node = copiedNodes[i]
-                            await copyNode({
-                                src: node,
-                                dest: activeFolder,
-                                destIndex: target
-                                    ? target.index! + 1 + i
-                                    : undefined
-                            })
-                        }
+                        pasteNodes({
+                            src: copiedNodes,
+                            dest: activeFolder,
+                            destIndex: target ? target.index! : undefined
+                        })
                     }
                 }
             }
@@ -161,11 +130,7 @@ export default function BookmarkPanel({ className }: { className?: string }) {
         }
     }, [selectedNodes, copiedNodes])
 
-    const {
-        contextMenuProps,
-        closeContextMenu,
-        handleContextMenuEvent
-    } = useContextMenu()
+    const { contextMenuProps, closeContextMenu, handleContextMenuEvent } = useContextMenu()
 
     const classNames = useStyle()
 
@@ -184,16 +149,12 @@ export default function BookmarkPanel({ className }: { className?: string }) {
                                 key={child.id}
                                 bookmarkNode={child}
                                 isHovered={isNodeHovered(child, hoverState)}
-                                hoverArea={
-                                    hoverState ? hoverState.area : undefined
-                                }
+                                hoverArea={hoverState ? hoverState.area : undefined}
                             />
                         ))}
                     </Paper>
                 ) : (
-                    <div className={classNames.emptySearchResults}>
-                        No search results found
-                    </div>
+                    <div className={classNames.emptySearchResults}>No search results found</div>
                 )
             ) : activeFolderChildren ? (
                 <Paper className={classNames.paper} elevation={3}>
@@ -210,9 +171,7 @@ export default function BookmarkPanel({ className }: { className?: string }) {
             <Menu {...contextMenuProps}>
                 <MenuItem
                     onClick={() => {
-                        dispatch(
-                            openBookmarkCreateModal(BookmarkNodeType.Bookmark)
-                        )
+                        dispatch(openBookmarkCreateModal(BookmarkNodeType.Bookmark))
                         closeContextMenu()
                     }}
                 >
@@ -220,9 +179,7 @@ export default function BookmarkPanel({ className }: { className?: string }) {
                 </MenuItem>
                 <MenuItem
                     onClick={() => {
-                        dispatch(
-                            openBookmarkCreateModal(BookmarkNodeType.Folder)
-                        )
+                        dispatch(openBookmarkCreateModal(BookmarkNodeType.Folder))
                         closeContextMenu()
                     }}
                 >
@@ -231,45 +188,4 @@ export default function BookmarkPanel({ className }: { className?: string }) {
             </Menu>
         </div>
     )
-}
-
-interface CopyNodeSpec {
-    src: BookmarkTreeNode
-    /** must be a node whose type is "folder" */
-    dest: BookmarkTreeNode
-    /** the index to paste under dest */
-    destIndex?: number
-}
-
-async function copyNode(spec: CopyNodeSpec) {
-    if (isNodeBookmark(spec.src)) {
-        await browser.bookmarks.create({
-            type: spec.src.type,
-            parentId: spec.dest.id,
-            index: spec.destIndex,
-            title: spec.src.title,
-            url: spec.src.url
-        })
-        return
-    }
-
-    if (isNodeFolder(spec.src)) {
-        const newFolder = await browser.bookmarks.create({
-            type: spec.src.type,
-            parentId: spec.dest.id,
-            index: spec.dest.index,
-            title: spec.src.title
-        })
-
-        if (spec.src.children) {
-            for (let i = 0; i < spec.src.children.length; i++) {
-                const child = spec.src.children[i]
-                await copyNode({
-                    src: child,
-                    dest: newFolder,
-                    destIndex: child.index
-                })
-            }
-        }
-    }
 }

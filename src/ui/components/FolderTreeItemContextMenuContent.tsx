@@ -1,8 +1,10 @@
 import React from "react"
 import { useDispatch } from "react-redux"
 import { MenuItem, Divider } from "@material-ui/core"
+import copyToClipboard from "copy-to-clipboard"
 
 import { openBookmarkEditModal } from "../store/modal"
+import { setCopiedNodes } from "../store/cnp"
 import { showSnackbar } from "../store/snackbar"
 import { BookmarkTreeNode, BookmarkNodeType } from "../types"
 import { setHashParam } from "../utils"
@@ -38,6 +40,18 @@ export default function FolderTreeItemContextMenuContent({
                 }}
             >
                 Delete
+            </MenuItem>
+            <Divider />
+            <MenuItem
+                onClick={e => {
+                    e.stopPropagation()
+                    dispatch(setCopiedNodes([bookmarkNode]))
+                    copyToClipboard(bookmarkNode.title)
+                    dispatch(showSnackbar({ message: `Copied "${bookmarkNode.title}"` }))
+                    onClose()
+                }}
+            >
+                Copy
             </MenuItem>
             <Divider />
             <MenuItem

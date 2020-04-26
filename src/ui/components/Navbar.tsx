@@ -1,26 +1,18 @@
-import React from "react"
+import React, { useState, useEffect, useRef, createRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import {
-    AppBar,
-    Toolbar,
-    Typography,
-    InputBase,
-    IconButton
-} from "@material-ui/core"
+import { AppBar, Toolbar, Typography, InputBase, IconButton, Menu, MenuItem } from "@material-ui/core"
 import { makeStyles, fade } from "@material-ui/core/styles"
-import { Search, Clear, Brightness4, Brightness5 } from "@material-ui/icons"
+import { Search, Clear, Brightness4, Brightness5, MoreVert } from "@material-ui/icons"
 
-import { RootState } from "../types"
+import { loadBookmarkTree } from "../store/bookmark"
 import { toggleDarkMode } from "../store/setting"
-import { setHashParam } from "../utils"
+import { setHashParam, sortFolderByName, sortFolderByUrl } from "../utils"
+import { RootState } from "../types"
 import { __MAC__ } from "../consts"
 
 const useNavbarStyle = makeStyles(theme => ({
     appBar: {
-        backgroundColor:
-            theme.palette.type === "dark"
-                ? theme.palette.background.default
-                : undefined
+        backgroundColor: theme.palette.type === "dark" ? theme.palette.background.default : undefined
     },
     toolbar: {
         display: "flex",
@@ -69,26 +61,23 @@ const useNavbarStyle = makeStyles(theme => ({
 }))
 
 export default function Navbar() {
+    const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
     const search = useSelector((state: RootState) => state.bookmark.search)
     const darkMode = useSelector((state: RootState) => state.setting.darkMode)
     const dispatch = useDispatch()
 
-    const [input, setInput] = React.useState(search)
-    const inputRef = React.useRef(React.createRef<HTMLInputElement>())
+    const [input, setInput] = useState(search)
+    const inputRef = useRef(createRef<HTMLInputElement>())
     // sync input with global search state
-    React.useEffect(() => {
+    useEffect(() => {
         if (input !== search) {
             setInput(search)
         }
     }, [search])
-    React.useEffect(() => {
+    useEffect(() => {
         // capture search hotkey to focus on input
         const focus = (e: KeyboardEvent) => {
-            if (
-                e.target === document.body &&
-                e.key === "f" &&
-                ((!__MAC__ && e.ctrlKey) || (__MAC__ && e.metaKey))
-            ) {
+            if (e.target === document.body && e.key === "f" && ((!__MAC__ && e.ctrlKey) || (__MAC__ && e.metaKey))) {
                 e.preventDefault()
                 const input = inputRef.current.current
                 if (input) {
@@ -100,8 +89,8 @@ export default function Navbar() {
         return () => window.removeEventListener("keydown", focus)
     }, [])
 
-    const [isInputFocused, setIsInputFocused] = React.useState(false)
-    React.useEffect(() => {
+    const [isInputFocused, setIsInputFocused] = useState(false)
+    useEffect(() => {
         if (inputRef.current && inputRef.current.current) {
             const input = inputRef.current.current
 
@@ -132,6 +121,9 @@ export default function Navbar() {
             }
         }
     }, [inputRef.current, isInputFocused, search])
+
+    const [actionMenuAndhor, setActionMenuAnchor] = useState<null | HTMLElement>(null)
+    const closeActionMenu = () => setActionMenuAnchor(null)
 
     const classNames = useNavbarStyle()
 
@@ -190,15 +182,46 @@ export default function Navbar() {
                         </div>
                     ) : null}
                 </div>
-                <IconButton
-                    color="inherit"
-                    onClick={e => {
-                        e.stopPropagation()
-                        dispatch(toggleDarkMode())
-                    }}
-                >
-                    {darkMode ? <Brightness5 /> : <Brightness4 />}
-                </IconButton>
+                <div>
+                    <IconButton
+                        color="inherit"
+                        onClick={e => {
+                            e.stopPropagation()
+                            dispatch(toggleDarkMode())
+                        }}
+                    >
+                        {darkMode ? <Brightness5 /> : <Brightness4 />}
+                    </IconButton>
+                    <IconButton color="inherit" onClick={e => setActionMenuAnchor(e.currentTarget)}>
+                        <MoreVert />
+                    </IconButton>
+                </div>
+                <Menu open={!!actionMenuAndhor} anchorEl={actionMenuAndhor} onClose={closeActionMenu}>
+                    <MenuItem
+                        onClick={async e => {
+                            e.stopPropagation()
+                            closeActionMenu()
+                            if (!search && activeFolder) {
+                                await sortFolderByName(activeFolder)
+                                dispatch(loadBookmarkTree())
+                            }
+                        }}
+                    >
+                        Sort by name
+                    </MenuItem>
+                    <MenuItem
+                        onClick={async e => {
+                            e.stopPropagation()
+                            closeActionMenu()
+                            if (!search && activeFolder) {
+                                await sortFolderByUrl(activeFolder)
+                                dispatch(loadBookmarkTree())
+                            }
+                        }}
+                    >
+                        Sort by URL
+                    </MenuItem>
+                </Menu>
             </Toolbar>
         </AppBar>
     )

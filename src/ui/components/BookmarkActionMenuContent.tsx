@@ -1,21 +1,35 @@
-import React from "react"
+import React, { useMemo } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { MenuItem, Divider } from "@material-ui/core"
+import copyToClipboard from "copy-to-clipboard"
 
-import { BookmarkNodeType, RootState } from "../types"
 import { clearSelectedNodes } from "../store/dnd"
+import { setCopiedNodes } from "../store/cnp"
 import { openBookmarkEditModal } from "../store/modal"
-import { isNodeBookmark, isNodeFolder } from "../utils"
+import { showSnackbar } from "../store/snackbar"
+import { isNodeBookmark, removeNodes, pasteNodes, getChildBookmarks, isNodeFolder } from "../utils"
+import { RootState, BookmarkTreeNode } from "../types"
 
-export default function BookmarkActionMenuContent({
-    onCloseMenu
-}: {
-    onCloseMenu: () => void
-}) {
-    const selectedNodes = useSelector(
-        (state: RootState) => state.dnd.selectedNodes
-    )
+export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu: () => void }) {
+    const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
+    const search = useSelector((state: RootState) => state.bookmark.search)
+    const selectedNodes = useSelector((state: RootState) => state.dnd.selectedNodes)
+    const copiedNodes = useSelector((state: RootState) => state.cnp.copied)
     const dispatch = useDispatch()
+
+    const selectedBookmarks = useMemo(() => {
+        const result = [] as BookmarkTreeNode[]
+        for (let i = 0; i < selectedNodes.length; i++) {
+            const node = selectedNodes[i]
+            if (isNodeBookmark(node)) {
+                result.push(node)
+            }
+            if (isNodeFolder(node)) {
+                result.push(...getChildBookmarks(node))
+            }
+        }
+        return result
+    }, [selectedNodes])
 
     return (
         <React.Fragment>
@@ -23,32 +37,19 @@ export default function BookmarkActionMenuContent({
                 <MenuItem
                     onClick={e => {
                         e.stopPropagation()
-                        dispatch(openBookmarkEditModal(selectedNodes[0]))
                         onCloseMenu()
+                        dispatch(openBookmarkEditModal(selectedNodes[0]))
                     }}
                 >
-                    {selectedNodes[0].type === BookmarkNodeType.Bookmark
-                        ? "Edit"
-                        : "Rename"}
+                    {isNodeBookmark(selectedNodes[0]) ? "Edit" : "Rename"}
                 </MenuItem>
             )}
             <MenuItem
-                onClick={e => {
+                onClick={async e => {
                     e.stopPropagation()
-                    const removeSelectedNodes = async () => {
-                        await Promise.all(
-                            selectedNodes.map(node => {
-                                if (isNodeBookmark(node)) {
-                                    browser.bookmarks.remove(node.id)
-                                }
-                                if (isNodeFolder(node)) {
-                                    browser.bookmarks.removeTree(node.id)
-                                }
-                            })
-                        )
-                        dispatch(clearSelectedNodes())
-                    }
-                    removeSelectedNodes()
+                    onCloseMenu()
+                    removeNodes(selectedNodes)
+                    dispatch(clearSelectedNodes())
                 }}
             >
                 Delete
@@ -57,7 +58,51 @@ export default function BookmarkActionMenuContent({
             <MenuItem
                 onClick={e => {
                     e.stopPropagation()
-                    selectedNodes.filter(isNodeBookmark).forEach(node => {
+                    onCloseMenu()
+                    copyToClipboard(selectedNodes.map(node => node.url ?? node.title).join("\t\n"))
+                    dispatch(setCopiedNodes(selectedNodes))
+                    dispatch(showSnackbar({ message: `Copied ${selectedNodes.length} items` }))
+                }}
+            >
+                Copy
+            </MenuItem>
+            {selectedNodes.length === 1 && isNodeBookmark(selectedNodes[0]) && (
+                <MenuItem
+                    onClick={e => {
+                        e.stopPropagation()
+                        onCloseMenu()
+                        copyToClipboard(selectedNodes[0].url!)
+                        dispatch(showSnackbar({ message: "URL copied" }))
+                    }}
+                >
+                    Copy URL
+                </MenuItem>
+            )}
+            <MenuItem
+                onClick={e => {
+                    e.stopPropagation()
+                    onCloseMenu()
+                    // only paste when not searching and a folder opened
+                    if (!search && activeFolder) {
+                        // paste copied nodes after the last of the selected nodes or append in the children of the current folder
+                        const target = selectedNodes[selectedNodes.length - 1]
+                        pasteNodes({
+                            src: copiedNodes,
+                            dest: activeFolder,
+                            destIndex: target ? target.index! : undefined
+                        })
+                    }
+                }}
+            >
+                Paste
+            </MenuItem>
+            <Divider />
+            <MenuItem
+                style={{ width: 230 }}
+                onClick={e => {
+                    e.stopPropagation()
+                    onCloseMenu()
+                    selectedBookmarks.forEach(node => {
                         browser.tabs.create({
                             url: node.url,
                             // should open in background by default
@@ -65,42 +110,35 @@ export default function BookmarkActionMenuContent({
                             active: false
                         })
                     })
-                    onCloseMenu()
                 }}
             >
-                {selectedNodes.length > 1
-                    ? "Open all in new tab"
-                    : "Open in new tab"}
+                {selectedBookmarks.length > 1 ? (
+                    <div
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            width: "100%"
+                        }}
+                    >
+                        <span>Open all bookmarks</span>
+                        <span>{selectedBookmarks.length}</span>
+                    </div>
+                ) : (
+                    "Open in new tab"
+                )}
             </MenuItem>
             <MenuItem
                 onClick={e => {
                     e.stopPropagation()
-
-                    browser.windows.create({
-                        url: selectedNodes
-                            .filter(isNodeBookmark)
-                            .map(node => node.url!)
-                    })
                     onCloseMenu()
+                    browser.windows.create({
+                        url: selectedBookmarks.map(bookmark => bookmark.url!)
+                    })
                 }}
             >
-                {selectedNodes.length > 1
-                    ? "Open all in new window"
-                    : "Open in new window"}
+                {selectedNodes.length > 1 ? "Open all in new window" : "Open in new window"}
             </MenuItem>
-            {/** @todo Error: Extension does not have permission for incognito mode */}
-            {/* <MenuItem
-                    onClick={e => {
-                        e.stopPropagation()
-                        browser.windows.create({
-                            url: bookmarkNode.url,
-                            incognito: true
-                        })
-                        onClose()
-                    }}
-                >
-                    Open in incognito window
-                </MenuItem> */}
         </React.Fragment>
     )
 }

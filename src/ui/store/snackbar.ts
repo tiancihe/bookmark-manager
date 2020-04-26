@@ -14,7 +14,6 @@ const slice = createSlice({
         },
         hideSnackbar: state => {
             state.visible = false
-            state.message = ""
         }
     }
 })

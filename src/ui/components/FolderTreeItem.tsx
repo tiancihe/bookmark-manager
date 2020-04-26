@@ -6,12 +6,13 @@ import { ArrowRight, ArrowDropDown, FolderTwoTone, FolderOpenTwoTone } from "@ma
 import { useDrop } from "react-dnd"
 
 import useContextMenu from "../hooks/useContextMenu"
-import FolderTreeItemContextMenuContent from "./FolderTreeItemContextMenuContent"
 import { setHoverState, clearHoverState } from "../store/dnd"
+import { isNodeHovered, setHashParam, isNodeFolder } from "../utils"
 import { BookmarkTreeNode } from "../../types"
 import { RootState, HoverArea } from "../types"
 import { DNDTypes, InternalGlobals } from "../consts"
-import { isNodeHovered, setHashParam, isNodeFolder } from "../utils"
+
+import FolderTreeItemContextMenuContent from "./FolderTreeItemContextMenuContent"
 
 const useFolderTreeItemStyle = makeStyles<Theme, { level: number; active: boolean }>(theme => ({
     container: {
@@ -159,16 +160,7 @@ export default function FolderTreeItem({
                 <div className={classNames.icon}>{open ? <FolderOpenTwoTone /> : <FolderTwoTone />}</div>
                 <div className={classNames.text}>{bookmarkNode.title}</div>
             </div>
-            <Menu
-                {...contextMenuProps}
-                // onDoubleClick={e => {
-                //     e.stopPropagation()
-                // }}
-                // onContextMenu={e => {
-                //     e.preventDefault()
-                //     e.stopPropagation()
-                // }}
-            >
+            <Menu {...contextMenuProps}>
                 <FolderTreeItemContextMenuContent bookmarkNode={bookmarkNode} onClose={closeContextMenu} />
             </Menu>
             {open && children}

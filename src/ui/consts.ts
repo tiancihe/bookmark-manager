@@ -1,5 +1,6 @@
 export const DNDTypes = {
-    BookmarkItem: "BookmarkItem"
+    BookmarkItem: "BookmarkItem",
+    FolderItem: "FolderItem"
 }
 
 export const __MAC__ = /mac/i.test(navigator.platform)

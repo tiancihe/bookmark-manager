@@ -1,3 +1,7 @@
+## 0.7.1 (2020/4/27)
+
+- add drag and drop support for the folder panel on the left
+
 ## 0.7.0 (2020/4/26)
 
 - add copy and paste context menu items

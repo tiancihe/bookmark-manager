@@ -1,16 +1,19 @@
-import React from "react"
+import React, { PropsWithChildren, Fragment, useState, useEffect, useMemo, useRef, createRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Menu } from "@material-ui/core"
 import { makeStyles, Theme, useTheme, fade } from "@material-ui/core/styles"
 import { ArrowRight, ArrowDropDown, FolderTwoTone, FolderOpenTwoTone } from "@material-ui/icons"
-import { useDrop } from "react-dnd"
+import { useDrop, useDrag } from "react-dnd"
+import throttle from "lodash/throttle"
 
 import useContextMenu from "../hooks/useContextMenu"
-import { setHoverState, clearHoverState } from "../store/dnd"
+import { setHoverState, clearHoverState, selectNode } from "../store/dnd"
 import { isNodeHovered, setHashParam, isNodeFolder } from "../utils"
+import { moveNodesUnderParent, moveNodesAboveTarget, moveNodesBelowTarget } from "../utils/bookmark"
+import { handleHoverAndDrop } from "../utils/dnd"
 import { BookmarkTreeNode } from "../../types"
 import { RootState, HoverArea } from "../types"
-import { DNDTypes, InternalGlobals } from "../consts"
+import { DNDTypes } from "../consts"
 
 import FolderTreeItemContextMenuContent from "./FolderTreeItemContextMenuContent"
 
@@ -19,7 +22,7 @@ const useFolderTreeItemStyle = makeStyles<Theme, { level: number; active: boolea
         display: "flex",
         alignItems: "center",
         height: "40px",
-        paddingLeft: props => props.level * 24 + "px",
+        marginLeft: props => props.level * 24,
         cursor: "pointer"
     },
     icon: {
@@ -39,7 +42,7 @@ export default function FolderTreeItem({
     bookmarkNode,
     defaultOpen,
     children
-}: React.PropsWithChildren<{
+}: PropsWithChildren<{
     level: number
     bookmarkNode: BookmarkTreeNode
     defaultOpen?: boolean
@@ -51,55 +54,72 @@ export default function FolderTreeItem({
     const isActive = !search && activeFolder !== null && activeFolder.id === bookmarkNode.id
 
     const selectedNodes = useSelector((state: RootState) => state.dnd.selectedNodes)
-
     const hoverState = useSelector((state: RootState) => state.dnd.hoverState)
     const isHovered = isNodeHovered(bookmarkNode, hoverState)
 
     const dispatch = useDispatch()
 
-    const [open, setOpen] = React.useState(defaultOpen)
+    const [open, setOpen] = useState(defaultOpen)
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (defaultOpen && !open) {
             setOpen(true)
         }
     }, [defaultOpen])
 
-    const hasSubfolders = React.useMemo(
+    const hasSubfolders = useMemo(
         () => Array.isArray(bookmarkNode.children) && bookmarkNode.children.filter(isNodeFolder).length > 0,
         [bookmarkNode]
     )
 
-    const [, drop] = useDrop({
-        accept: DNDTypes.BookmarkItem,
-        hover: (item, monitor) => {
-            if (!hoverState || !isHovered) {
-                dispatch(
-                    setHoverState({
-                        node: bookmarkNode,
-                        area: HoverArea.Mid
-                    })
-                )
-            }
+    const nodeRef = useRef(createRef<HTMLDivElement>())
+    const [_, drag] = useDrag({
+        item: {
+            type: DNDTypes.FolderItem
         },
-        drop: (item, monitor) => {
-            const move = async () => {
-                InternalGlobals.isBatchingUpdate = true
-                for (let i = 0; i < selectedNodes.length; i++) {
-                    // toggle back to normal batching state just before the last update
-                    if (i === selectedNodes.length - 1) {
-                        InternalGlobals.isBatchingUpdate = false
-                    }
-
-                    await browser.bookmarks.move(selectedNodes[i].id, {
-                        parentId: bookmarkNode.id
-                    })
-                }
+        begin: () => {
+            dispatch(selectNode(bookmarkNode))
+        }
+    })
+    const [, drop] = useDrop({
+        accept: [DNDTypes.BookmarkItem, DNDTypes.FolderItem],
+        hover: throttle((item, monitor) => {
+            const node = nodeRef.current.current
+            if (node) {
+                handleHoverAndDrop({
+                    node,
+                    monitor,
+                    top: () => dispatch(setHoverState({ node: bookmarkNode, area: HoverArea.Top })),
+                    mid: () => dispatch(setHoverState({ node: bookmarkNode, area: HoverArea.Mid })),
+                    bottom: () => dispatch(setHoverState({ node: bookmarkNode, area: HoverArea.Bottom }))
+                })
             }
-            move()
+        }, 10),
+        drop: (item, monitor) => {
+            const node = nodeRef.current.current
+            if (node) {
+                handleHoverAndDrop({
+                    node,
+                    monitor,
+                    top: () => {
+                        if (selectedNodes.length === 1 && isNodeFolder(selectedNodes[0])) {
+                            moveNodesAboveTarget(selectedNodes, bookmarkNode)
+                        }
+                    },
+                    mid: () => moveNodesUnderParent(selectedNodes, bookmarkNode),
+                    bottom: () => {
+                        if (selectedNodes.length === 1 && isNodeFolder(selectedNodes[0])) {
+                            moveNodesBelowTarget(selectedNodes, bookmarkNode)
+                        }
+                    }
+                })
+            }
+
             dispatch(clearHoverState())
         }
     })
+
+    drag(drop(nodeRef.current))
 
     const theme = useTheme()
     const classNames = useFolderTreeItemStyle({
@@ -109,13 +129,24 @@ export default function FolderTreeItem({
 
     const { contextMenuProps, handleContextMenuEvent, closeContextMenu } = useContextMenu()
 
+    const hoverArea = hoverState?.area
+
     return (
-        <React.Fragment>
+        <Fragment>
             <div
-                ref={drop}
+                ref={nodeRef.current}
                 className={classNames.container}
                 style={{
-                    backgroundColor: isHovered ? fade(theme.palette.primary.main, 0.25) : undefined
+                    borderTop:
+                        isHovered && hoverArea === HoverArea.Top
+                            ? `1px solid ${theme.palette.primary.main}`
+                            : undefined,
+                    borderBottom:
+                        isHovered && hoverArea === HoverArea.Bottom
+                            ? `1px solid ${theme.palette.primary.main}`
+                            : undefined,
+                    backgroundColor:
+                        isHovered && hoverArea === HoverArea.Mid ? fade(theme.palette.primary.main, 0.25) : undefined
                 }}
                 onClick={e => {
                     e.stopPropagation()
@@ -164,6 +195,6 @@ export default function FolderTreeItem({
                 <FolderTreeItemContextMenuContent bookmarkNode={bookmarkNode} onClose={closeContextMenu} />
             </Menu>
             {open && children}
-        </React.Fragment>
+        </Fragment>
     )
 }

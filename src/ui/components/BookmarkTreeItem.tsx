@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useRef, createRef, memo, Fragment } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Menu } from "@material-ui/core"
 import { makeStyles, useTheme, fade } from "@material-ui/core/styles"
@@ -6,17 +6,14 @@ import { FolderTwoTone } from "@material-ui/icons"
 import { useDrag, useDrop } from "react-dnd"
 import { throttle } from "lodash"
 
-import { BookmarkTreeNode } from "../../types"
-import { RootState, HoverArea, BookmarkNodeType } from "../types"
-import { getFavicon, isNodeSelected, setHashParam } from "../utils"
-import { DNDTypes, __MAC__, InternalGlobals } from "../consts"
 import useContextMenu from "../hooks/useContextMenu"
-import {
-    selectNodes,
-    selectNode,
-    setHoverState,
-    clearHoverState
-} from "../store/dnd"
+import { selectNodes, selectNode, setHoverState, clearHoverState } from "../store/dnd"
+import { getFavicon, isNodeSelected, setHashParam, isNodeFolder, isNodeBookmark } from "../utils"
+import { moveNodesAboveTarget, moveNodesUnderParent, moveNodesBelowTarget } from "../utils/bookmark"
+import { handleHoverAndDrop } from "../utils/dnd"
+import { BookmarkTreeNode } from "../../types"
+import { RootState, HoverArea } from "../types"
+import { DNDTypes, __MAC__ } from "../consts"
 
 import BookmarkActionMenu from "./BookmarkActionMenu"
 import BookmarkActionMenuContent from "./BookmarkActionMenuContent"
@@ -55,7 +52,7 @@ const useBookmarkListItemStyle = makeStyles(theme => ({
     }
 }))
 
-const BookmarkTreeItem = React.memo(function BookmarkTreeItem({
+const BookmarkTreeItem = memo(function BookmarkTreeItem({
     bookmarkNode,
     isHovered,
     hoverArea
@@ -64,24 +61,20 @@ const BookmarkTreeItem = React.memo(function BookmarkTreeItem({
     isHovered: boolean
     hoverArea?: HoverArea
 }) {
-    const isFolder = bookmarkNode.type === BookmarkNodeType.Folder
-    const isBookmark = bookmarkNode.type === BookmarkNodeType.Bookmark
-
-    const activeFolder = useSelector(
-        (state: RootState) => state.bookmark.activeFolder
-    )
-    const searchResult = useSelector(
-        (state: RootState) => state.bookmark.searchResult
-    )
-    const selectedNodes = useSelector(
-        (state: RootState) => state.dnd.selectedNodes
-    )
-    const isSelected = isNodeSelected(bookmarkNode, selectedNodes)
+    const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
+    const searchResult = useSelector((state: RootState) => state.bookmark.searchResult)
+    const selectedNodes = useSelector((state: RootState) => state.dnd.selectedNodes)
     const dispatch = useDispatch()
 
-    const nodeRef = React.useRef(React.createRef<HTMLDivElement>())
+    const isFolder = isNodeFolder(bookmarkNode)
+    const isBookmark = isNodeBookmark(bookmarkNode)
+    const isSelected = isNodeSelected(bookmarkNode, selectedNodes)
+
+    const nodeRef = useRef(createRef<HTMLDivElement>())
     const [, drag] = useDrag({
-        item: { type: DNDTypes.BookmarkItem },
+        item: {
+            type: DNDTypes.BookmarkItem
+        },
         begin: () => {
             if (!isSelected) {
                 dispatch(selectNode(bookmarkNode))
@@ -92,130 +85,39 @@ const BookmarkTreeItem = React.memo(function BookmarkTreeItem({
         accept: DNDTypes.BookmarkItem,
         hover: throttle((item, monitor) => {
             const node = nodeRef.current.current
-
             if (node) {
-                const rect = node.getBoundingClientRect()
-                const pos = monitor.getClientOffset()
-
-                if (
-                    pos &&
-                    pos.x > rect.left &&
-                    pos.x < rect.right &&
-                    pos.y > rect.top &&
-                    pos.y < rect.bottom
-                ) {
-                    const topMid = rect.top + rect.height / 3
-                    const midBottom = rect.bottom - rect.height / 3
-
-                    dispatch(
-                        setHoverState({
-                            node: bookmarkNode,
-                            area:
-                                pos.y < topMid
-                                    ? HoverArea.Top
-                                    : pos.y < midBottom
-                                    ? HoverArea.Mid
-                                    : HoverArea.Bottom
-                        })
-                    )
-                }
+                handleHoverAndDrop({
+                    node,
+                    monitor,
+                    top: () => dispatch(setHoverState({ node: bookmarkNode, area: HoverArea.Top })),
+                    mid: () => dispatch(setHoverState({ node: bookmarkNode, area: HoverArea.Mid })),
+                    bottom: () => dispatch(setHoverState({ node: bookmarkNode, area: HoverArea.Bottom }))
+                })
             }
         }, 10),
         drop: (item, monitor) => {
             const node = nodeRef.current.current
-
             if (node && !isSelected) {
-                const rect = node.getBoundingClientRect()
-                const pos = monitor.getClientOffset()
-
-                if (
-                    pos &&
-                    pos.x > rect.left &&
-                    pos.x < rect.right &&
-                    pos.y > rect.top &&
-                    pos.y < rect.bottom
-                ) {
-                    const topMid = rect.top + rect.height / 3
-                    const midBottom = rect.bottom - rect.height / 3
-
-                    if (pos.y < topMid) {
-                        const move = async () => {
-                            InternalGlobals.isBatchingUpdate = true
-                            for (let i = 0; i < selectedNodes.length; i++) {
-                                // toggle back to normal batching state just before the last update
-                                if (i === selectedNodes.length - 1) {
-                                    InternalGlobals.isBatchingUpdate = false
-                                }
-
-                                await browser.bookmarks.move(
-                                    selectedNodes[i].id,
-                                    {
-                                        parentId: bookmarkNode.parentId,
-                                        index: bookmarkNode.index! + i
-                                    }
-                                )
-                            }
-                        }
-                        move()
-                    } else if (pos.y < midBottom) {
-                        if (isFolder) {
-                            const move = async () => {
-                                InternalGlobals.isBatchingUpdate = true
-                                for (let i = 0; i < selectedNodes.length; i++) {
-                                    // toggle back to normal batching state just before the last update
-                                    if (i === selectedNodes.length - 1) {
-                                        InternalGlobals.isBatchingUpdate = false
-                                    }
-
-                                    await browser.bookmarks.move(
-                                        selectedNodes[i].id,
-                                        {
-                                            parentId: bookmarkNode.id
-                                        }
-                                    )
-                                }
-                            }
-                            move()
-                        }
-                    } else {
-                        const move = async () => {
-                            InternalGlobals.isBatchingUpdate = true
-                            for (let i = 0; i < selectedNodes.length; i++) {
-                                // toggle back to normal batching state just before the last update
-                                if (i === selectedNodes.length - 1) {
-                                    InternalGlobals.isBatchingUpdate = false
-                                }
-
-                                await browser.bookmarks.move(
-                                    selectedNodes[i].id,
-                                    {
-                                        parentId: bookmarkNode.parentId,
-                                        index: bookmarkNode.index! + 1 + i
-                                    }
-                                )
-                            }
-                        }
-                        move()
-                    }
-                }
+                handleHoverAndDrop({
+                    node,
+                    monitor,
+                    top: () => moveNodesAboveTarget(selectedNodes, bookmarkNode),
+                    mid: () => moveNodesUnderParent(selectedNodes, bookmarkNode),
+                    bottom: () => moveNodesBelowTarget(selectedNodes, bookmarkNode)
+                })
             }
-
             dispatch(clearHoverState())
         }
     })
     drag(drop(nodeRef.current))
 
-    const {
-        contextMenuProps,
-        handleContextMenuEvent,
-        closeContextMenu
-    } = useContextMenu()
+    const { contextMenuProps, handleContextMenuEvent, closeContextMenu } = useContextMenu()
 
     const theme = useTheme()
     const classNames = useBookmarkListItemStyle()
 
     return (
-        <React.Fragment>
+        <Fragment>
             <div
                 ref={nodeRef.current}
                 className={classNames.container}
@@ -240,39 +142,23 @@ const BookmarkTreeItem = React.memo(function BookmarkTreeItem({
                         // if ctrl is pressed (command on mac)
                         if (!isSelected) {
                             // and the current node is not selected, select it
-                            dispatch(
-                                selectNodes(selectedNodes.concat(bookmarkNode))
-                            )
+                            dispatch(selectNodes(selectedNodes.concat(bookmarkNode)))
                         } else {
                             // otherwise unselect it
-                            dispatch(
-                                selectNodes(
-                                    selectedNodes.filter(
-                                        node => node.id !== bookmarkNode.id
-                                    )
-                                )
-                            )
+                            dispatch(selectNodes(selectedNodes.filter(node => node.id !== bookmarkNode.id)))
                         }
                     } else if (e.shiftKey) {
                         // if shift is pressed, select all nodes between the first node and the current node, including them
                         // display strategy: searchResult || activeFolder.children
 
-                        const target =
-                            searchResult.length > 0
-                                ? searchResult
-                                : activeFolder!.children!
-                        const firstNodeIndex = target.findIndex(
-                            node => node.id === selectedNodes[0].id
-                        )
-                        const currentNodeIndex = target.findIndex(
-                            node => node.id === bookmarkNode.id
-                        )
+                        const target = searchResult.length > 0 ? searchResult : activeFolder!.children!
+                        const firstNodeIndex = target.findIndex(node => node.id === selectedNodes[0].id)
+                        const currentNodeIndex = target.findIndex(node => node.id === bookmarkNode.id)
                         dispatch(
                             selectNodes(
                                 target.slice(
                                     Math.min(firstNodeIndex, currentNodeIndex),
-                                    Math.max(firstNodeIndex, currentNodeIndex) +
-                                        1
+                                    Math.max(firstNodeIndex, currentNodeIndex) + 1
                                 )
                             )
                         )
@@ -327,9 +213,7 @@ const BookmarkTreeItem = React.memo(function BookmarkTreeItem({
             >
                 <div className={classNames.icon}>
                     {isFolder && <FolderTwoTone />}
-                    {isBookmark && (
-                        <img src={getFavicon(bookmarkNode.url || "")} />
-                    )}
+                    {isBookmark && <img src={getFavicon(bookmarkNode.url || "")} />}
                 </div>
                 <div className={classNames.title} title={bookmarkNode.title}>
                     {bookmarkNode.title}
@@ -339,10 +223,7 @@ const BookmarkTreeItem = React.memo(function BookmarkTreeItem({
                         {bookmarkNode.url}
                     </div>
                 )}
-                <BookmarkActionMenu
-                    className={classNames.actions}
-                    bookmarkNode={bookmarkNode}
-                />
+                <BookmarkActionMenu className={classNames.actions} bookmarkNode={bookmarkNode} />
             </div>
             <Menu
                 {...contextMenuProps}
@@ -356,7 +237,7 @@ const BookmarkTreeItem = React.memo(function BookmarkTreeItem({
             >
                 <BookmarkActionMenuContent onCloseMenu={closeContextMenu} />
             </Menu>
-        </React.Fragment>
+        </Fragment>
     )
 })
 

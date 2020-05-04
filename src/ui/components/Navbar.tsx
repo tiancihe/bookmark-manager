@@ -5,6 +5,7 @@ import { makeStyles, fade } from "@material-ui/core/styles"
 import { Search, Clear, Brightness4, Brightness5, MoreVert } from "@material-ui/icons"
 
 import { loadBookmarkTree } from "../store/bookmark"
+import { selectNode } from "../store/dnd"
 import { toggleDarkMode } from "../store/setting"
 import { setHashParam, sortFolderByName, sortFolderByUrl } from "../utils"
 import { RootState } from "../types"
@@ -63,6 +64,7 @@ const useNavbarStyle = makeStyles(theme => ({
 export default function Navbar() {
     const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
     const search = useSelector((state: RootState) => state.bookmark.search)
+    const searchResult = useSelector((state: RootState) => state.bookmark.searchResult)
     const darkMode = useSelector((state: RootState) => state.setting.darkMode)
     const dispatch = useDispatch()
 
@@ -89,9 +91,11 @@ export default function Navbar() {
         return () => window.removeEventListener("keydown", focus)
     }, [])
 
-    const [isInputFocused, setIsInputFocused] = useState(false)
+    // used autofocus attribute on the input element
+    const [isInputFocused, setIsInputFocused] = useState(true)
+
     useEffect(() => {
-        if (inputRef.current && inputRef.current.current) {
+        if (inputRef.current.current) {
             const input = inputRef.current.current
 
             const inputFocusListener = () => {
@@ -121,6 +125,24 @@ export default function Navbar() {
             }
         }
     }, [inputRef.current, isInputFocused, search])
+
+    // captures ArrowDown key to move focus to BookmarkPanel
+    // where you can use up and down arrow keys to move through bookmarks and folders
+    useEffect(() => {
+        if (inputRef.current.current && isInputFocused) {
+            const input = inputRef.current.current
+            const listener = (e: KeyboardEvent) => {
+                if (e.key === "ArrowDown") {
+                    input.blur()
+                    if (searchResult.length) {
+                        dispatch(selectNode(searchResult[0]))
+                    }
+                }
+            }
+            input.addEventListener("keydown", listener)
+            return () => input.removeEventListener("keydown", listener)
+        }
+    }, [inputRef.current, isInputFocused, searchResult])
 
     const [actionMenuAndhor, setActionMenuAnchor] = useState<null | HTMLElement>(null)
     const closeActionMenu = () => setActionMenuAnchor(null)

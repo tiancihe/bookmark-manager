@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Paper, Menu, MenuItem } from "@material-ui/core"
 import { makeStyles } from "@material-ui/core/styles"
@@ -6,10 +6,11 @@ import copyToClipboard from "copy-to-clipboard"
 
 import useContextMenu from "../hooks/useContextMenu"
 import { openBookmarkCreateModal } from "../store/modal"
-import { selectNodes, clearSelectedNodes } from "../store/dnd"
+import { selectNodes, clearSelectedNodes, selectNode } from "../store/dnd"
 import { setCopiedNodes } from "../store/cnp"
 import { showSnackbar } from "../store/snackbar"
-import { isNodeHovered, pasteNodes } from "../utils"
+import { isNodeHovered, pasteNodes, isNodeBookmark, isNodeFolder, setHashParam } from "../utils"
+import { openTab } from "../utils/bookmark"
 import { RootState, BookmarkNodeType } from "../types"
 import { __MAC__ } from "../consts"
 
@@ -49,13 +50,39 @@ export default function BookmarkPanel({ className }: { className?: string }) {
     const activeFolderChildren = React.useMemo(() => {
         return activeFolder !== null && Array.isArray(activeFolder.children) && activeFolder.children.length > 0
             ? activeFolder.children.filter(
-                  child => child.type === BookmarkNodeType.Bookmark || child.type === BookmarkNodeType.Folder
-              )
+                child => child.type === BookmarkNodeType.Bookmark || child.type === BookmarkNodeType.Folder
+            )
             : null
     }, [activeFolder])
 
+    // use arrow keys to move between bookmarks and folders
+    // use enter key to open a bookmark or folder
+    useEffect(() => {
+        const listener = (e: KeyboardEvent) => {
+            if (!selectedNodes.length) return
+            const items = searchResult.length ? searchResult : (activeFolderChildren ?? [])
+            const currentIndex = items.findIndex(item => item.id === selectedNodes[0].id)
+            if (e.key === "ArrowDown" && currentIndex < items.length) {
+                dispatch(selectNode(items[currentIndex + 1]))
+            } else if (e.key === "ArrowUp" && currentIndex > 0) {
+                dispatch(selectNode(items[currentIndex - 1]))
+            } else if (e.key === "Enter") {
+                const item = items[currentIndex!]
+                if (isNodeBookmark(item)) {
+                    // selectedNodes is guaranteed to be among items (searchResult || activeFolderChildren) , see render result down below
+                    openTab(item.url!)
+                } else if (isNodeFolder(item)) {
+                    // clear out search state, and open that folder
+                    setHashParam({ folder: item.id, search: undefined })
+                }
+            }
+        }
+        window.addEventListener("keydown", listener)
+        return () => window.removeEventListener("keydown", listener)
+    }, [searchResult, activeFolderChildren, selectedNodes])
+
     // capture select all hotkey to select all bookmark nodes that are currently displayed
-    React.useEffect(() => {
+    useEffect(() => {
         const selectAllListener = (e: KeyboardEvent) => {
             if (
                 e.target === document.body && // only captures events fired globally
@@ -79,7 +106,7 @@ export default function BookmarkPanel({ className }: { className?: string }) {
     }, [searchResult, activeFolder])
 
     // capture escape key to clear selected nodes
-    React.useEffect(() => {
+    useEffect(() => {
         const escapeListener = (e: KeyboardEvent) => {
             if (e.target === document.body && e.key === "Escape") {
                 if (selectedNodes.length) {
@@ -92,7 +119,7 @@ export default function BookmarkPanel({ className }: { className?: string }) {
     }, [selectedNodes])
 
     // copy and paste bookmarks
-    React.useEffect(() => {
+    useEffect(() => {
         const copyListener = (e: KeyboardEvent) => {
             if (e.target === document.body && e.key === "c" && ((__MAC__ && e.metaKey) || (!__MAC__ && e.ctrlKey))) {
                 if (selectedNodes.length) {
@@ -154,8 +181,8 @@ export default function BookmarkPanel({ className }: { className?: string }) {
                         ))}
                     </Paper>
                 ) : (
-                    <div className={classNames.emptySearchResults}>No search results found</div>
-                )
+                        <div className={classNames.emptySearchResults}>No search results found</div>
+                    )
             ) : activeFolderChildren ? (
                 <Paper className={classNames.paper} elevation={3}>
                     {activeFolderChildren.map(child => (

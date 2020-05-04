@@ -32,3 +32,10 @@ export async function moveNodesBelowTarget(nodes: BookmarkTreeNode[], target: Bo
         })
     }
 }
+
+export function openTab(url: string) {
+    browser.tabs.create({
+        url,
+        active: true
+    })
+}

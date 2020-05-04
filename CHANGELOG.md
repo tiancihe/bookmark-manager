@@ -1,3 +1,9 @@
+## 0.7.2 (2020/5/4)
+
+- add arrow keys and enter key support for the search input and main panel
+  - when focused in search input, press down arrow key to quickly select the first search result
+  - use enter key to quickly open a bookmark or folder
+
 ## 0.7.1 (2020/4/27)
 
 - add drag and drop support for the folder panel on the left

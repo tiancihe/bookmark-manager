@@ -1,4 +1,4 @@
-import React, { useRef, createRef, memo, Fragment } from "react"
+import React, { useEffect, useRef, createRef, memo, Fragment } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Menu } from "@material-ui/core"
 import { makeStyles, useTheme, fade } from "@material-ui/core/styles"
@@ -110,6 +110,15 @@ const BookmarkTreeItem = memo(function BookmarkTreeItem({
         }
     })
     drag(drop(nodeRef.current))
+
+    useEffect(() => {
+        if (isSelected) {
+            nodeRef.current.current?.scrollIntoView({
+                block: "center",
+                behavior: "smooth"
+            })
+        }
+    }, [isSelected, nodeRef.current])
 
     const { contextMenuProps, handleContextMenuEvent, closeContextMenu } = useContextMenu()
 

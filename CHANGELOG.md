@@ -1,3 +1,8 @@
+## 0.7.3 (2020/5/8)
+
+- when using arrow up and down keys to select items will scroll the panel and make the item display at center
+- fixed a bug when using arrow down key to select the last node crashes
+
 ## 0.7.2 (2020/5/4)
 
 - add arrow keys and enter key support for the search input and main panel

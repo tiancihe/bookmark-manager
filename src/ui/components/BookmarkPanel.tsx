@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useMemo } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Paper, Menu, MenuItem } from "@material-ui/core"
 import { makeStyles } from "@material-ui/core/styles"
@@ -47,11 +47,11 @@ export default function BookmarkPanel({ className }: { className?: string }) {
     const copiedNodes = useSelector((state: RootState) => state.cnp.copied)
     const dispatch = useDispatch()
 
-    const activeFolderChildren = React.useMemo(() => {
+    const activeFolderChildren = useMemo(() => {
         return activeFolder !== null && Array.isArray(activeFolder.children) && activeFolder.children.length > 0
             ? activeFolder.children.filter(
-                child => child.type === BookmarkNodeType.Bookmark || child.type === BookmarkNodeType.Folder
-            )
+                  child => child.type === BookmarkNodeType.Bookmark || child.type === BookmarkNodeType.Folder
+              )
             : null
     }, [activeFolder])
 
@@ -60,9 +60,9 @@ export default function BookmarkPanel({ className }: { className?: string }) {
     useEffect(() => {
         const listener = (e: KeyboardEvent) => {
             if (!selectedNodes.length) return
-            const items = searchResult.length ? searchResult : (activeFolderChildren ?? [])
+            const items = searchResult.length ? searchResult : activeFolderChildren ?? []
             const currentIndex = items.findIndex(item => item.id === selectedNodes[0].id)
-            if (e.key === "ArrowDown" && currentIndex < items.length) {
+            if (e.key === "ArrowDown" && currentIndex < items.length - 1) {
                 dispatch(selectNode(items[currentIndex + 1]))
             } else if (e.key === "ArrowUp" && currentIndex > 0) {
                 dispatch(selectNode(items[currentIndex - 1]))
@@ -181,8 +181,8 @@ export default function BookmarkPanel({ className }: { className?: string }) {
                         ))}
                     </Paper>
                 ) : (
-                        <div className={classNames.emptySearchResults}>No search results found</div>
-                    )
+                    <div className={classNames.emptySearchResults}>No search results found</div>
+                )
             ) : activeFolderChildren ? (
                 <Paper className={classNames.paper} elevation={3}>
                     {activeFolderChildren.map(child => (

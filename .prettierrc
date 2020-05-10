@@ -6,6 +6,7 @@
         "tabWidth": 4,
         "semi": false,
         "printWidth": 120,
+        "trailingComma": "all",
         "arrowParens": "avoid"
       }
     }

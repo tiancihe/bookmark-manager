@@ -1,3 +1,8 @@
+## 0.8.0 (2020/5/15)
+
+- major refactoring, great performance improvement, say goodbye to jaggy drag and drop
+- fixed a bug where dropping multiple items do not behave as expected
+
 ## 0.7.3 (2020/5/8)
 
 - when using arrow up and down keys to select items will scroll the panel and make the item display at center

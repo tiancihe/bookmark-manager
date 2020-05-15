@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect, useMemo } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { CssBaseline, makeStyles, createMuiTheme, useMediaQuery, MuiThemeProvider, Snackbar } from "@material-ui/core"
 import { DndProvider } from "react-dnd"
@@ -9,7 +9,7 @@ import { resetDndState } from "./store/dnd"
 import { closeModal } from "./store/modal"
 import { toggleDarkMode } from "./store/setting"
 import { RootState, ModalType } from "./types"
-import { __MAC__, InternalGlobals } from "./consts"
+import { __MAC__, BatchingUpdateListener, BatchingUpdateManager } from "./consts"
 
 import Navbar from "./components/Navbar"
 import FolderPanel from "./components/FolderPanel"
@@ -22,25 +22,25 @@ const useAppStyle = makeStyles(theme => ({
         display: "flex",
         flexDirection: "column",
         width: "100vw",
-        height: "100vh"
+        height: "100vh",
     },
     mainContent: {
         flex: 1,
         display: "flex",
-        overflow: "hidden"
+        overflow: "hidden",
     },
     folderPanel: {
         width: "256px",
         height: "100%",
         padding: theme.spacing(1, 0.5, 0, 2),
-        overflow: "auto"
+        overflow: "auto",
     },
     displayPanel: {
         flex: 1,
         height: "100%",
         padding: theme.spacing(0, 4, 0, 2),
-        overflow: "auto"
-    }
+        overflow: "auto",
+    },
 }))
 
 export default function App() {
@@ -48,13 +48,19 @@ export default function App() {
     const selectedNodes = useSelector((state: RootState) => state.dnd.selectedNodes)
     const dispatch = useDispatch()
 
-    React.useEffect(() => {
+    useEffect(() => {
         const loadTree = () => {
-            if (InternalGlobals.isBatchingUpdate) return
+            if (BatchingUpdateManager.state.isBatchingUpdate) {
+                return
+            }
             dispatch(loadBookmarkTree())
         }
         // initialize bookmarkTree
         loadTree()
+
+        // subscribe to batching update event, loadTree on batching ends
+        const batchingUpdateListener: BatchingUpdateListener = isBatchingUpdate => !isBatchingUpdate && loadTree()
+        BatchingUpdateManager.subscribe(batchingUpdateListener)
 
         // reloads bookmarkTree when user changes any bookmarks
         browser.bookmarks.onCreated.addListener(loadTree)
@@ -66,6 +72,8 @@ export default function App() {
         window.addEventListener("hashchange", hashChangeListener)
 
         return () => {
+            BatchingUpdateManager.unsubscribe(batchingUpdateListener)
+
             browser.bookmarks.onCreated.removeListener(loadTree)
             browser.bookmarks.onChanged.removeListener(loadTree)
             browser.bookmarks.onRemoved.removeListener(loadTree)
@@ -78,13 +86,13 @@ export default function App() {
     // when bookmarkTree changes, sync bookmark search and activeFolder state from hash params
     // this is because searchResult and activeFolder are all refs to the current bookmark nodes
     // which will change when bookmarkTree changes
-    React.useEffect(() => {
+    useEffect(() => {
         if (bookmarkTree) {
             dispatch(syncBookmarkStateFromHashParams())
         }
     }, [bookmarkTree])
 
-    React.useEffect(() => {
+    useEffect(() => {
         // reset dndState when user clicks away
         const reset = () => {
             if (selectedNodes.length) {
@@ -102,19 +110,19 @@ export default function App() {
 
     const darkMode = useSelector((state: RootState) => state.setting.darkMode)
     const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)")
-    React.useEffect(() => {
+    useEffect(() => {
         if (darkMode !== prefersDarkMode) {
             dispatch(toggleDarkMode())
         }
     }, [prefersDarkMode])
-    const theme = React.useMemo(() => {
+    const theme = useMemo(() => {
         return createMuiTheme({
             palette: {
                 type: darkMode ? "dark" : "light",
                 primary: {
-                    main: "#3367d6"
-                }
-            }
+                    main: "#3367d6",
+                },
+            },
         })
     }, [darkMode])
     const classNames = useAppStyle()
@@ -140,7 +148,7 @@ export default function App() {
             <Snackbar
                 anchorOrigin={{
                     vertical: "bottom",
-                    horizontal: "left"
+                    horizontal: "left",
                 }}
                 open={snackbarState.visible}
                 message={snackbarState.message}

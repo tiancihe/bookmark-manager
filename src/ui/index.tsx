@@ -12,5 +12,5 @@ ReactDOM.render(
     <Provider store={store}>
         <App />
     </Provider>,
-    ROOT_NODE
+    ROOT_NODE,
 )

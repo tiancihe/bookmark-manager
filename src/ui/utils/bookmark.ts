@@ -1,41 +1,69 @@
+import { BatchingUpdateManager } from "../consts"
 import { BookmarkTreeNode } from "../types"
-import { InternalGlobals } from "../consts"
 
 export async function moveNodesUnderParent(nodes: BookmarkTreeNode[], parent: BookmarkTreeNode) {
-    InternalGlobals.isBatchingUpdate = true
+    BatchingUpdateManager.beginBatchingUpdate()
     for (let i = 0; i < nodes.length; i++) {
-        if (i === nodes.length - 1) InternalGlobals.isBatchingUpdate = false
         await browser.bookmarks.move(nodes[i].id, {
-            parentId: parent.id
+            parentId: parent.id,
         })
     }
+    BatchingUpdateManager.endBatchingUpdate()
 }
 
 export async function moveNodesAboveTarget(nodes: BookmarkTreeNode[], target: BookmarkTreeNode) {
-    InternalGlobals.isBatchingUpdate = true
+    BatchingUpdateManager.beginBatchingUpdate()
+    const children = await browser.bookmarks.getChildren(target.parentId!)!
+    // splice out nodes to be moved
     for (let i = 0; i < nodes.length; i++) {
-        if (i === nodes.length - 1) InternalGlobals.isBatchingUpdate = false
-        await browser.bookmarks.move(nodes[i].id, {
-            parentId: target.parentId,
-            index: target.index! + i
-        })
+        children.splice(
+            children.findIndex(node => node.id === nodes[i].id),
+            1,
+        )
     }
+    // put nodes to be moved to the right position
+    children.splice(
+        children.findIndex(node => node.id === target.id),
+        0,
+        ...nodes,
+    )
+    for (let i = 0; i < children.length; i++) {
+        if (children[i].index !== i) {
+            await browser.bookmarks.move(children[i].id, {
+                parentId: target.parentId,
+                index: i,
+            })
+        }
+    }
+    BatchingUpdateManager.endBatchingUpdate()
 }
 
 export async function moveNodesBelowTarget(nodes: BookmarkTreeNode[], target: BookmarkTreeNode) {
-    InternalGlobals.isBatchingUpdate = true
+    BatchingUpdateManager.beginBatchingUpdate()
+    const children = await browser.bookmarks.getChildren(target.parentId!)!
+    // splice out nodes to be moved
     for (let i = 0; i < nodes.length; i++) {
-        if (i === nodes.length - 1) InternalGlobals.isBatchingUpdate = false
-        await browser.bookmarks.move(nodes[i].id, {
-            parentId: target.parentId,
-            index: target.index! + 1 + i
-        })
+        children.splice(
+            children.findIndex(node => node.id === nodes[i].id),
+            1,
+        )
     }
+    // put nodes to be moved to the right position
+    children.splice(children.findIndex(node => node.id === target.id) + 1, 0, ...nodes)
+    for (let i = 0; i < children.length; i++) {
+        if (children[i].index !== i) {
+            await browser.bookmarks.move(children[i].id, {
+                parentId: target.parentId,
+                index: i,
+            })
+        }
+    }
+    BatchingUpdateManager.endBatchingUpdate()
 }
 
 export function openTab(url: string) {
     browser.tabs.create({
         url,
-        active: true
+        active: true,
     })
 }

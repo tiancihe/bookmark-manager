@@ -1,13 +1,12 @@
-import React, { useEffect, useRef, createRef, memo, Fragment } from "react"
+import React, { useEffect, useRef, createRef, Fragment } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Menu } from "@material-ui/core"
 import { makeStyles, useTheme, fade } from "@material-ui/core/styles"
 import { FolderTwoTone } from "@material-ui/icons"
 import { useDrag, useDrop } from "react-dnd"
-import { throttle } from "lodash"
 
 import useContextMenu from "../hooks/useContextMenu"
-import { selectNodes, selectNode, setHoverState, clearHoverState } from "../store/dnd"
+import { selectNodes, selectNode } from "../store/dnd"
 import { getFavicon, isNodeSelected, setHashParam, isNodeFolder, isNodeBookmark } from "../utils"
 import { moveNodesAboveTarget, moveNodesUnderParent, moveNodesBelowTarget } from "../utils/bookmark"
 import { handleHoverAndDrop } from "../utils/dnd"
@@ -17,27 +16,28 @@ import { DNDTypes, __MAC__ } from "../consts"
 
 import BookmarkActionMenu from "./BookmarkActionMenu"
 import BookmarkActionMenuContent from "./BookmarkActionMenuContent"
+import HoverStateManager from "../hover-state-manager"
 
 const useBookmarkListItemStyle = makeStyles(theme => ({
     container: {
         display: "flex",
         alignItems: "center",
         paddingLeft: theme.spacing(3),
-        userSelect: "none"
+        userSelect: "none",
     },
     icon: {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         width: theme.spacing(3),
-        height: theme.spacing(3)
+        height: theme.spacing(3),
     },
     title: {
         flex: 2,
         margin: theme.spacing(0, 2),
         overflow: "hidden",
         whiteSpace: "nowrap",
-        textOverflow: "ellipsis"
+        textOverflow: "ellipsis",
     },
     url: {
         flex: 1,
@@ -45,22 +45,16 @@ const useBookmarkListItemStyle = makeStyles(theme => ({
         overflow: "hidden",
         whiteSpace: "nowrap",
         textOverflow: "ellipsis",
-        color: fade(theme.palette.text.primary, 0.55)
+        color: fade(theme.palette.text.primary, 0.55),
     },
     actions: {
-        justifySelf: "flex-end"
-    }
+        justifySelf: "flex-end",
+    },
 }))
 
-const BookmarkTreeItem = memo(function BookmarkTreeItem({
-    bookmarkNode,
-    isHovered,
-    hoverArea
-}: {
-    bookmarkNode: BookmarkTreeNode
-    isHovered: boolean
-    hoverArea?: HoverArea
-}) {
+export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: BookmarkTreeNode }) {
+    const theme = useTheme()
+
     const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
     const searchResult = useSelector((state: RootState) => state.bookmark.searchResult)
     const selectedNodes = useSelector((state: RootState) => state.dnd.selectedNodes)
@@ -73,28 +67,29 @@ const BookmarkTreeItem = memo(function BookmarkTreeItem({
     const nodeRef = useRef(createRef<HTMLDivElement>())
     const [, drag] = useDrag({
         item: {
-            type: DNDTypes.BookmarkItem
+            type: DNDTypes.BookmarkItem,
         },
         begin: () => {
             if (!isSelected) {
                 dispatch(selectNode(bookmarkNode))
             }
-        }
+        },
     })
     const [, drop] = useDrop({
         accept: DNDTypes.BookmarkItem,
-        hover: throttle((item, monitor) => {
+        hover: (item, monitor) => {
             const node = nodeRef.current.current
             if (node) {
+                HoverStateManager.subscribe({ bookmarkNode, isSelected, node, theme })
                 handleHoverAndDrop({
                     node,
                     monitor,
-                    top: () => dispatch(setHoverState({ node: bookmarkNode, area: HoverArea.Top })),
-                    mid: () => dispatch(setHoverState({ node: bookmarkNode, area: HoverArea.Mid })),
-                    bottom: () => dispatch(setHoverState({ node: bookmarkNode, area: HoverArea.Bottom }))
+                    top: () => HoverStateManager.applyHoverStyle(HoverArea.Top),
+                    mid: () => HoverStateManager.applyHoverStyle(HoverArea.Mid),
+                    bottom: () => HoverStateManager.applyHoverStyle(HoverArea.Bottom),
                 })
             }
-        }, 10),
+        },
         drop: (item, monitor) => {
             const node = nodeRef.current.current
             if (node && !isSelected) {
@@ -103,11 +98,11 @@ const BookmarkTreeItem = memo(function BookmarkTreeItem({
                     monitor,
                     top: () => moveNodesAboveTarget(selectedNodes, bookmarkNode),
                     mid: () => moveNodesUnderParent(selectedNodes, bookmarkNode),
-                    bottom: () => moveNodesBelowTarget(selectedNodes, bookmarkNode)
+                    bottom: () => moveNodesBelowTarget(selectedNodes, bookmarkNode),
                 })
             }
-            dispatch(clearHoverState())
-        }
+            HoverStateManager.reset()
+        },
     })
     drag(drop(nodeRef.current))
 
@@ -115,14 +110,13 @@ const BookmarkTreeItem = memo(function BookmarkTreeItem({
         if (isSelected) {
             nodeRef.current.current?.scrollIntoView({
                 block: "center",
-                behavior: "smooth"
+                behavior: "smooth",
             })
         }
     }, [isSelected, nodeRef.current])
 
     const { contextMenuProps, handleContextMenuEvent, closeContextMenu } = useContextMenu()
 
-    const theme = useTheme()
     const classNames = useBookmarkListItemStyle()
 
     return (
@@ -131,19 +125,22 @@ const BookmarkTreeItem = memo(function BookmarkTreeItem({
                 ref={nodeRef.current}
                 className={classNames.container}
                 style={{
-                    borderTop:
-                        isHovered && hoverArea === HoverArea.Top
-                            ? `1px solid ${theme.palette.primary.main}`
-                            : undefined,
-                    borderBottom:
-                        isHovered && hoverArea === HoverArea.Bottom
-                            ? `1px solid ${theme.palette.primary.main}`
-                            : undefined,
-                    backgroundColor:
-                        isSelected || (isHovered && hoverArea === HoverArea.Mid)
-                            ? fade(theme.palette.primary.main, 0.25)
-                            : undefined
+                    backgroundColor: isSelected ? fade(theme.palette.primary.main, 0.25) : undefined,
                 }}
+                // style={{
+                //     borderTop:
+                //         isHovered && hoverArea === HoverArea.Top
+                //             ? `1px solid ${theme.palette.primary.main}`
+                //             : undefined,
+                //     borderBottom:
+                //         isHovered && hoverArea === HoverArea.Bottom
+                //             ? `1px solid ${theme.palette.primary.main}`
+                //             : undefined,
+                //     backgroundColor:
+                //         isSelected || (isHovered && hoverArea === HoverArea.Mid)
+                //             ? fade(theme.palette.primary.main, 0.25)
+                //             : undefined
+                // }}
                 onClick={e => {
                     e.stopPropagation()
 
@@ -167,9 +164,9 @@ const BookmarkTreeItem = memo(function BookmarkTreeItem({
                             selectNodes(
                                 target.slice(
                                     Math.min(firstNodeIndex, currentNodeIndex),
-                                    Math.max(firstNodeIndex, currentNodeIndex) + 1
-                                )
-                            )
+                                    Math.max(firstNodeIndex, currentNodeIndex) + 1,
+                                ),
+                            ),
                         )
                     } else {
                         // select current node only
@@ -182,13 +179,13 @@ const BookmarkTreeItem = memo(function BookmarkTreeItem({
                     if (isFolder) {
                         setHashParam({
                             folder: bookmarkNode.id,
-                            search: undefined
+                            search: undefined,
                         })
                     }
 
                     if (isBookmark) {
                         browser.tabs.create({
-                            url: bookmarkNode.url
+                            url: bookmarkNode.url,
                         })
                     }
                 }}
@@ -203,7 +200,7 @@ const BookmarkTreeItem = memo(function BookmarkTreeItem({
                         if (isBookmark) {
                             browser.tabs.create({
                                 url: bookmarkNode.url,
-                                active: false
+                                active: false,
                             })
                         }
 
@@ -248,6 +245,4 @@ const BookmarkTreeItem = memo(function BookmarkTreeItem({
             </Menu>
         </Fragment>
     )
-})
-
-export default BookmarkTreeItem
+}

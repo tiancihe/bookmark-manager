@@ -13,15 +13,15 @@ import { __MAC__ } from "../consts"
 
 const useNavbarStyle = makeStyles(theme => ({
     appBar: {
-        backgroundColor: theme.palette.type === "dark" ? theme.palette.background.default : undefined
+        backgroundColor: theme.palette.type === "dark" ? theme.palette.background.default : undefined,
     },
     toolbar: {
         display: "flex",
         alignItems: "center",
-        justifyContent: "space-between"
+        justifyContent: "space-between",
     },
     title: {
-        cursor: "pointer"
+        cursor: "pointer",
     },
     searchContainer: {
         flex: 1,
@@ -31,34 +31,34 @@ const useNavbarStyle = makeStyles(theme => ({
         borderRadius: theme.shape.borderRadius,
         backgroundColor: fade(theme.palette.common.white, 0.15),
         "&:hover": {
-            backgroundColor: fade(theme.palette.common.white, 0.25)
-        }
+            backgroundColor: fade(theme.palette.common.white, 0.25),
+        },
     },
     searchIconContainer: {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         width: theme.spacing(5),
-        cursor: "pointer"
+        cursor: "pointer",
     },
     clearIconContainer: {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         width: theme.spacing(5),
-        cursor: "pointer"
+        cursor: "pointer",
     },
     inputRoot: {
         flex: 1,
-        color: "inherit"
+        color: "inherit",
     },
     inputInput: {
         padding: theme.spacing(1),
         width: "100%",
         [theme.breakpoints.up("md")]: {
-            width: "200px"
-        }
-    }
+            width: "200px",
+        },
+    },
 }))
 
 export default function Navbar() {
@@ -175,7 +175,7 @@ export default function Navbar() {
                         placeholder="Search here"
                         classes={{
                             root: classNames.inputRoot,
-                            input: classNames.inputInput
+                            input: classNames.inputInput,
                         }}
                         inputRef={inputRef.current}
                         value={input}
@@ -220,24 +220,22 @@ export default function Navbar() {
                 </div>
                 <Menu open={!!actionMenuAndhor} anchorEl={actionMenuAndhor} onClose={closeActionMenu}>
                     <MenuItem
-                        onClick={async e => {
+                        onClick={e => {
                             e.stopPropagation()
                             closeActionMenu()
                             if (!search && activeFolder) {
-                                await sortFolderByName(activeFolder)
-                                dispatch(loadBookmarkTree())
+                                sortFolderByName(activeFolder)
                             }
                         }}
                     >
                         Sort by name
                     </MenuItem>
                     <MenuItem
-                        onClick={async e => {
+                        onClick={e => {
                             e.stopPropagation()
                             closeActionMenu()
                             if (!search && activeFolder) {
-                                await sortFolderByUrl(activeFolder)
-                                dispatch(loadBookmarkTree())
+                                sortFolderByUrl(activeFolder)
                             }
                         }}
                     >

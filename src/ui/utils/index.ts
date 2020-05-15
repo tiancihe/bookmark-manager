@@ -2,8 +2,8 @@ import qs from "query-string"
 import naturalCompare from "natural-compare"
 
 import { BookmarkTreeNode } from "../../types"
-import { HoverState, HashParams, BookmarkNodeType } from "../types"
-import { InternalGlobals } from "../consts"
+import { HashParams, BookmarkNodeType } from "../types"
+import { BatchingUpdateManager } from "../consts"
 
 export function getHashParams() {
     return qs.parse(decodeURIComponent(location.hash)) as HashParams
@@ -13,8 +13,8 @@ export function setHashParam(payload: HashParams) {
     location.hash = encodeURIComponent(
         qs.stringify({
             ...getHashParams(),
-            ...payload
-        })
+            ...payload,
+        }),
     )
 }
 
@@ -26,10 +26,6 @@ export function getFavicon(url: string) {
 
 export function isNodeSelected(node: BookmarkTreeNode, selectedNodes: BookmarkTreeNode[]) {
     return selectedNodes.findIndex(_node => _node.id === node.id) >= 0
-}
-
-export function isNodeHovered(node: BookmarkTreeNode, hoverState: HoverState | null) {
-    return hoverState !== null && node.id === hoverState.node.id
 }
 
 export function isNodeBookmark(node: BookmarkTreeNode) {
@@ -55,7 +51,7 @@ export async function pasteNode(spec: PasteNodeSpec) {
             parentId: spec.dest.id,
             index: spec.destIndex ? spec.destIndex + 1 : undefined,
             title: spec.src.title,
-            url: spec.src.url
+            url: spec.src.url,
         })
         return
     }
@@ -65,7 +61,7 @@ export async function pasteNode(spec: PasteNodeSpec) {
             type: spec.src.type,
             parentId: spec.dest.id,
             index: spec.destIndex ? spec.destIndex + 1 : undefined,
-            title: spec.src.title
+            title: spec.src.title,
         })
 
         if (spec.src.children) {
@@ -74,7 +70,7 @@ export async function pasteNode(spec: PasteNodeSpec) {
                 await pasteNode({
                     src: child,
                     dest: newFolder,
-                    destIndex: i
+                    destIndex: i,
                 })
             }
         }
@@ -87,22 +83,20 @@ export interface PasteNodesSpec extends Omit<PasteNodeSpec, "src"> {
 
 export async function pasteNodes(spec: PasteNodesSpec) {
     const { src, dest, destIndex } = spec
-    InternalGlobals.isBatchingUpdate = true
+    BatchingUpdateManager.beginBatchingUpdate()
     for (let i = 0; i < src.length; i++) {
-        if (i === src.length - 1) InternalGlobals.isBatchingUpdate = false
         await pasteNode({
             src: src[i],
             dest,
-            destIndex: destIndex ? destIndex + i : undefined
+            destIndex: destIndex ? destIndex + i : undefined,
         })
     }
+    BatchingUpdateManager.endBatchingUpdate()
 }
 
 export async function removeNodes(nodes: BookmarkTreeNode[]) {
-    InternalGlobals.isBatchingUpdate = true
+    BatchingUpdateManager.beginBatchingUpdate()
     for (let i = 0; i < nodes.length; i++) {
-        if (i === nodes.length - 1) InternalGlobals.isBatchingUpdate = false
-
         const node = nodes[i]
         if (isNodeFolder(node)) {
             await browser.bookmarks.removeTree(node.id)
@@ -110,6 +104,7 @@ export async function removeNodes(nodes: BookmarkTreeNode[]) {
             await browser.bookmarks.remove(node.id)
         }
     }
+    BatchingUpdateManager.endBatchingUpdate()
 }
 
 /** get all child bookmarks under a folder */
@@ -140,17 +135,17 @@ export async function sortFolderByName(folder: BookmarkTreeNode) {
 
         const sorted = [...subFolders, ...bookmarks]
 
-        InternalGlobals.isBatchingUpdate = true
+        BatchingUpdateManager.beginBatchingUpdate()
         for (let i = 0; i < sorted.length; i++) {
             const node = sorted[i]
             if (node.index !== i) {
                 await browser.bookmarks.move(node.id, {
                     parentId: folder.id,
-                    index: i
+                    index: i,
                 })
             }
         }
-        InternalGlobals.isBatchingUpdate = false
+        BatchingUpdateManager.endBatchingUpdate()
     }
 }
 
@@ -165,16 +160,16 @@ export async function sortFolderByUrl(folder: BookmarkTreeNode) {
 
         const sorted = [...subFolders, ...bookmarks]
 
-        InternalGlobals.isBatchingUpdate = true
+        BatchingUpdateManager.beginBatchingUpdate()
         for (let i = 0; i < sorted.length; i++) {
             const node = sorted[i]
             if (node.index !== i) {
                 await browser.bookmarks.move(node.id, {
                     parentId: folder.id,
-                    index: i
+                    index: i,
                 })
             }
         }
-        InternalGlobals.isBatchingUpdate = false
+        BatchingUpdateManager.endBatchingUpdate()
     }
 }

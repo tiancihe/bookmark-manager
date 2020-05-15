@@ -11,23 +11,18 @@ export type BookmarkTreeNode = browser.bookmarks.BookmarkTreeNode
 
 export enum BookmarkNodeType {
     Bookmark = "bookmark",
-    Folder = "folder"
+    Folder = "folder",
 }
 
 export enum HoverArea {
     Top = "Top",
     Mid = "Mid",
-    Bottom = "Bottom"
-}
-
-export interface HoverState {
-    node: BookmarkTreeNode
-    area: HoverArea
+    Bottom = "Bottom",
 }
 
 export enum ModalType {
     BookmarkEdit = "BookmarkEdit",
-    BookmarkCreate = "BookmarkCreate"
+    BookmarkCreate = "BookmarkCreate",
 }
 
 export interface HashParams {

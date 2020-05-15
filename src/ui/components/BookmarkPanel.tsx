@@ -9,7 +9,7 @@ import { openBookmarkCreateModal } from "../store/modal"
 import { selectNodes, clearSelectedNodes, selectNode } from "../store/dnd"
 import { setCopiedNodes } from "../store/cnp"
 import { showSnackbar } from "../store/snackbar"
-import { isNodeHovered, pasteNodes, isNodeBookmark, isNodeFolder, setHashParam } from "../utils"
+import { pasteNodes, isNodeBookmark, isNodeFolder, setHashParam } from "../utils"
 import { openTab } from "../utils/bookmark"
 import { RootState, BookmarkNodeType } from "../types"
 import { __MAC__ } from "../consts"
@@ -23,7 +23,7 @@ const useStyle = makeStyles(theme => ({
         margin: "auto",
         marginTop: theme.spacing(2),
         marginBottom: theme.spacing(3),
-        padding: theme.spacing(1, 0)
+        padding: theme.spacing(1, 0),
     },
     emptySearchResults: {
         display: "flex",
@@ -34,8 +34,8 @@ const useStyle = makeStyles(theme => ({
         fontWeight: theme.typography.h6.fontWeight,
         color: "#6e6e6e",
         userSelect: "none",
-        cursor: "default"
-    }
+        cursor: "default",
+    },
 }))
 
 export default function BookmarkPanel({ className }: { className?: string }) {
@@ -43,14 +43,13 @@ export default function BookmarkPanel({ className }: { className?: string }) {
     const search = useSelector((state: RootState) => state.bookmark.search)
     const searchResult = useSelector((state: RootState) => state.bookmark.searchResult)
     const selectedNodes = useSelector((state: RootState) => state.dnd.selectedNodes)
-    const hoverState = useSelector((state: RootState) => state.dnd.hoverState)
     const copiedNodes = useSelector((state: RootState) => state.cnp.copied)
     const dispatch = useDispatch()
 
     const activeFolderChildren = useMemo(() => {
         return activeFolder !== null && Array.isArray(activeFolder.children) && activeFolder.children.length > 0
             ? activeFolder.children.filter(
-                  child => child.type === BookmarkNodeType.Bookmark || child.type === BookmarkNodeType.Folder
+                  child => child.type === BookmarkNodeType.Bookmark || child.type === BookmarkNodeType.Folder,
               )
             : null
     }, [activeFolder])
@@ -143,7 +142,7 @@ export default function BookmarkPanel({ className }: { className?: string }) {
                         pasteNodes({
                             src: copiedNodes,
                             dest: activeFolder,
-                            destIndex: target ? target.index! : undefined
+                            destIndex: target ? target.index! : undefined,
                         })
                     }
                 }
@@ -172,12 +171,7 @@ export default function BookmarkPanel({ className }: { className?: string }) {
                 searchResult.length ? (
                     <Paper className={classNames.paper} elevation={3}>
                         {searchResult.map(child => (
-                            <BookmarkTreeItem
-                                key={child.id}
-                                bookmarkNode={child}
-                                isHovered={isNodeHovered(child, hoverState)}
-                                hoverArea={hoverState ? hoverState.area : undefined}
-                            />
+                            <BookmarkTreeItem key={child.id} bookmarkNode={child} />
                         ))}
                     </Paper>
                 ) : (
@@ -186,12 +180,7 @@ export default function BookmarkPanel({ className }: { className?: string }) {
             ) : activeFolderChildren ? (
                 <Paper className={classNames.paper} elevation={3}>
                     {activeFolderChildren.map(child => (
-                        <BookmarkTreeItem
-                            key={child.id}
-                            bookmarkNode={child}
-                            isHovered={isNodeHovered(child, hoverState)}
-                            hoverArea={hoverState ? hoverState.area : undefined}
-                        />
+                        <BookmarkTreeItem key={child.id} bookmarkNode={child} />
                     ))}
                 </Paper>
             ) : null}

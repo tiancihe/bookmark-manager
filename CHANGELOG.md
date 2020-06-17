@@ -1,3 +1,7 @@
+## 0.8.1 (2020/6/17)
+
+- fixed a bug when pressing enter key to confirm editing bookmark or folder opens the bookmark or folder
+
 ## 0.8.0 (2020/5/15)
 
 - major refactoring, great performance improvement, say goodbye to jaggy drag and drop

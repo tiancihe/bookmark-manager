@@ -8,7 +8,7 @@ import {
     CardContent,
     TextField,
     CardActions,
-    Button
+    Button,
 } from "@material-ui/core"
 
 import { BookmarkTreeNode } from "../../types"
@@ -18,19 +18,19 @@ const useStyle = makeStyles({
     modal: {
         display: "flex",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
     },
     content: {
-        minWidth: "500px"
+        minWidth: "500px",
     },
     actions: {
-        justifyContent: "flex-end"
-    }
+        justifyContent: "flex-end",
+    },
 })
 
 export default function BookmarkEditModal({
     bookmarkNode,
-    onClose
+    onClose,
 }: {
     bookmarkNode: BookmarkTreeNode
     onClose: () => void
@@ -42,7 +42,7 @@ export default function BookmarkEditModal({
 
     const handleSubmit = async () => {
         const payload: Partial<Pick<BookmarkTreeNode, "title" | "url">> = {
-            title
+            title,
         }
 
         if (isBookmark) {
@@ -60,20 +60,13 @@ export default function BookmarkEditModal({
     const classNames = useStyle()
 
     return (
-        <Modal
-            className={classNames.modal}
-            open
-            onClose={onClose}
-            BackdropComponent={Backdrop}
-        >
+        <Modal className={classNames.modal} open onClose={onClose} BackdropComponent={Backdrop}>
             <Card
                 className={classNames.content}
                 onClick={e => e.stopPropagation()}
                 onDoubleClick={e => e.stopPropagation()}
             >
-                <CardHeader
-                    title={isBookmark ? "Edit Bookmark" : "Rename Folder"}
-                />
+                <CardHeader title={isBookmark ? "Edit Bookmark" : "Rename Folder"} />
                 <CardContent>
                     <TextField
                         fullWidth
@@ -83,6 +76,7 @@ export default function BookmarkEditModal({
                         onChange={e => setTitle(e.target.value)}
                         onKeyDown={e => {
                             if (e.key === "Enter") {
+                                e.stopPropagation()
                                 handleSubmit()
                             }
                         }}
@@ -95,6 +89,7 @@ export default function BookmarkEditModal({
                             onChange={e => setUrl(e.target.value)}
                             onKeyDown={e => {
                                 if (e.key === "Enter") {
+                                    e.stopPropagation()
                                     handleSubmit()
                                 }
                             }}
@@ -105,11 +100,7 @@ export default function BookmarkEditModal({
                     <Button variant="outlined" onClick={onClose}>
                         Cancel
                     </Button>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleSubmit}
-                    >
+                    <Button variant="contained" color="primary" onClick={handleSubmit}>
                         Save
                     </Button>
                 </CardActions>

@@ -9,7 +9,7 @@ import { openBookmarkCreateModal } from "../store/modal"
 import { selectNodes, clearSelectedNodes, selectNode } from "../store/dnd"
 import { setCopiedNodes } from "../store/cnp"
 import { showSnackbar } from "../store/snackbar"
-import { pasteNodes, isNodeBookmark, isNodeFolder, setHashParam } from "../utils"
+import { pasteNodes, isNodeBookmark, isNodeFolder, setHashParam, removeNodes } from "../utils"
 import { openTab } from "../utils/bookmark"
 import { RootState, BookmarkNodeType } from "../types"
 import { __MAC__ } from "../consts"
@@ -155,6 +155,20 @@ export default function BookmarkPanel({ className }: { className?: string }) {
             window.removeEventListener("keydown", pasteListener)
         }
     }, [selectedNodes, copiedNodes])
+
+    // capture delete key to delete selected nodes
+    useEffect(() => {
+        const deleteListener = async (e: KeyboardEvent) => {
+            if (
+                e.target === document.body &&
+                ((__MAC__ && e.key === "Backspace" && e.metaKey) || (!__MAC__ && e.key === "Delete"))
+            ) {
+                removeNodes(selectedNodes)
+            }
+        }
+        window.addEventListener("keydown", deleteListener)
+        return () => window.removeEventListener("keydown", deleteListener)
+    }, [selectedNodes])
 
     const { contextMenuProps, closeContextMenu, handleContextMenuEvent } = useContextMenu()
 

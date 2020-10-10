@@ -6,6 +6,7 @@ import { FolderTwoTone } from "@material-ui/icons"
 import { useDrag, useDrop } from "react-dnd"
 
 import useContextMenu from "../hooks/useContextMenu"
+import useSettings from "../hooks/useSettings"
 import { selectNodes, selectNode } from "../store/dnd"
 import { getFavicon, isNodeSelected, setHashParam, isNodeFolder, isNodeBookmark } from "../utils"
 import { moveNodesAboveTarget, moveNodesUnderParent, moveNodesBelowTarget } from "../utils/bookmark"
@@ -117,6 +118,8 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
 
     const { contextMenuProps, handleContextMenuEvent, closeContextMenu } = useContextMenu()
 
+    const { settings } = useSettings()
+
     const classNames = useBookmarkListItemStyle()
 
     return (
@@ -219,12 +222,12 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
             >
                 <div className={classNames.icon}>
                     {isFolder && <FolderTwoTone />}
-                    {isBookmark && <img src={getFavicon(bookmarkNode.url || "")} />}
+                    {!settings?.disableFavicon && isBookmark && <img src={getFavicon(bookmarkNode.url || "")} />}
                 </div>
                 <div className={classNames.title} title={bookmarkNode.title}>
                     {bookmarkNode.title}
                 </div>
-                {isSelected && (
+                {(settings?.alwaysShowURL || isSelected) && (
                     <div className={classNames.url} title={bookmarkNode.url}>
                         {bookmarkNode.url}
                     </div>

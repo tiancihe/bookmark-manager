@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Bookmark Manager",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "icons": {
     "48": "icon-48x48.png",
     "96": "icon-96x96.png"
@@ -20,5 +20,5 @@
   "background": {
     "scripts": ["scripts/background.js"]
   },
-  "permissions": ["bookmarks", "tabs"]
+  "permissions": ["bookmarks", "tabs", "storage"]
 }

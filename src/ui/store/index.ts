@@ -6,7 +6,6 @@ import { dnd } from "./dnd"
 import { cnp } from "./cnp"
 import { modal } from "./modal"
 import { snackbar } from "./snackbar"
-import { setting } from "./setting"
 
 export const reducer = combineReducers({
     bookmark,
@@ -14,14 +13,13 @@ export const reducer = combineReducers({
     cnp,
     modal,
     snackbar,
-    setting
 })
 
 const middleware = [thunk]
 
 const store = configureStore({
     reducer,
-    middleware
+    middleware,
 })
 
 if (__DEV__) {

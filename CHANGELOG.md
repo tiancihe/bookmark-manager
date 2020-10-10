@@ -1,3 +1,10 @@
+## 0.9.0 (2020/10/10)
+
+- persist user settings
+- added setting to disable favicon (favicon service might not be accessible in some regions)
+- added setting to always show bookmark url
+- added delete shortcut (command + backspace on mac, delete on windows or linux) to quickly delete bookmarks and folders
+
 ## 0.8.1 (2020/6/17)
 
 - fixed a bug when pressing enter key to confirm editing bookmark or folder opens the bookmark or folder

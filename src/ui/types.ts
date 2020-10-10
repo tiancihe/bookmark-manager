@@ -29,3 +29,9 @@ export interface HashParams {
     search?: string
     folder?: string
 }
+
+export type Settings = {
+    darkMode: boolean
+    disableFavicon: boolean
+    alwaysShowURL: boolean
+}

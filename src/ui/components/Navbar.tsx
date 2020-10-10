@@ -1,12 +1,22 @@
 import React, { useState, useEffect, useRef, createRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { AppBar, Toolbar, Typography, InputBase, IconButton, Menu, MenuItem } from "@material-ui/core"
+import {
+    AppBar,
+    Toolbar,
+    Typography,
+    InputBase,
+    IconButton,
+    Menu,
+    MenuItem,
+    Divider,
+    FormControlLabel,
+    Switch,
+} from "@material-ui/core"
 import { makeStyles, fade } from "@material-ui/core/styles"
 import { Search, Clear, Brightness4, Brightness5, MoreVert } from "@material-ui/icons"
 
-import { loadBookmarkTree } from "../store/bookmark"
+import useSettings from "../hooks/useSettings"
 import { selectNode } from "../store/dnd"
-import { toggleDarkMode } from "../store/setting"
 import { setHashParam, sortFolderByName, sortFolderByUrl } from "../utils"
 import { RootState } from "../types"
 import { __MAC__ } from "../consts"
@@ -65,7 +75,6 @@ export default function Navbar() {
     const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
     const search = useSelector((state: RootState) => state.bookmark.search)
     const searchResult = useSelector((state: RootState) => state.bookmark.searchResult)
-    const darkMode = useSelector((state: RootState) => state.setting.darkMode)
     const dispatch = useDispatch()
 
     const [input, setInput] = useState(search)
@@ -144,6 +153,8 @@ export default function Navbar() {
         }
     }, [inputRef.current, isInputFocused, searchResult])
 
+    const { settings, setSettings } = useSettings()
+
     const [actionMenuAndhor, setActionMenuAnchor] = useState<null | HTMLElement>(null)
     const closeActionMenu = () => setActionMenuAnchor(null)
 
@@ -209,10 +220,10 @@ export default function Navbar() {
                         color="inherit"
                         onClick={e => {
                             e.stopPropagation()
-                            dispatch(toggleDarkMode())
+                            setSettings({ ...settings!, darkMode: !settings?.darkMode })
                         }}
                     >
-                        {darkMode ? <Brightness5 /> : <Brightness4 />}
+                        {settings?.darkMode ? <Brightness5 /> : <Brightness4 />}
                     </IconButton>
                     <IconButton color="inherit" onClick={e => setActionMenuAnchor(e.currentTarget)}>
                         <MoreVert />
@@ -240,6 +251,31 @@ export default function Navbar() {
                         }}
                     >
                         Sort by URL
+                    </MenuItem>
+                    <Divider />
+                    <MenuItem>
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    color="primary"
+                                    checked={settings?.disableFavicon}
+                                    onChange={(_, checked) => setSettings({ ...settings!, disableFavicon: checked })}
+                                />
+                            }
+                            label="Disable favicon"
+                        />
+                    </MenuItem>
+                    <MenuItem>
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    color="primary"
+                                    checked={settings?.alwaysShowURL}
+                                    onChange={(_, checked) => setSettings({ ...settings!, alwaysShowURL: checked })}
+                                />
+                            }
+                            label="Always show URL"
+                        />
                     </MenuItem>
                 </Menu>
             </Toolbar>

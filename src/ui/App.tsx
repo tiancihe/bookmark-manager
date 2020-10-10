@@ -1,16 +1,16 @@
 import React, { useEffect, useMemo } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { CssBaseline, makeStyles, createMuiTheme, useMediaQuery, MuiThemeProvider, Snackbar } from "@material-ui/core"
+import { CssBaseline, makeStyles, createMuiTheme, MuiThemeProvider, Snackbar } from "@material-ui/core"
 import { DndProvider } from "react-dnd"
 import HTML5Backend from "react-dnd-html5-backend"
 
 import { loadBookmarkTree, syncBookmarkStateFromHashParams } from "./store/bookmark"
 import { resetDndState } from "./store/dnd"
 import { closeModal } from "./store/modal"
-import { toggleDarkMode } from "./store/setting"
 import { RootState, ModalType } from "./types"
 import { __MAC__, BatchingUpdateListener, BatchingUpdateManager } from "./consts"
 
+import useSettings from "./hooks/useSettings"
 import Navbar from "./components/Navbar"
 import FolderPanel from "./components/FolderPanel"
 import BookmarkPanel from "./components/BookmarkPanel"
@@ -108,24 +108,22 @@ export default function App() {
     const bookmarkNode = useSelector((state: RootState) => state.modal.bookmarkNode)
     const createType = useSelector((state: RootState) => state.modal.createType)
 
-    const darkMode = useSelector((state: RootState) => state.setting.darkMode)
-    const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)")
-    useEffect(() => {
-        if (darkMode !== prefersDarkMode) {
-            dispatch(toggleDarkMode())
-        }
-    }, [prefersDarkMode])
+    const { loadingSettings, settings } = useSettings()
+
     const theme = useMemo(() => {
         return createMuiTheme({
             palette: {
-                type: darkMode ? "dark" : "light",
+                type: settings?.darkMode ? "dark" : "light",
                 primary: {
                     main: "#3367d6",
                 },
             },
         })
-    }, [darkMode])
+    }, [settings])
+
     const classNames = useAppStyle()
+
+    if (loadingSettings) return null
 
     return (
         <MuiThemeProvider theme={theme}>

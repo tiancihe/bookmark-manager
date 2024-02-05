@@ -1,7 +1,7 @@
 import { PropsWithChildren, useState, useEffect, useMemo, useRef, createRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { Menu, Typography } from "@mui/material"
-import { Theme, useTheme, alpha, styled } from "@mui/material/styles"
+import { Box, Menu, Typography } from "@mui/material"
+import { useTheme, alpha } from "@mui/material/styles"
 import { ArrowRight, ArrowDropDown, FolderTwoTone, FolderOpenTwoTone } from "@mui/icons-material"
 import { useDrop, useDrag } from "react-dnd"
 
@@ -16,37 +16,6 @@ import { DNDTypes } from "../consts"
 
 import FolderTreeItemContextMenuContent from "./FolderTreeItemContextMenuContent"
 import HoverStateManager from "../hover-state-manager"
-
-const PREFIX = "FolderTreeItem"
-
-const classes = {
-    container: `${PREFIX}-container`,
-    icon: `${PREFIX}-icon`,
-    text: `${PREFIX}-text`,
-}
-
-const Root = styled("div")(({ theme, level, isActive }: { theme: Theme; level: number; isActive: boolean }) => ({
-    [`& .${classes.container}`]: {
-        display: "flex",
-        alignItems: "center",
-        height: "40px",
-        marginLeft: `${level * 24}px`,
-        cursor: "pointer",
-    },
-
-    [`& .${classes.icon}`]: {
-        flexShrink: `0`,
-        display: "flex",
-        alignItems: "center",
-        width: "24px",
-        height: "40px",
-    },
-
-    [`& .${classes.text}`]: {
-        paddingLeft: "8px",
-        color: isActive ? theme.palette.primary.main : theme.palette.text.primary,
-    },
-}))
 
 export default function FolderTreeItem({
     level,
@@ -64,7 +33,7 @@ export default function FolderTreeItem({
     const search = useSelector((state: RootState) => state.bookmark.search)
     // if search state is true, all folder items should stay inactive
     // user should be able to click any folder to active it and clear search state in the mean time
-    const isActive = !search && activeFolder !== null && activeFolder.id === bookmarkNode.id
+    const isActive = !search && activeFolder?.id === bookmarkNode.id
 
     const selectedNodes = useSelector((state: RootState) => state.dnd.selectedNodes)
     const isSelected = isNodeSelected(bookmarkNode, selectedNodes)
@@ -141,12 +110,16 @@ export default function FolderTreeItem({
     const { contextMenuProps, handleContextMenuEvent, closeContextMenu } = useContextMenu()
 
     return (
-        <Root theme={theme} level={level} isActive={isActive}>
-            <div
+        <>
+            <Box
                 ref={nodeRef.current}
-                className={classes.container}
-                style={{
+                sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    height: theme.spacing(5),
+                    marginLeft: theme.spacing(3 * level),
                     backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.25) : undefined,
+                    cursor: "pointer",
                 }}
                 onClick={e => {
                     e.stopPropagation()
@@ -170,7 +143,15 @@ export default function FolderTreeItem({
                     handleContextMenuEvent(e)
                 }}
             >
-                <div className={classes.icon}>
+                <Box
+                    sx={{
+                        flexShrink: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        width: theme.spacing(3),
+                        height: theme.spacing(5),
+                    }}
+                >
                     {hasSubfolders &&
                         (open ? (
                             <ArrowDropDown
@@ -187,16 +168,33 @@ export default function FolderTreeItem({
                                 }}
                             />
                         ))}
-                </div>
-                <div className={classes.icon}>{open ? <FolderOpenTwoTone /> : <FolderTwoTone />}</div>
-                <Typography className={classes.text} noWrap title={bookmarkNode.title}>
+                </Box>
+                <Box
+                    sx={{
+                        flexShrink: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        width: theme.spacing(3),
+                        height: theme.spacing(5),
+                    }}
+                >
+                    {open ? <FolderOpenTwoTone /> : <FolderTwoTone />}
+                </Box>
+                <Typography
+                    sx={{
+                        paddingLeft: theme.spacing(1),
+                        color: isActive ? theme.palette.primary.main : theme.palette.text.primary,
+                    }}
+                    noWrap
+                    title={bookmarkNode.title}
+                >
                     {bookmarkNode.title}
                 </Typography>
-            </div>
+            </Box>
             <Menu {...contextMenuProps}>
                 <FolderTreeItemContextMenuContent bookmarkNode={bookmarkNode} onClose={closeContextMenu} />
             </Menu>
             {open && children}
-        </Root>
+        </>
     )
 }

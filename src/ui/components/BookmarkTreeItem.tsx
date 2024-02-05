@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, createRef, Fragment } from "react"
+import { useEffect, useRef, createRef, Fragment } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { Menu } from "@material-ui/core"
-import { makeStyles, useTheme, alpha } from "@material-ui/core/styles"
-import { FolderTwoTone } from "@material-ui/icons"
+import { Menu, alpha } from "@mui/material"
+import { makeStyles, useTheme } from "@mui/styles"
+import { FolderTwoTone } from "@mui/icons-material"
 import { useDrag, useDrop } from "react-dnd"
 
 import useContextMenu from "../hooks/useContextMenu"
@@ -134,20 +134,6 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
                 style={{
                     backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.25) : undefined,
                 }}
-                // style={{
-                //     borderTop:
-                //         isHovered && hoverArea === HoverArea.Top
-                //             ? `1px solid ${theme.palette.primary.main}`
-                //             : undefined,
-                //     borderBottom:
-                //         isHovered && hoverArea === HoverArea.Bottom
-                //             ? `1px solid ${theme.palette.primary.main}`
-                //             : undefined,
-                //     backgroundColor:
-                //         isSelected || (isHovered && hoverArea === HoverArea.Mid)
-                //             ? fade(theme.palette.primary.main, 0.25)
-                //             : undefined
-                // }}
                 onClick={e => {
                     e.stopPropagation()
 
@@ -236,7 +222,7 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
                         {bookmarkNode.url}
                     </div>
                 )}
-                <BookmarkActionMenu className={classNames.actions} bookmarkNode={bookmarkNode} />
+                <BookmarkActionMenu className={classNames.actions} />
             </div>
             <Menu
                 {...(contextMenuProps || {})}

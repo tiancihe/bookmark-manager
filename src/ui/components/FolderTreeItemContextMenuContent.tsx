@@ -1,6 +1,6 @@
-import React from "react"
+import { Fragment } from "react"
 import { useDispatch } from "react-redux"
-import { MenuItem, Divider } from "@material-ui/core"
+import { MenuItem, Divider } from "@mui/material"
 import copyToClipboard from "copy-to-clipboard"
 
 import { openBookmarkEditModal } from "../store/modal"
@@ -11,7 +11,7 @@ import { setHashParam } from "../utils"
 
 export default function FolderTreeItemContextMenuContent({
     bookmarkNode,
-    onClose
+    onClose,
 }: {
     bookmarkNode: BookmarkTreeNode
     onClose: () => void
@@ -21,7 +21,7 @@ export default function FolderTreeItemContextMenuContent({
     const childBookmarks = bookmarkNode.children?.filter(item => item.type === BookmarkNodeType.Bookmark) ?? []
 
     return (
-        <React.Fragment>
+        <Fragment>
             <MenuItem
                 onClick={() => {
                     dispatch(openBookmarkEditModal(bookmarkNode))
@@ -59,7 +59,7 @@ export default function FolderTreeItemContextMenuContent({
                 onClick={() => {
                     childBookmarks.forEach(bookmark => {
                         browser.tabs.create({
-                            url: bookmark.url
+                            url: bookmark.url,
                         })
                     })
                     onClose()
@@ -73,13 +73,13 @@ export default function FolderTreeItemContextMenuContent({
             <MenuItem
                 onClick={() => {
                     browser.windows.create({
-                        url: childBookmarks.map(bookmark => bookmark.url!)
+                        url: childBookmarks.map(bookmark => bookmark.url!),
                     })
                     onClose()
                 }}
             >
                 Open all in new window
             </MenuItem>
-        </React.Fragment>
+        </Fragment>
     )
 }

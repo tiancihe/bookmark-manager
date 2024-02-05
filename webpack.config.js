@@ -27,6 +27,7 @@ const commonConfig = {
         rules: [
             {
                 test: /\.(j|t)sx?$/,
+                exclude: /node_modules/,
                 use: [
                     {
                         loader: "babel-loader",

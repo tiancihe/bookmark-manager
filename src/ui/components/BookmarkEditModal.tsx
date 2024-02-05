@@ -1,15 +1,6 @@
-import React from "react"
-import {
-    makeStyles,
-    Modal,
-    Backdrop,
-    Card,
-    CardHeader,
-    CardContent,
-    TextField,
-    CardActions,
-    Button,
-} from "@material-ui/core"
+import { useState } from "react"
+import { Modal, Backdrop, Card, CardHeader, CardContent, TextField, CardActions, Button } from "@mui/material"
+import { makeStyles } from "@mui/styles"
 
 import { BookmarkTreeNode } from "../../types"
 import { BookmarkNodeType } from "../types"
@@ -35,8 +26,8 @@ export default function BookmarkEditModal({
     bookmarkNode: BookmarkTreeNode
     onClose: () => void
 }) {
-    const [title, setTitle] = React.useState(bookmarkNode.title)
-    const [url, setUrl] = React.useState(bookmarkNode.url)
+    const [title, setTitle] = useState(bookmarkNode.title)
+    const [url, setUrl] = useState(bookmarkNode.url)
 
     const isBookmark = bookmarkNode.type === BookmarkNodeType.Bookmark
 

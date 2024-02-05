@@ -1,8 +1,8 @@
-import React, { PropsWithChildren, Fragment, useState, useEffect, useMemo, useRef, createRef } from "react"
+import { PropsWithChildren, Fragment, useState, useEffect, useMemo, useRef, createRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { Menu } from "@material-ui/core"
-import { makeStyles, Theme, useTheme, fade } from "@material-ui/core/styles"
-import { ArrowRight, ArrowDropDown, FolderTwoTone, FolderOpenTwoTone } from "@material-ui/icons"
+import { Menu, Theme, alpha } from "@mui/material"
+import { makeStyles, useTheme } from "@mui/styles"
+import { ArrowRight, ArrowDropDown, FolderTwoTone, FolderOpenTwoTone } from "@mui/icons-material"
 import { useDrop, useDrag } from "react-dnd"
 
 import useContextMenu from "../hooks/useContextMenu"
@@ -140,7 +140,7 @@ export default function FolderTreeItem({
                 ref={nodeRef.current}
                 className={classNames.container}
                 style={{
-                    backgroundColor: isSelected ? fade(theme.palette.primary.main, 0.25) : undefined,
+                    backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.25) : undefined,
                 }}
                 onClick={e => {
                     e.stopPropagation()

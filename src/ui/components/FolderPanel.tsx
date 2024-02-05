@@ -1,4 +1,4 @@
-import React, { Fragment } from "react"
+import { Fragment, useMemo } from "react"
 import { useSelector } from "react-redux"
 
 import { BookmarkTreeNode } from "../../types"
@@ -12,7 +12,7 @@ export default function FolderPanel({ className }: { className?: string }) {
     const bookmarkMap = useSelector((state: RootState) => state.bookmark.bookmarkMap)
     const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
 
-    const defaultOpenFolders = React.useMemo(() => {
+    const defaultOpenFolders = useMemo(() => {
         const defaultOpenFolders = {} as Record<string, boolean>
         let current = activeFolder
         const markParent = (child: BookmarkTreeNode) => {
@@ -29,7 +29,7 @@ export default function FolderPanel({ className }: { className?: string }) {
         return defaultOpenFolders
     }, [bookmarkMap, activeFolder])
 
-    const folderTree = React.useMemo(() => {
+    const folderTree = useMemo(() => {
         if (!bookmarkTree) return null
 
         const render = (bookmarkNode: BookmarkTreeNode, level: number) => {

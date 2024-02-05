@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { Paper, Menu, MenuItem } from "@material-ui/core"
-import { makeStyles } from "@material-ui/core/styles"
+import { Paper, Menu, MenuItem } from "@mui/material"
+import { makeStyles } from "@mui/styles"
 import copyToClipboard from "copy-to-clipboard"
 
 import useContextMenu from "../hooks/useContextMenu"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, createRef } from "react"
+import { useState, useEffect, useRef, createRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import {
     AppBar,
@@ -11,9 +11,10 @@ import {
     Divider,
     FormControlLabel,
     Switch,
-} from "@material-ui/core"
-import { makeStyles, alpha } from "@material-ui/core/styles"
-import { Search, Clear, Brightness4, Brightness5, MoreVert } from "@material-ui/icons"
+    alpha,
+} from "@mui/material"
+import { makeStyles } from "@mui/styles"
+import { Search, Clear, Brightness4, Brightness5, MoreVert } from "@mui/icons-material"
 
 import useSettings from "../hooks/useSettings"
 import { selectNode } from "../store/dnd"

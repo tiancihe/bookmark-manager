@@ -1,6 +1,6 @@
-import React, { useMemo } from "react"
+import { Fragment, useMemo } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { MenuItem, Divider } from "@material-ui/core"
+import { MenuItem, Divider } from "@mui/material"
 import copyToClipboard from "copy-to-clipboard"
 
 import { clearSelectedNodes } from "../store/dnd"
@@ -32,7 +32,7 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
     }, [selectedNodes])
 
     return (
-        <React.Fragment>
+        <Fragment>
             {selectedNodes.length === 1 && (
                 <MenuItem
                     onClick={e => {
@@ -89,7 +89,7 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                         pasteNodes({
                             src: copiedNodes,
                             dest: activeFolder,
-                            destIndex: target ? target.index! : undefined
+                            destIndex: target ? target.index! : undefined,
                         })
                     }
                 }}
@@ -107,7 +107,7 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                             url: node.url,
                             // should open in background by default
                             // this is the default behaviour in chrome's bookmark manager
-                            active: false
+                            active: false,
                         })
                     })
                 }}
@@ -118,7 +118,7 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-between",
-                            width: "100%"
+                            width: "100%",
                         }}
                     >
                         <span>Open all bookmarks</span>
@@ -133,12 +133,12 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                     e.stopPropagation()
                     onCloseMenu()
                     browser.windows.create({
-                        url: selectedBookmarks.map(bookmark => bookmark.url!)
+                        url: selectedBookmarks.map(bookmark => bookmark.url!),
                     })
                 }}
             >
                 {selectedNodes.length > 1 ? "Open all in new window" : "Open in new window"}
             </MenuItem>
-        </React.Fragment>
+        </Fragment>
     )
 }

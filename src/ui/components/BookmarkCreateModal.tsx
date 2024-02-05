@@ -1,17 +1,7 @@
-import React from "react"
+import { useState } from "react"
 import { useSelector } from "react-redux"
-import {
-    makeStyles,
-    Modal,
-    Backdrop,
-    Card,
-    CardHeader,
-    CardContent,
-    CardActions,
-    Button,
-    TextField,
-    Snackbar
-} from "@material-ui/core"
+import { Modal, Backdrop, Card, CardHeader, CardContent, CardActions, Button, TextField, Snackbar } from "@mui/material"
+import { makeStyles } from "@mui/styles"
 
 import { RootState, BookmarkNodeType } from "../types"
 
@@ -21,37 +11,30 @@ const useCreateBookmarkModalStyle = makeStyles({
     modal: {
         display: "flex",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
     },
     content: {
-        minWidth: "500px"
+        minWidth: "500px",
     },
     actions: {
-        justifyContent: "flex-end"
-    }
+        justifyContent: "flex-end",
+    },
 })
 
 export default function CreateBookmarkModal({
     createType,
-    onClose
+    onClose,
 }: {
     createType: BookmarkNodeType
     onClose: () => void
 }) {
-    const activeFolder = useSelector(
-        (state: RootState) => state.bookmark.activeFolder
-    )
+    const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
 
-    const [title, setTitle] = React.useState("")
-    const [url, setUrl] = React.useState("")
+    const [title, setTitle] = useState("")
+    const [url, setUrl] = useState("")
     // only validates url, title can be empty
-    const [urlValidationError, setUrlValidationError] = React.useState<
-        string | null
-    >(null)
-    const [
-        showNoActiveFolderError,
-        setShowNoActiveFolderError
-    ] = React.useState(false)
+    const [urlValidationError, setUrlValidationError] = useState<string | null>(null)
+    const [showNoActiveFolderError, setShowNoActiveFolderError] = useState(false)
 
     const classNames = useCreateBookmarkModalStyle()
 
@@ -66,7 +49,7 @@ export default function CreateBookmarkModal({
                 parentId: activeFolder.id,
                 title,
                 url,
-                type: createType
+                type: createType,
             }
 
             if (createType === BookmarkNodeType.Folder) {
@@ -82,12 +65,7 @@ export default function CreateBookmarkModal({
     }
 
     return (
-        <Modal
-            className={classNames.modal}
-            open
-            onClose={onClose}
-            BackdropComponent={Backdrop}
-        >
+        <Modal className={classNames.modal} open onClose={onClose} BackdropComponent={Backdrop}>
             <Card
                 className={classNames.content}
                 onClick={e => e.stopPropagation()}
@@ -123,25 +101,17 @@ export default function CreateBookmarkModal({
                     )}
                 </CardContent>
                 <CardActions className={classNames.actions}>
-                    <Button
-                        variant="outlined"
-                        color="primary"
-                        onClick={onClose}
-                    >
+                    <Button variant="outlined" color="primary" onClick={onClose}>
                         Cancel
                     </Button>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleSubmit}
-                    >
+                    <Button variant="contained" color="primary" onClick={handleSubmit}>
                         Save
                     </Button>
                 </CardActions>
                 <Snackbar
                     anchorOrigin={{
                         vertical: "bottom",
-                        horizontal: "left"
+                        horizontal: "left",
                     }}
                     open={showNoActiveFolderError}
                     autoHideDuration={1500}

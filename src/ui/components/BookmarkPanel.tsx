@@ -48,9 +48,7 @@ export default function BookmarkPanel({ className }: { className?: string }) {
 
     const activeFolderChildren = useMemo(() => {
         return activeFolder !== null && Array.isArray(activeFolder.children) && activeFolder.children.length > 0
-            ? activeFolder.children.filter(
-                  child => child.type === BookmarkNodeType.Bookmark || child.type === BookmarkNodeType.Folder,
-              )
+            ? activeFolder.children
             : null
     }, [activeFolder])
 

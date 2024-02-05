@@ -1,4 +1,4 @@
-import React from "react"
+import React, { Fragment } from "react"
 import { useSelector } from "react-redux"
 
 import { BookmarkTreeNode } from "../../types"
@@ -8,15 +8,9 @@ import { isNodeFolder } from "../utils"
 import FolderTreeItem from "./FolderTreeItem"
 
 export default function FolderPanel({ className }: { className?: string }) {
-    const bookmarkTree = useSelector(
-        (state: RootState) => state.bookmark.bookmarkTree
-    )
-    const bookmarkMap = useSelector(
-        (state: RootState) => state.bookmark.bookmarkMap
-    )
-    const activeFolder = useSelector(
-        (state: RootState) => state.bookmark.activeFolder
-    )
+    const bookmarkTree = useSelector((state: RootState) => state.bookmark.bookmarkTree)
+    const bookmarkMap = useSelector((state: RootState) => state.bookmark.bookmarkMap)
+    const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
 
     const defaultOpenFolders = React.useMemo(() => {
         const defaultOpenFolders = {} as Record<string, boolean>
@@ -38,42 +32,24 @@ export default function FolderPanel({ className }: { className?: string }) {
     const folderTree = React.useMemo(() => {
         if (!bookmarkTree) return null
 
-        let renderResult = null as React.ReactElement | null
+        const render = (bookmarkNode: BookmarkTreeNode, level: number) => {
+            const children = bookmarkNode.children?.filter(isNodeFolder)?.map(child => render(child, level + 1)) || null
 
-        const renderFolder = (
-            bookmarkNode: BookmarkTreeNode,
-            parent: React.ReactElement | null,
-            level: number
-        ) => {
-            const elm = (
+            return bookmarkNode.title ? (
                 <FolderTreeItem
+                    key={bookmarkNode.id}
                     bookmarkNode={bookmarkNode}
                     level={level}
                     defaultOpen={defaultOpenFolders[bookmarkNode.id]}
-                />
+                >
+                    {children}
+                </FolderTreeItem>
+            ) : (
+                <Fragment>{children}</Fragment>
             )
-
-            if (bookmarkNode.children) {
-                bookmarkNode.children
-                    .filter(isNodeFolder)
-                    .forEach(child => renderFolder(child, elm, level + 1))
-            }
-
-            if (parent) {
-                if (parent.props.children) {
-                    parent.props.children.push(elm)
-                } else {
-                    parent.props.children = [elm]
-                }
-            } else {
-                renderResult = (
-                    <React.Fragment>{elm.props.children}</React.Fragment>
-                )
-            }
         }
-        renderFolder(bookmarkTree, renderResult, -1)
 
-        return renderResult
+        return render(bookmarkTree, -1)
     }, [bookmarkTree, defaultOpenFolders])
 
     return <div className={className}>{folderTree}</div>

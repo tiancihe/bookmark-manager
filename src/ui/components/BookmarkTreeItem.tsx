@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, createRef, Fragment } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Menu } from "@material-ui/core"
-import { makeStyles, useTheme, fade } from "@material-ui/core/styles"
+import { makeStyles, useTheme, alpha } from "@material-ui/core/styles"
 import { FolderTwoTone } from "@material-ui/icons"
 import { useDrag, useDrop } from "react-dnd"
 
@@ -30,8 +30,12 @@ const useBookmarkListItemStyle = makeStyles(theme => ({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        width: theme.spacing(3),
-        height: theme.spacing(3),
+        width: theme.spacing(2),
+        height: theme.spacing(2),
+        "& img": {
+            maxWidth: "100%",
+            maxHeight: "100%",
+        },
     },
     title: {
         flex: 2,
@@ -46,7 +50,7 @@ const useBookmarkListItemStyle = makeStyles(theme => ({
         overflow: "hidden",
         whiteSpace: "nowrap",
         textOverflow: "ellipsis",
-        color: fade(theme.palette.text.primary, 0.55),
+        color: alpha(theme.palette.text.primary, 0.55),
     },
     actions: {
         justifySelf: "flex-end",
@@ -128,7 +132,7 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
                 ref={nodeRef.current}
                 className={classNames.container}
                 style={{
-                    backgroundColor: isSelected ? fade(theme.palette.primary.main, 0.25) : undefined,
+                    backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.25) : undefined,
                 }}
                 // style={{
                 //     borderTop:
@@ -235,7 +239,7 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
                 <BookmarkActionMenu className={classNames.actions} bookmarkNode={bookmarkNode} />
             </div>
             <Menu
-                {...contextMenuProps}
+                {...(contextMenuProps || {})}
                 onDoubleClick={e => {
                     e.stopPropagation()
                 }}

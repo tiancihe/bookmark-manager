@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { CssBaseline, makeStyles, createMuiTheme, MuiThemeProvider, Snackbar } from "@material-ui/core"
+import { CssBaseline, makeStyles, MuiThemeProvider, Snackbar, createTheme } from "@material-ui/core"
 import { DndProvider } from "react-dnd"
 import HTML5Backend from "react-dnd-html5-backend"
 
@@ -111,7 +111,7 @@ export default function App() {
     const { loadingSettings, settings } = useSettings()
 
     const theme = useMemo(() => {
-        return createMuiTheme({
+        return createTheme({
             palette: {
                 type: settings?.darkMode ? "dark" : "light",
                 primary: {

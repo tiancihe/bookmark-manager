@@ -3,7 +3,7 @@ export const DNDTypes = {
     FolderItem: "FolderItem",
 }
 
-export const __MAC__ = /mac/i.test(navigator.platform)
+export const __MAC__ = /mac/i.test(navigator.userAgent)
 
 export type BatchingUpdateListener = (isBatchingUpdate: boolean) => void
 

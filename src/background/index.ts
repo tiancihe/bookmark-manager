@@ -1,5 +1,7 @@
+import "../compat"
+
 const openUI = async () => {
-    const url = browser.extension.getURL(__DEV__ ? "ui-dev.html" : "ui.html")
+    const url = browser.runtime.getURL("ui.html")
     const tabs = (await browser.tabs.query({}))
         .map(tab => {
             tab.url = tab.url!.split("#")[0]
@@ -17,4 +19,4 @@ if (__DEV__) {
     openUI()
 }
 
-browser.browserAction.onClicked.addListener(openUI)
+browser.action.onClicked.addListener(openUI)

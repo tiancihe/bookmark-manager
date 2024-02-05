@@ -3,8 +3,10 @@ node_modules
 package-lock.json
 yarn.lock
 
+dll
 package/scripts
 package/.web-extension-id
+chrome/scripts
 
 web-ext-artifacts
 

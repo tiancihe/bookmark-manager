@@ -4,6 +4,7 @@
   "version": "0.9.0",
   "icons": {
     "16": "icon-16x16.png",
+    "32": "icon-32x32.png",
     "48": "icon-48x48.png",
     "96": "icon-96x96.png",
     "128": "icon-128x128.png"
@@ -14,13 +15,13 @@
   "commands": {
     "_execute_action": {
       "suggested_key": {
-        "default": "Ctrl+Alt+B",
-        "mac": "MacCtrl+Command+B"
+        "default": "Alt+Shift+B",
+        "mac": "Command+Ctrl+B"
       }
     }
   },
   "background": {
-    "scripts": ["scripts/background.js"]
+    "service_worker": "scripts/background.js"
   },
-  "permissions": ["bookmarks", "tabs", "storage"]
+  "permissions": ["bookmarks", "tabs", "storage", "favicon"]
 }

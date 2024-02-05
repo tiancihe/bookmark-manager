@@ -1,25 +1,33 @@
 import { useState } from "react"
+import { styled } from "@mui/material/styles"
 import { useSelector } from "react-redux"
 import { Modal, Backdrop, Card, CardHeader, CardContent, CardActions, Button, TextField, Snackbar } from "@mui/material"
-import { makeStyles } from "@mui/styles"
 
 import { RootState, BookmarkNodeType } from "../types"
 
-type CreateDetails = browser.bookmarks.CreateDetails
+const PREFIX = "BookmarkCreateModal"
 
-const useCreateBookmarkModalStyle = makeStyles({
-    modal: {
+const classes = {
+    modal: `${PREFIX}-modal`,
+    content: `${PREFIX}-content`,
+    actions: `${PREFIX}-actions`,
+}
+
+const StyledModal = styled(Modal)({
+    [`& .${classes.modal}`]: {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
     },
-    content: {
+    [`& .${classes.content}`]: {
         minWidth: "500px",
     },
-    actions: {
+    [`& .${classes.actions}`]: {
         justifyContent: "flex-end",
     },
 })
+
+type CreateDetails = browser.bookmarks.CreateDetails
 
 export default function CreateBookmarkModal({
     createType,
@@ -35,8 +43,6 @@ export default function CreateBookmarkModal({
     // only validates url, title can be empty
     const [urlValidationError, setUrlValidationError] = useState<string | null>(null)
     const [showNoActiveFolderError, setShowNoActiveFolderError] = useState(false)
-
-    const classNames = useCreateBookmarkModalStyle()
 
     const handleSubmit = async () => {
         if (activeFolder !== null) {
@@ -65,9 +71,9 @@ export default function CreateBookmarkModal({
     }
 
     return (
-        <Modal className={classNames.modal} open onClose={onClose} BackdropComponent={Backdrop}>
+        <StyledModal className={classes.modal} open onClose={onClose} slots={{ backdrop: Backdrop }}>
             <Card
-                className={classNames.content}
+                className={classes.content}
                 onClick={e => e.stopPropagation()}
                 onDoubleClick={e => e.stopPropagation()}
             >
@@ -100,7 +106,7 @@ export default function CreateBookmarkModal({
                         />
                     )}
                 </CardContent>
-                <CardActions className={classNames.actions}>
+                <CardActions className={classes.actions}>
                     <Button variant="outlined" color="primary" onClick={onClose}>
                         Cancel
                     </Button>
@@ -119,6 +125,6 @@ export default function CreateBookmarkModal({
                     message="Select a folder on the left panel first"
                 />
             </Card>
-        </Modal>
+        </StyledModal>
     )
 }

@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react"
+import { styled } from "@mui/material/styles"
 import { useSelector, useDispatch } from "react-redux"
 import { Paper, Menu, MenuItem } from "@mui/material"
-import { makeStyles } from "@mui/styles"
 import copyToClipboard from "copy-to-clipboard"
 
 import useContextMenu from "../hooks/useContextMenu"
@@ -16,8 +16,15 @@ import { __MAC__ } from "../consts"
 
 import BookmarkTreeItem from "./BookmarkTreeItem"
 
-const useStyle = makeStyles(theme => ({
-    paper: {
+const PREFIX = "BookmarkPanel"
+
+const classes = {
+    paper: `${PREFIX}-paper`,
+    emptySearchResults: `${PREFIX}-emptySearchResults`,
+}
+
+const Root = styled("div")(({ theme }) => ({
+    [`& .${classes.paper}`]: {
         width: "100%",
         maxWidth: "960px",
         margin: "auto",
@@ -25,7 +32,8 @@ const useStyle = makeStyles(theme => ({
         marginBottom: theme.spacing(3),
         padding: theme.spacing(1, 0),
     },
-    emptySearchResults: {
+
+    [`& .${classes.emptySearchResults}`]: {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -170,10 +178,8 @@ export default function BookmarkPanel({ className }: { className?: string }) {
 
     const { contextMenuProps, closeContextMenu, handleContextMenuEvent } = useContextMenu()
 
-    const classNames = useStyle()
-
     return (
-        <div
+        <Root
             className={className}
             onContextMenu={e => {
                 handleContextMenuEvent(e)
@@ -181,16 +187,16 @@ export default function BookmarkPanel({ className }: { className?: string }) {
         >
             {search ? (
                 searchResult.length ? (
-                    <Paper className={classNames.paper} elevation={3}>
+                    <Paper className={classes.paper} elevation={3}>
                         {searchResult.map(child => (
                             <BookmarkTreeItem key={child.id} bookmarkNode={child} />
                         ))}
                     </Paper>
                 ) : (
-                    <div className={classNames.emptySearchResults}>No search results found</div>
+                    <div className={classes.emptySearchResults}>No search results found</div>
                 )
             ) : activeFolderChildren ? (
-                <Paper className={classNames.paper} elevation={3}>
+                <Paper className={classes.paper} elevation={3}>
                     {activeFolderChildren.map(child => (
                         <BookmarkTreeItem key={child.id} bookmarkNode={child} />
                     ))}
@@ -214,6 +220,6 @@ export default function BookmarkPanel({ className }: { className?: string }) {
                     Add new folder
                 </MenuItem>
             </Menu>
-        </div>
+        </Root>
     )
 }

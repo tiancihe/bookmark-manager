@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, createRef } from "react"
+import { styled } from "@mui/material/styles"
 import { useSelector, useDispatch } from "react-redux"
 import {
     AppBar,
@@ -13,7 +14,6 @@ import {
     Switch,
 } from "@mui/material"
 import { alpha } from "@mui/material/styles"
-import { makeStyles } from "@mui/styles"
 import { Search, Clear, Brightness4, Brightness5, MoreVert } from "@mui/icons-material"
 
 import useSettings from "../hooks/useSettings"
@@ -22,19 +22,35 @@ import { setHashParam, sortFolderByName, sortFolderByUrl } from "../utils"
 import { RootState } from "../types"
 import { __MAC__ } from "../consts"
 
-const useNavbarStyle = makeStyles(theme => ({
-    appBar: {
-        backgroundColor: theme.palette.type === "dark" ? theme.palette.background.default : undefined,
+const PREFIX = "Navbar"
+
+const classes = {
+    appBar: `${PREFIX}-appBar`,
+    toolbar: `${PREFIX}-toolbar`,
+    title: `${PREFIX}-title`,
+    searchContainer: `${PREFIX}-searchContainer`,
+    searchIconContainer: `${PREFIX}-searchIconContainer`,
+    clearIconContainer: `${PREFIX}-clearIconContainer`,
+    inputRoot: `${PREFIX}-inputRoot`,
+    inputInput: `${PREFIX}-inputInput`,
+}
+
+const StyledAppBar = styled(AppBar)(({ theme }) => ({
+    [`& .${classes.appBar}`]: {
+        backgroundColor: theme.palette.mode === "dark" ? theme.palette.background.default : undefined,
     },
-    toolbar: {
+
+    [`& .${classes.toolbar}`]: {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
     },
-    title: {
+
+    [`& .${classes.title}`]: {
         cursor: "pointer",
     },
-    searchContainer: {
+
+    [`& .${classes.searchContainer}`]: {
         flex: 1,
         display: "flex",
         alignItems: "center",
@@ -45,25 +61,29 @@ const useNavbarStyle = makeStyles(theme => ({
             backgroundColor: alpha(theme.palette.common.white, 0.25),
         },
     },
-    searchIconContainer: {
+
+    [`& .${classes.searchIconContainer}`]: {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         width: theme.spacing(5),
         cursor: "pointer",
     },
-    clearIconContainer: {
+
+    [`& .${classes.clearIconContainer}`]: {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         width: theme.spacing(5),
         cursor: "pointer",
     },
-    inputRoot: {
+
+    [`& .${classes.inputRoot}`]: {
         flex: 1,
         color: "inherit",
     },
-    inputInput: {
+
+    [`& .${classes.inputInput}`]: {
         padding: theme.spacing(1),
         width: "100%",
         [theme.breakpoints.up("md")]: {
@@ -159,13 +179,11 @@ export default function Navbar() {
     const [actionMenuAndhor, setActionMenuAnchor] = useState<null | HTMLElement>(null)
     const closeActionMenu = () => setActionMenuAnchor(null)
 
-    const classNames = useNavbarStyle()
-
     return (
-        <AppBar className={classNames.appBar} position="static">
-            <Toolbar className={classNames.toolbar}>
+        <StyledAppBar className={classes.appBar} position="static">
+            <Toolbar className={classes.toolbar}>
                 <Typography
-                    className={classNames.title}
+                    className={classes.title}
                     onClick={e => {
                         e.stopPropagation()
                         setHashParam({ search: undefined, folder: undefined })
@@ -173,8 +191,8 @@ export default function Navbar() {
                 >
                     Bookmarks
                 </Typography>
-                <div className={classNames.searchContainer}>
-                    <div className={classNames.searchIconContainer}>
+                <div className={classes.searchContainer}>
+                    <div className={classes.searchIconContainer}>
                         <Search
                             onClick={e => {
                                 e.stopPropagation()
@@ -186,8 +204,8 @@ export default function Navbar() {
                         autoFocus
                         placeholder="Search here"
                         classes={{
-                            root: classNames.inputRoot,
-                            input: classNames.inputInput,
+                            root: classes.inputRoot,
+                            input: classes.inputInput,
                         }}
                         inputRef={inputRef.current}
                         value={input}
@@ -206,7 +224,7 @@ export default function Navbar() {
                         }}
                     />
                     {search ? (
-                        <div className={classNames.clearIconContainer}>
+                        <div className={classes.clearIconContainer}>
                             <Clear
                                 onClick={e => {
                                     e.stopPropagation()
@@ -280,6 +298,6 @@ export default function Navbar() {
                     </MenuItem>
                 </Menu>
             </Toolbar>
-        </AppBar>
+        </StyledAppBar>
     )
 }

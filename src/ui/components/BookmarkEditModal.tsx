@@ -1,20 +1,28 @@
 import { useState } from "react"
+import { styled } from "@mui/material/styles"
 import { Modal, Backdrop, Card, CardHeader, CardContent, TextField, CardActions, Button } from "@mui/material"
-import { makeStyles } from "@mui/styles"
 
 import { BookmarkTreeNode } from "../../types"
 import { BookmarkNodeType } from "../types"
 
-const useStyle = makeStyles({
-    modal: {
+const PREFIX = "BookmarkEditModal"
+
+const classes = {
+    modal: `${PREFIX}-modal`,
+    content: `${PREFIX}-content`,
+    actions: `${PREFIX}-actions`,
+}
+
+const StyledModal = styled(Modal)({
+    [`& .${classes.modal}`]: {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
     },
-    content: {
+    [`& .${classes.content}`]: {
         minWidth: "500px",
     },
-    actions: {
+    [`& .${classes.actions}`]: {
         justifyContent: "flex-end",
     },
 })
@@ -48,12 +56,10 @@ export default function BookmarkEditModal({
         }
     }
 
-    const classNames = useStyle()
-
     return (
-        <Modal className={classNames.modal} open onClose={onClose} BackdropComponent={Backdrop}>
+        <StyledModal className={classes.modal} open onClose={onClose} BackdropComponent={Backdrop}>
             <Card
-                className={classNames.content}
+                className={classes.content}
                 onClick={e => e.stopPropagation()}
                 onDoubleClick={e => e.stopPropagation()}
             >
@@ -87,7 +93,7 @@ export default function BookmarkEditModal({
                         />
                     )}
                 </CardContent>
-                <CardActions className={classNames.actions}>
+                <CardActions className={classes.actions}>
                     <Button variant="outlined" onClick={onClose}>
                         Cancel
                     </Button>
@@ -96,6 +102,6 @@ export default function BookmarkEditModal({
                     </Button>
                 </CardActions>
             </Card>
-        </Modal>
+        </StyledModal>
     )
 }

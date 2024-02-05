@@ -1,8 +1,7 @@
-import { PropsWithChildren, Fragment, useState, useEffect, useMemo, useRef, createRef } from "react"
+import { PropsWithChildren, useState, useEffect, useMemo, useRef, createRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { Menu } from "@mui/material"
-import { Theme, alpha } from "@mui/material/styles"
-import { makeStyles, useTheme } from "@mui/styles"
+import { Menu, Typography } from "@mui/material"
+import { Theme, useTheme, alpha, styled } from "@mui/material/styles"
 import { ArrowRight, ArrowDropDown, FolderTwoTone, FolderOpenTwoTone } from "@mui/icons-material"
 import { useDrop, useDrag } from "react-dnd"
 
@@ -18,23 +17,34 @@ import { DNDTypes } from "../consts"
 import FolderTreeItemContextMenuContent from "./FolderTreeItemContextMenuContent"
 import HoverStateManager from "../hover-state-manager"
 
-const useFolderTreeItemStyle = makeStyles<Theme, { level: number; active: boolean }>(theme => ({
-    container: {
+const PREFIX = "FolderTreeItem"
+
+const classes = {
+    container: `${PREFIX}-container`,
+    icon: `${PREFIX}-icon`,
+    text: `${PREFIX}-text`,
+}
+
+const Root = styled("div")(({ theme, level, isActive }: { theme: Theme; level: number; isActive: boolean }) => ({
+    [`& .${classes.container}`]: {
         display: "flex",
         alignItems: "center",
         height: "40px",
-        marginLeft: props => props.level * 24,
+        marginLeft: `${level * 24}px`,
         cursor: "pointer",
     },
-    icon: {
+
+    [`& .${classes.icon}`]: {
+        flexShrink: `0`,
         display: "flex",
         alignItems: "center",
         width: "24px",
         height: "40px",
     },
-    text: {
+
+    [`& .${classes.text}`]: {
         paddingLeft: "8px",
-        color: props => (props.active ? theme.palette.primary.main : theme.palette.text.primary),
+        color: isActive ? theme.palette.primary.main : theme.palette.text.primary,
     },
 }))
 
@@ -128,18 +138,13 @@ export default function FolderTreeItem({
 
     drag(drop(nodeRef.current))
 
-    const classNames = useFolderTreeItemStyle({
-        level,
-        active: isActive,
-    })
-
     const { contextMenuProps, handleContextMenuEvent, closeContextMenu } = useContextMenu()
 
     return (
-        <Fragment>
+        <Root theme={theme} level={level} isActive={isActive}>
             <div
                 ref={nodeRef.current}
-                className={classNames.container}
+                className={classes.container}
                 style={{
                     backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.25) : undefined,
                 }}
@@ -165,7 +170,7 @@ export default function FolderTreeItem({
                     handleContextMenuEvent(e)
                 }}
             >
-                <div className={classNames.icon}>
+                <div className={classes.icon}>
                     {hasSubfolders &&
                         (open ? (
                             <ArrowDropDown
@@ -183,13 +188,15 @@ export default function FolderTreeItem({
                             />
                         ))}
                 </div>
-                <div className={classNames.icon}>{open ? <FolderOpenTwoTone /> : <FolderTwoTone />}</div>
-                <div className={classNames.text}>{bookmarkNode.title}</div>
+                <div className={classes.icon}>{open ? <FolderOpenTwoTone /> : <FolderTwoTone />}</div>
+                <Typography className={classes.text} noWrap title={bookmarkNode.title}>
+                    {bookmarkNode.title}
+                </Typography>
             </div>
             <Menu {...contextMenuProps}>
                 <FolderTreeItemContextMenuContent bookmarkNode={bookmarkNode} onClose={closeContextMenu} />
             </Menu>
             {open && children}
-        </Fragment>
+        </Root>
     )
 }

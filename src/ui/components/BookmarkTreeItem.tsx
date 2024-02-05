@@ -1,8 +1,7 @@
-import { useEffect, useRef, createRef, Fragment } from "react"
+import { useEffect, useRef, createRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Menu } from "@mui/material"
-import { alpha } from "@mui/material/styles"
-import { makeStyles, useTheme } from "@mui/styles"
+import { useTheme, alpha, styled } from "@mui/material/styles"
 import { FolderTwoTone } from "@mui/icons-material"
 import { useDrag, useDrop } from "react-dnd"
 
@@ -20,14 +19,25 @@ import BookmarkActionMenu from "./BookmarkActionMenu"
 import BookmarkActionMenuContent from "./BookmarkActionMenuContent"
 import HoverStateManager from "../hover-state-manager"
 
-const useBookmarkListItemStyle = makeStyles(theme => ({
-    container: {
+const PREFIX = "BookmarkTreeItem"
+
+const classes = {
+    container: `${PREFIX}-container`,
+    icon: `${PREFIX}-icon`,
+    title: `${PREFIX}-title`,
+    url: `${PREFIX}-url`,
+    actions: `${PREFIX}-actions`,
+}
+
+const Root = styled("div")(({ theme }) => ({
+    [`& .${classes.container}`]: {
         display: "flex",
         alignItems: "center",
         paddingLeft: theme.spacing(3),
         userSelect: "none",
     },
-    icon: {
+
+    [`& .${classes.icon}`]: {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -38,14 +48,16 @@ const useBookmarkListItemStyle = makeStyles(theme => ({
             maxHeight: "100%",
         },
     },
-    title: {
+
+    [`& .${classes.title}`]: {
         flex: 2,
         margin: theme.spacing(0, 2),
         overflow: "hidden",
         whiteSpace: "nowrap",
         textOverflow: "ellipsis",
     },
-    url: {
+
+    [`& .${classes.url}`]: {
         flex: 1,
         margin: theme.spacing(0, 2),
         overflow: "hidden",
@@ -53,7 +65,8 @@ const useBookmarkListItemStyle = makeStyles(theme => ({
         textOverflow: "ellipsis",
         color: alpha(theme.palette.text.primary, 0.55),
     },
-    actions: {
+
+    [`& .${classes.actions}`]: {
         justifySelf: "flex-end",
     },
 }))
@@ -125,13 +138,11 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
 
     const { settings } = useSettings()
 
-    const classNames = useBookmarkListItemStyle()
-
     return (
-        <Fragment>
+        <Root>
             <div
                 ref={nodeRef.current}
-                className={classNames.container}
+                className={classes.container}
                 style={{
                     backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.25) : undefined,
                 }}
@@ -211,19 +222,19 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
                     handleContextMenuEvent(e)
                 }}
             >
-                <div className={classNames.icon}>
+                <div className={classes.icon}>
                     {isFolder && <FolderTwoTone />}
                     {!settings?.disableFavicon && isBookmark && <img src={getFavicon(bookmarkNode.url || "")} />}
                 </div>
-                <div className={classNames.title} title={bookmarkNode.title}>
+                <div className={classes.title} title={bookmarkNode.title}>
                     {bookmarkNode.title}
                 </div>
                 {(settings?.alwaysShowURL || isSelected) && (
-                    <div className={classNames.url} title={bookmarkNode.url}>
+                    <div className={classes.url} title={bookmarkNode.url}>
                         {bookmarkNode.url}
                     </div>
                 )}
-                <BookmarkActionMenu className={classNames.actions} />
+                <BookmarkActionMenu className={classes.actions} />
             </div>
             <Menu
                 {...(contextMenuProps || {})}
@@ -237,6 +248,6 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
             >
                 <BookmarkActionMenuContent onCloseMenu={closeContextMenu} />
             </Menu>
-        </Fragment>
+        </Root>
     )
 }

@@ -11,9 +11,6 @@ export default function ThemeWrapper() {
         return createTheme({
             palette: {
                 mode: settings?.darkMode ? "dark" : "light",
-                primary: {
-                    main: "#3367d6",
-                },
             },
         })
     }, [settings])

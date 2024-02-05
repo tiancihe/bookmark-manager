@@ -1,4 +1,4 @@
-import { Theme, alpha } from "@mui/material"
+import { Theme, alpha } from "@mui/material/styles"
 
 import { HoverArea, BookmarkTreeNode } from "./types"
 

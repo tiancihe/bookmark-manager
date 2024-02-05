@@ -11,8 +11,8 @@ import {
     Divider,
     FormControlLabel,
     Switch,
-    alpha,
 } from "@mui/material"
+import { alpha } from "@mui/material/styles"
 import { makeStyles } from "@mui/styles"
 import { Search, Clear, Brightness4, Brightness5, MoreVert } from "@mui/icons-material"
 

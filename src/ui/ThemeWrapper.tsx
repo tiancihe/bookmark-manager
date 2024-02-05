@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { ThemeProvider, createTheme } from "@mui/material"
+import { ThemeProvider, createTheme } from "@mui/material/styles"
 
 import App from "./App"
 import useSettings from "./hooks/useSettings"

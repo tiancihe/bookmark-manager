@@ -1,6 +1,7 @@
 import { PropsWithChildren, Fragment, useState, useEffect, useMemo, useRef, createRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { Menu, Theme, alpha } from "@mui/material"
+import { Menu } from "@mui/material"
+import { Theme, alpha } from "@mui/material/styles"
 import { makeStyles, useTheme } from "@mui/styles"
 import { ArrowRight, ArrowDropDown, FolderTwoTone, FolderOpenTwoTone } from "@mui/icons-material"
 import { useDrop, useDrag } from "react-dnd"

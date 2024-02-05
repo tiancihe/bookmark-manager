@@ -5,6 +5,8 @@ export const DNDTypes = {
 
 export const __MAC__ = /mac/i.test(navigator.userAgent)
 
+export const __FOLDER_PANEL_ID__ = "__FOLDER_PANEL__"
+
 export type BatchingUpdateListener = (isBatchingUpdate: boolean) => void
 
 function createBatchingUpdateManager() {
@@ -31,12 +33,19 @@ function createBatchingUpdateManager() {
         listeners.forEach(l => l(false))
     }
 
+    const batchUpdate = async (update: () => Promise<void>) => {
+        beginBatchingUpdate()
+        await update()
+        endBatchingUpdate()
+    }
+
     return {
         state,
         subscribe,
         unsubscribe,
         beginBatchingUpdate,
         endBatchingUpdate,
+        batchUpdate,
     }
 }
 

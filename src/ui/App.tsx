@@ -1,7 +1,6 @@
 import { useEffect } from "react"
-import { styled } from "@mui/material/styles"
 import { useSelector, useDispatch } from "react-redux"
-import { CssBaseline, Snackbar } from "@mui/material"
+import { CssBaseline, Snackbar, Stack } from "@mui/material"
 import { DndProvider } from "react-dnd"
 import HTML5Backend from "react-dnd-html5-backend"
 
@@ -16,44 +15,7 @@ import FolderPanel from "./components/FolderPanel"
 import BookmarkPanel from "./components/BookmarkPanel"
 import BookmarkEditModal from "./components/BookmarkEditModal"
 import BookmarkCreateModal from "./components/BookmarkCreateModal"
-
-const PREFIX = "App"
-
-const classes = {
-    container: `${PREFIX}-container`,
-    mainContent: `${PREFIX}-mainContent`,
-    folderPanel: `${PREFIX}-folderPanel`,
-    displayPanel: `${PREFIX}-displayPanel`,
-}
-
-const Root = styled("div")(({ theme }) => ({
-    [`& .${classes.container}`]: {
-        display: "flex",
-        flexDirection: "column",
-        width: "100vw",
-        height: "100vh",
-    },
-
-    [`& .${classes.mainContent}`]: {
-        flex: 1,
-        display: "flex",
-        overflow: "hidden",
-    },
-
-    [`& .${classes.folderPanel}`]: {
-        width: "256px",
-        height: "100%",
-        padding: theme.spacing(1, 0.5, 0, 2),
-        overflow: "auto",
-    },
-
-    [`& .${classes.displayPanel}`]: {
-        flex: 1,
-        height: "100%",
-        padding: theme.spacing(0, 4, 0, 2),
-        overflow: "auto",
-    },
-}))
+import Splitter from "./components/Splitter"
 
 export default function App() {
     const bookmarkTree = useSelector((state: RootState) => state.bookmark.bookmarkTree)
@@ -121,17 +83,18 @@ export default function App() {
     const createType = useSelector((state: RootState) => state.modal.createType)
 
     return (
-        <Root>
-            <div className={classes.container}>
-                <CssBaseline />
+        <>
+            <CssBaseline />
+            <Stack width="100vw" height="100vh">
                 <Navbar />
                 <DndProvider backend={HTML5Backend}>
-                    <div className={classes.mainContent}>
-                        <FolderPanel className={classes.folderPanel} />
-                        <BookmarkPanel className={classes.displayPanel} />
-                    </div>
+                    <Stack direction="row" flexGrow={1} overflow="hidden">
+                        <FolderPanel />
+                        <Splitter />
+                        <BookmarkPanel />
+                    </Stack>
                 </DndProvider>
-            </div>
+            </Stack>
             {modalType === ModalType.BookmarkEdit && (
                 <BookmarkEditModal bookmarkNode={bookmarkNode!} onClose={() => dispatch(closeModal())} />
             )}
@@ -146,6 +109,6 @@ export default function App() {
                 open={snackbarState.visible}
                 message={snackbarState.message}
             />
-        </Root>
+        </>
     )
 }

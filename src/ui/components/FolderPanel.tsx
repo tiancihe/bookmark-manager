@@ -1,13 +1,17 @@
 import { Fragment, useMemo } from "react"
 import { useSelector } from "react-redux"
+import { Box } from "@mui/material"
 
 import { BookmarkTreeNode } from "../../types"
 import { RootState } from "../types"
 import { isNodeFolder } from "../utils"
 
 import FolderTreeItem from "./FolderTreeItem"
+import useSettings from "../hooks/useSettings"
+import { __FOLDER_PANEL_ID__ } from "../consts"
 
-export default function FolderPanel({ className }: { className?: string }) {
+export default function FolderPanel() {
+    const { settings } = useSettings()
     const bookmarkTree = useSelector((state: RootState) => state.bookmark.bookmarkTree)
     const bookmarkMap = useSelector((state: RootState) => state.bookmark.bookmarkMap)
     const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
@@ -52,5 +56,17 @@ export default function FolderPanel({ className }: { className?: string }) {
         return render(bookmarkTree, -1)
     }, [bookmarkTree, defaultOpenFolders])
 
-    return <div className={className}>{folderTree}</div>
+    return (
+        <Box
+            id={__FOLDER_PANEL_ID__}
+            sx={{
+                width: settings?.splitterPosition || 256,
+                height: "100%",
+                padding: theme => theme.spacing(1),
+                overflow: "auto",
+            }}
+        >
+            {folderTree}
+        </Box>
+    )
 }

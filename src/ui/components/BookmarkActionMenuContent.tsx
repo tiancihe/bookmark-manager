@@ -1,6 +1,6 @@
 import { Fragment, useMemo } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { MenuItem, Divider } from "@mui/material"
+import { MenuItem, Divider, Typography } from "@mui/material"
 import copyToClipboard from "copy-to-clipboard"
 
 import { clearSelectedNodes } from "../store/dnd"
@@ -113,17 +113,7 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                 }}
             >
                 {selectedBookmarks.length > 1 ? (
-                    <div
-                        style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            width: "100%",
-                        }}
-                    >
-                        <span>Open all bookmarks</span>
-                        <span>{selectedBookmarks.length}</span>
-                    </div>
+                    <Typography>Open all ({selectedBookmarks.length}) bookmarks</Typography>
                 ) : (
                     "Open in new tab"
                 )}
@@ -137,7 +127,23 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                     })
                 }}
             >
-                {selectedNodes.length > 1 ? "Open all in new window" : "Open in new window"}
+                {selectedNodes.length > 1
+                    ? `Open all (${selectedBookmarks.length}) in new window`
+                    : "Open in new window"}
+            </MenuItem>
+            <MenuItem
+                onClick={e => {
+                    e.stopPropagation()
+                    onCloseMenu()
+                    browser.windows.create({
+                        url: selectedBookmarks.map(bookmark => bookmark.url!),
+                        incognito: true,
+                    })
+                }}
+            >
+                {selectedNodes.length > 1
+                    ? `Open all (${selectedBookmarks.length}) in incognito window`
+                    : "Open in incognito window"}
             </MenuItem>
         </Fragment>
     )

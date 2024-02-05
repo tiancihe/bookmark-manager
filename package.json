@@ -16,6 +16,7 @@
     "@fontsource/roboto": "^5.0.8",
     "@mui/icons-material": "^5.15.7",
     "@mui/material": "^5.15.7",
+    "@mui/x-tree-view": "^6.17.0",
     "@reduxjs/toolkit": "^1.2.3",
     "copy-to-clipboard": "^3.2.1",
     "lodash": "^4.17.15",

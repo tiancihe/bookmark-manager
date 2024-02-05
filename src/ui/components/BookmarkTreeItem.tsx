@@ -1,4 +1,4 @@
-import { useEffect, useRef, createRef } from "react"
+import { useRef, createRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Box, Menu, Typography } from "@mui/material"
 import { useTheme, alpha, styled } from "@mui/material/styles"
@@ -83,7 +83,7 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
     const isBookmark = isNodeBookmark(bookmarkNode)
     const isSelected = isNodeSelected(bookmarkNode, selectedNodes)
 
-    const nodeRef = useRef(createRef<HTMLDivElement>())
+    const nodeRef = useRef<HTMLElement | null>(null)
     const [, drag] = useDrag({
         item: {
             type: DNDTypes.BookmarkItem,
@@ -97,7 +97,7 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
     const [, drop] = useDrop({
         accept: DNDTypes.BookmarkItem,
         hover: (item, monitor) => {
-            const node = nodeRef.current.current
+            const node = nodeRef.current
             if (node) {
                 HoverStateManager.subscribe({ bookmarkNode, isSelected, node, theme })
                 handleHoverAndDrop({
@@ -110,7 +110,7 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
             }
         },
         drop: (item, monitor) => {
-            const node = nodeRef.current.current
+            const node = nodeRef.current
             if (node && !isSelected) {
                 handleHoverAndDrop({
                     node,
@@ -125,15 +125,6 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
     })
     drag(drop(nodeRef.current))
 
-    useEffect(() => {
-        if (isSelected) {
-            nodeRef.current.current?.scrollIntoView({
-                block: "center",
-                behavior: "smooth",
-            })
-        }
-    }, [isSelected, nodeRef.current])
-
     const { contextMenuProps, handleContextMenuEvent, closeContextMenu } = useContextMenu()
 
     const { settings } = useSettings()
@@ -141,11 +132,12 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
     return (
         <>
             <Box
-                ref={nodeRef.current}
+                ref={nodeRef}
                 sx={{
                     display: "flex",
                     alignItems: "center",
                     paddingLeft: theme.spacing(3),
+                    paddingRight: theme.spacing(1),
                     backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.25) : undefined,
                     userSelect: "none",
                 }}
@@ -238,32 +230,37 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
                         },
                     }}
                 >
-                    {isFolder && <FolderOutlined />}
+                    {isFolder && <FolderOutlined fontSize="small" />}
                     {!settings?.disableFavicon && isBookmark && <img src={getFavicon(bookmarkNode.url || "")} />}
                 </Box>
-                <Typography
-                    sx={{
-                        flex: 2,
-                        margin: theme.spacing(0, 2),
-                    }}
-                    noWrap
-                    title={bookmarkNode.title}
-                >
-                    {bookmarkNode.title}
-                </Typography>
-                {(settings?.alwaysShowURL || isSelected) && (
+                <Box sx={{ flex: 1, display: "flex", alignItems: "center", overflow: "hidden" }}>
                     <Typography
                         sx={{
-                            flex: 1,
-                            margin: theme.spacing(0, 2),
-                            color: alpha(theme.palette.text.primary, 0.55),
+                            flex: settings?.alwaysShowURL || isSelected ? "0 auto" : 1,
+                            marginLeft: theme.spacing(2),
                         }}
+                        variant="body2"
                         noWrap
-                        title={bookmarkNode.url}
+                        title={bookmarkNode.title}
                     >
-                        {bookmarkNode.url}
+                        {bookmarkNode.title}
                     </Typography>
-                )}
+                    {(settings?.alwaysShowURL || isSelected) && (
+                        <Typography
+                            sx={{
+                                flex: 1,
+                                minWidth: 100,
+                                margin: theme.spacing(0, 2),
+                                color: alpha(theme.palette.text.primary, 0.55),
+                            }}
+                            variant="body2"
+                            noWrap
+                            title={bookmarkNode.url}
+                        >
+                            {bookmarkNode.url}
+                        </Typography>
+                    )}
+                </Box>
                 <BookmarkActionMenu />
             </Box>
             <Menu

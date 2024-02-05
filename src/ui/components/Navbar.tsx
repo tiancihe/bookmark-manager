@@ -176,7 +176,7 @@ export default function Navbar() {
 
     const { settings, setSettings } = useSettings()
 
-    const [actionMenuAndhor, setActionMenuAnchor] = useState<null | HTMLElement>(null)
+    const [actionMenuAnchor, setActionMenuAnchor] = useState<null | HTMLElement>(null)
     const closeActionMenu = () => setActionMenuAnchor(null)
 
     return (
@@ -248,7 +248,7 @@ export default function Navbar() {
                         <MoreVert />
                     </IconButton>
                 </div>
-                <Menu open={!!actionMenuAndhor} anchorEl={actionMenuAndhor} onClose={closeActionMenu}>
+                <Menu open={!!actionMenuAnchor} anchorEl={actionMenuAnchor} onClose={closeActionMenu}>
                     <MenuItem
                         onClick={e => {
                             e.stopPropagation()

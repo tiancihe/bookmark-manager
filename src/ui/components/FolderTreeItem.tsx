@@ -53,7 +53,7 @@ export default function FolderTreeItem({
         [bookmarkNode],
     )
 
-    const nodeRef = useRef(createRef<HTMLDivElement>())
+    const nodeRef = useRef<HTMLElement | null>(null)
     const [_, drag] = useDrag({
         item: {
             type: DNDTypes.FolderItem,
@@ -65,7 +65,7 @@ export default function FolderTreeItem({
     const [, drop] = useDrop({
         accept: [DNDTypes.BookmarkItem, DNDTypes.FolderItem],
         hover: (item, monitor) => {
-            const node = nodeRef.current.current
+            const node = nodeRef.current
             if (node) {
                 HoverStateManager.subscribe({
                     bookmarkNode,
@@ -83,7 +83,7 @@ export default function FolderTreeItem({
             }
         },
         drop: (item, monitor) => {
-            const node = nodeRef.current.current
+            const node = nodeRef.current
             if (node) {
                 handleHoverAndDrop({
                     node,
@@ -112,14 +112,22 @@ export default function FolderTreeItem({
     return (
         <>
             <Box
-                ref={nodeRef.current}
+                ref={nodeRef}
                 sx={{
                     display: "flex",
                     alignItems: "center",
                     height: theme.spacing(5),
-                    marginLeft: theme.spacing(3 * level),
-                    backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.25) : undefined,
+                    paddingLeft: theme.spacing(3 * level),
+                    borderRadius: theme.spacing(0, 3, 3, 0),
+                    backgroundColor: isActive
+                        ? alpha(theme.palette.primary.main, 0.1)
+                        : isSelected
+                          ? alpha(theme.palette.primary.main, 0.25)
+                          : undefined,
                     cursor: "pointer",
+                    "&:hover": {
+                        backgroundColor: isActive ? undefined : theme.palette.action.hover,
+                    },
                 }}
                 onClick={e => {
                     e.stopPropagation()
@@ -180,9 +188,10 @@ export default function FolderTreeItem({
                         color: isActive ? theme.palette.primary.main : theme.palette.text.primary,
                     }}
                 >
-                    {open ? <FolderOpenOutlined /> : <FolderOutlined />}
+                    {open ? <FolderOpenOutlined fontSize="small" /> : <FolderOutlined fontSize="small" />}
                 </Box>
                 <Typography
+                    variant="body2"
                     sx={{
                         paddingLeft: theme.spacing(1),
                         color: isActive ? theme.palette.primary.main : theme.palette.text.primary,

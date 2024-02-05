@@ -5,7 +5,7 @@ import { HoverArea, BookmarkTreeNode } from "./types"
 interface HoverStateManagerState {
     bookmarkNode: BookmarkTreeNode
     isSelected: boolean
-    node: HTMLDivElement
+    node: HTMLElement
     theme: Theme
     hoverArea?: HoverArea
 }

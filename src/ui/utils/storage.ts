@@ -6,6 +6,7 @@ export const DEFAULT_SETTINGS: Settings = {
     darkMode: false,
     disableFavicon: false,
     alwaysShowURL: false,
+    splitterPosition: 256,
 }
 
 type SettingsListener = (settings: Settings) => void

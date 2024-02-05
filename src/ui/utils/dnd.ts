@@ -1,7 +1,7 @@
 import { DropTargetMonitor } from "react-dnd"
 
 export interface HandleHoverAndDropSpec {
-    node: HTMLDivElement
+    node: HTMLElement
     monitor: DropTargetMonitor
     top?: () => void
     mid?: () => void

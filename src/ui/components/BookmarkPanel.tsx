@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react"
 import { styled } from "@mui/material/styles"
 import { useSelector, useDispatch } from "react-redux"
-import { Paper, Menu, MenuItem } from "@mui/material"
+import { Paper, Menu, MenuItem, Typography, Stack, Box } from "@mui/material"
 import copyToClipboard from "copy-to-clipboard"
 
 import useContextMenu from "../hooks/useContextMenu"
@@ -13,40 +13,18 @@ import { pasteNodes, isNodeBookmark, isNodeFolder, setHashParam, removeNodes } f
 import { openTab } from "../utils/bookmark"
 import { RootState, BookmarkNodeType } from "../types"
 import { __MAC__ } from "../consts"
-
 import BookmarkTreeItem from "./BookmarkTreeItem"
 
-const PREFIX = "BookmarkPanel"
-
-const classes = {
-    paper: `${PREFIX}-paper`,
-    emptySearchResults: `${PREFIX}-emptySearchResults`,
-}
-
-const Root = styled("div")(({ theme }) => ({
-    [`& .${classes.paper}`]: {
+const StyledPaper = styled(Paper)(({ theme }) => {
+    return {
         width: "100%",
-        maxWidth: "960px",
-        margin: "auto",
-        marginTop: theme.spacing(2),
-        marginBottom: theme.spacing(3),
+        maxWidth: 960,
+        margin: theme.spacing(0, "auto"),
         padding: theme.spacing(1, 0),
-    },
+    }
+})
 
-    [`& .${classes.emptySearchResults}`]: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100%",
-        fontSize: theme.typography.h6.fontSize,
-        fontWeight: theme.typography.h6.fontWeight,
-        color: "#6e6e6e",
-        userSelect: "none",
-        cursor: "default",
-    },
-}))
-
-export default function BookmarkPanel({ className }: { className?: string }) {
+export default function BookmarkPanel() {
     const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
     const search = useSelector((state: RootState) => state.bookmark.search)
     const searchResult = useSelector((state: RootState) => state.bookmark.searchResult)
@@ -126,7 +104,11 @@ export default function BookmarkPanel({ className }: { className?: string }) {
     // copy and paste bookmarks
     useEffect(() => {
         const copyListener = (e: KeyboardEvent) => {
-            if (e.target === document.body && e.key === "c" && ((__MAC__ && e.metaKey) || (!__MAC__ && e.ctrlKey))) {
+            if (
+                e.target === document.body &&
+                e.key === "c" &&
+                ((__MAC__ && e.metaKey && !e.shiftKey) || (!__MAC__ && e.ctrlKey && !e.shiftKey))
+            ) {
                 if (selectedNodes.length) {
                     e.preventDefault()
                     dispatch(setCopiedNodes([...selectedNodes]))
@@ -167,7 +149,7 @@ export default function BookmarkPanel({ className }: { className?: string }) {
         const deleteListener = async (e: KeyboardEvent) => {
             if (
                 e.target === document.body &&
-                ((__MAC__ && e.key === "Backspace" && e.metaKey) || (!__MAC__ && e.key === "Delete"))
+                ((__MAC__ && e.key === "Backspace") || (!__MAC__ && e.key === "Delete"))
             ) {
                 removeNodes(selectedNodes)
             }
@@ -179,28 +161,37 @@ export default function BookmarkPanel({ className }: { className?: string }) {
     const { contextMenuProps, closeContextMenu, handleContextMenuEvent } = useContextMenu()
 
     return (
-        <Root
-            className={className}
+        <Box
+            sx={{
+                flex: 1,
+                height: "100%",
+                padding: theme => theme.spacing(3, 4),
+                overflow: "auto",
+            }}
             onContextMenu={e => {
                 handleContextMenuEvent(e)
             }}
         >
             {search ? (
                 searchResult.length ? (
-                    <Paper className={classes.paper} elevation={3}>
+                    <StyledPaper elevation={3}>
                         {searchResult.map(child => (
                             <BookmarkTreeItem key={child.id} bookmarkNode={child} />
                         ))}
-                    </Paper>
+                    </StyledPaper>
                 ) : (
-                    <div className={classes.emptySearchResults}>No search results found</div>
+                    <Stack height="100%" alignItems="center" justifyContent="center">
+                        <Typography variant="body2" color={theme => theme.palette.text.secondary}>
+                            No search results found
+                        </Typography>
+                    </Stack>
                 )
             ) : activeFolderChildren ? (
-                <Paper className={classes.paper} elevation={3}>
+                <StyledPaper elevation={3}>
                     {activeFolderChildren.map(child => (
                         <BookmarkTreeItem key={child.id} bookmarkNode={child} />
                     ))}
-                </Paper>
+                </StyledPaper>
             ) : null}
             <Menu {...contextMenuProps}>
                 <MenuItem
@@ -220,6 +211,6 @@ export default function BookmarkPanel({ className }: { className?: string }) {
                     Add new folder
                 </MenuItem>
             </Menu>
-        </Root>
+        </Box>
     )
 }

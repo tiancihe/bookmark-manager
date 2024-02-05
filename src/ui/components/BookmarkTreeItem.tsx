@@ -1,8 +1,8 @@
 import { useEffect, useRef, createRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { Menu } from "@mui/material"
+import { Box, Menu, Typography } from "@mui/material"
 import { useTheme, alpha, styled } from "@mui/material/styles"
-import { FolderTwoTone } from "@mui/icons-material"
+import { FolderOutlined } from "@mui/icons-material"
 import { useDrag, useDrop } from "react-dnd"
 
 import useContextMenu from "../hooks/useContextMenu"
@@ -139,12 +139,15 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
     const { settings } = useSettings()
 
     return (
-        <Root>
-            <div
+        <>
+            <Box
                 ref={nodeRef.current}
-                className={classes.container}
-                style={{
+                sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    paddingLeft: theme.spacing(3),
                     backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.25) : undefined,
+                    userSelect: "none",
                 }}
                 onClick={e => {
                     e.stopPropagation()
@@ -222,20 +225,47 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
                     handleContextMenuEvent(e)
                 }}
             >
-                <div className={classes.icon}>
-                    {isFolder && <FolderTwoTone />}
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: theme.spacing(2),
+                        height: theme.spacing(2),
+                        "& img": {
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                        },
+                    }}
+                >
+                    {isFolder && <FolderOutlined />}
                     {!settings?.disableFavicon && isBookmark && <img src={getFavicon(bookmarkNode.url || "")} />}
-                </div>
-                <div className={classes.title} title={bookmarkNode.title}>
+                </Box>
+                <Typography
+                    sx={{
+                        flex: 2,
+                        margin: theme.spacing(0, 2),
+                    }}
+                    noWrap
+                    title={bookmarkNode.title}
+                >
                     {bookmarkNode.title}
-                </div>
+                </Typography>
                 {(settings?.alwaysShowURL || isSelected) && (
-                    <div className={classes.url} title={bookmarkNode.url}>
+                    <Typography
+                        sx={{
+                            flex: 1,
+                            margin: theme.spacing(0, 2),
+                            color: alpha(theme.palette.text.primary, 0.55),
+                        }}
+                        noWrap
+                        title={bookmarkNode.url}
+                    >
                         {bookmarkNode.url}
-                    </div>
+                    </Typography>
                 )}
-                <BookmarkActionMenu className={classes.actions} />
-            </div>
+                <BookmarkActionMenu />
+            </Box>
             <Menu
                 {...(contextMenuProps || {})}
                 onDoubleClick={e => {
@@ -248,6 +278,6 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
             >
                 <BookmarkActionMenuContent onCloseMenu={closeContextMenu} />
             </Menu>
-        </Root>
+        </>
     )
 }

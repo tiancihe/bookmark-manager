@@ -2,7 +2,7 @@ import { PropsWithChildren, useState, useEffect, useMemo, useRef, createRef } fr
 import { useSelector, useDispatch } from "react-redux"
 import { Box, Menu, Typography } from "@mui/material"
 import { useTheme, alpha } from "@mui/material/styles"
-import { ArrowRight, ArrowDropDown, FolderTwoTone, FolderOpenTwoTone } from "@mui/icons-material"
+import { ArrowRight, ArrowDropDown, FolderOutlined, FolderOpenOutlined } from "@mui/icons-material"
 import { useDrop, useDrag } from "react-dnd"
 
 import useContextMenu from "../hooks/useContextMenu"
@@ -150,6 +150,7 @@ export default function FolderTreeItem({
                         alignItems: "center",
                         width: theme.spacing(3),
                         height: theme.spacing(5),
+                        color: isActive ? theme.palette.primary.main : theme.palette.text.primary,
                     }}
                 >
                     {hasSubfolders &&
@@ -176,9 +177,10 @@ export default function FolderTreeItem({
                         alignItems: "center",
                         width: theme.spacing(3),
                         height: theme.spacing(5),
+                        color: isActive ? theme.palette.primary.main : theme.palette.text.primary,
                     }}
                 >
-                    {open ? <FolderOpenTwoTone /> : <FolderTwoTone />}
+                    {open ? <FolderOpenOutlined /> : <FolderOutlined />}
                 </Box>
                 <Typography
                     sx={{

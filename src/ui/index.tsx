@@ -1,17 +1,14 @@
 import "../compat"
-import React from "react"
-import ReactDOM from "react-dom"
+import { createRoot } from "react-dom/client"
 import { Provider } from "react-redux"
 
 import store from "./store"
 import App from "./App"
 
-const ROOT_NODE = document.createElement("div")
-document.body.appendChild(ROOT_NODE)
+const ROOT_NODE = document.getElementById("root")!
 
-ReactDOM.render(
+createRoot(ROOT_NODE).render(
     <Provider store={store}>
         <App />
     </Provider>,
-    ROOT_NODE,
 )

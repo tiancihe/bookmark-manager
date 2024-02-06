@@ -4,6 +4,7 @@
   "version": "0.9.0",
   "icons": {
     "16": "icon-16x16.png",
+    "32": "icon-32x32.png",
     "48": "icon-48x48.png",
     "96": "icon-96x96.png",
     "128": "icon-128x128.png"
@@ -14,7 +15,7 @@
   "commands": {
     "_execute_action": {
       "suggested_key": {
-        "default": "Ctrl+Alt+B",
+        "default": "Ctrl+Shift+B",
         "mac": "MacCtrl+Command+B"
       }
     }

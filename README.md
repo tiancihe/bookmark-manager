@@ -1,49 +1,21 @@
 # Bookmark Manager
 
-A bookmark manager extension for firefox.
+A bookmark manager extension for browsers.
 
 ## Features
 
-- Quick open with `Ctrl/Cmd + Alt + B`
-- Quick search with `Ctrl/Cmd + F` (press `ESC` key will clear the search input), then use arrow keys to navigate through search results, enter key (or double click) to quickly open a bookmark or folder
-- Hold `Ctrl/Cmd` to select another item, hold `Shift` to select items in between
-- Copy and paste with `Ctrl/Cmd + C`, `Ctrl/Cmd + V`, copy bookmarks will also copy their urls to clipboard
-- Delete bookmarks/folders via `Del/Cmd + Backspace`
+- Quick open with `Ctrl + Shift + B` ( `Command + Control + B` on mac )
+- Quick search with `Ctrl + F` ( `Command + F` on mac ), then use arrow keys to navigate through search results, `Enter` key ( or double click ) to quickly open a bookmark or folder, press `ESC` key will clear the search input
+- Hold `Ctrl` ( `Command` on mac ) to select multiple items, hold `Shift` to select all items in between
+- Copy, paste and cut with `Ctrl + C` ( `Command + C` on mac ), `Ctrl + V` ( `Command + V` on mac ), `Ctrl + X` ( `Command + X` on mac ), copy or cut bookmarks will also copy their urls to clipboard
+- Undo and redo with `Ctrl + Z` ( `Command + Z` on mac ), `Ctrl + Shift + Z` ( `Command + Shift + Z` on mac ), note that action history is not kept between sessions, meaning when you close the bookmark page, all action history are cleared
+- Delete bookmarks/folders via `Delete`
 - Drag and drop selected items
-- Sort bookmarks by URL/name (located at top right corner)
+- Sort bookmarks by URL/name
 - Hash history sync (meaning you can go forward and backward like web pages)
 - Supports dark mode
-- Settings are kept locally, including theme setting (light / dark)
+- Settings are kept locally, such as theme setting (light / dark)
 
 ### TODO
 
 - i18n
-- Resizable folder panel
-- Undo previous actions
-- Add support to cut items
-
-## Development
-
-1. First, install dependencies (make sure nodejs is installed)
-
-   ```bash
-   npm i
-   ```
-
-1. start webpack-dev-server
-
-   ```bash
-   npm start
-   ```
-
-1. run the extension (make sure your default browser is firefox)
-
-   ```bash
-   npm run ext
-   ```
-
-1. The following command will pack the extension into a zip file under `web-ext-artifacts` ready for production.
-
-   ```bash
-   npm run pack
-   ```

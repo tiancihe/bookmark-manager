@@ -127,7 +127,7 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                     })
                 }}
             >
-                {selectedNodes.length > 1
+                {selectedBookmarks.length > 1
                     ? `Open all (${selectedBookmarks.length}) in new window`
                     : "Open in new window"}
             </MenuItem>
@@ -141,7 +141,7 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                     })
                 }}
             >
-                {selectedNodes.length > 1
+                {selectedBookmarks.length > 1
                     ? `Open all (${selectedBookmarks.length}) in incognito window`
                     : "Open in incognito window"}
             </MenuItem>

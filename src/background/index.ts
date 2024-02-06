@@ -19,4 +19,8 @@ if (__DEV__) {
     openUI()
 }
 
-browser.action.onClicked.addListener(openUI)
+if (__CHROME__) {
+    browser.action.onClicked.addListener(openUI)
+} else {
+    browser.browserAction.onClicked.addListener(openUI)
+}

@@ -19,3 +19,21 @@ A bookmark manager extension for browsers.
 ### TODO
 
 - i18n
+
+## Development
+
+1. First, install dependencies (make sure nodejs is installed)
+
+   ```bash
+   pnpm i
+   ```
+
+2. start dev server
+
+   ```bash
+   pnpm dev
+   ```
+
+3. load the extension inside the package folder in your firefox desktop browser
+
+4. run `pnpm run pack` to pack the artifacts for AMO submission

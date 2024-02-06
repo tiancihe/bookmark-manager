@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 
-import { BookmarkTreeNode } from "../../types"
+import { BookmarkTreeNode } from "../types"
 import { AppThunkAction } from "../types"
 import { getHashParams } from "../utils"
 import { resetDndState } from "./dnd"
@@ -13,7 +13,7 @@ const slice = createSlice({
         bookmarkList: [] as BookmarkTreeNode[],
         activeFolder: null as BookmarkTreeNode | null,
         search: "",
-        searchResult: [] as BookmarkTreeNode[]
+        searchResult: [] as BookmarkTreeNode[],
     },
     reducers: {
         setBookmarkTree(state, { payload }: PayloadAction<BookmarkTreeNode>) {
@@ -39,12 +39,12 @@ const slice = createSlice({
         setState(
             state,
             {
-                payload
+                payload,
             }: PayloadAction<{
                 search?: string
                 searchResult?: BookmarkTreeNode[]
                 activeFolderId?: string
-            }>
+            }>,
         ) {
             const { search, searchResult, activeFolderId } = payload
 
@@ -61,8 +61,8 @@ const slice = createSlice({
             } else {
                 state.activeFolder = null
             }
-        }
-    }
+        },
+    },
 })
 
 export const { setBookmarkTree, setState } = slice.actions
@@ -70,13 +70,13 @@ export const { setBookmarkTree, setState } = slice.actions
 export const bookmark = slice.reducer
 
 export function loadBookmarkTree(): AppThunkAction {
-    return async function(dispatch) {
+    return async function (dispatch) {
         dispatch(setBookmarkTree((await browser.bookmarks.getTree())[0]))
     }
 }
 
 export function syncBookmarkStateFromHashParams(): AppThunkAction {
-    return async function(dispatch) {
+    return async function (dispatch) {
         const { search = "", folder } = getHashParams()
 
         const searchResult = search ? await browser.bookmarks.search(search) : []
@@ -85,8 +85,8 @@ export function syncBookmarkStateFromHashParams(): AppThunkAction {
             setState({
                 search,
                 searchResult,
-                activeFolderId: folder
-            })
+                activeFolderId: folder,
+            }),
         )
 
         // when hash params change, dnd state should also be cleared together

@@ -1,11 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 
-import { BookmarkTreeNode } from "../../types"
+import { BookmarkTreeNode } from "../types"
 
 export const slice = createSlice({
     name: "CopyAndPaste",
     initialState: {
-        copied: [] as BookmarkTreeNode[]
+        copied: [] as BookmarkTreeNode[],
     },
     reducers: {
         setCopiedNodes(state, { payload }: PayloadAction<BookmarkTreeNode[]>) {
@@ -13,8 +13,8 @@ export const slice = createSlice({
         },
         clearCopiedNodes(state) {
             state.copied = []
-        }
-    }
+        },
+    },
 })
 
 export const { setCopiedNodes, clearCopiedNodes } = slice.actions

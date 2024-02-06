@@ -2,7 +2,7 @@ import { Fragment, useMemo } from "react"
 import { useSelector } from "react-redux"
 import { Box } from "@mui/material"
 
-import { BookmarkTreeNode } from "../../types"
+import { BookmarkTreeNode } from "../types"
 import { RootState } from "../types"
 import { isNodeFolder } from "../utils/bookmark"
 

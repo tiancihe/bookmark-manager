@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Modal, Card, CardHeader, CardContent, TextField, CardActions, Button, Stack } from "@mui/material"
 
-import { BookmarkTreeNode } from "../../types"
+import { BookmarkTreeNode } from "../types"
 import { isNodeBookmark, updateBookmark } from "../utils/bookmark"
 
 export default function BookmarkEditModal({

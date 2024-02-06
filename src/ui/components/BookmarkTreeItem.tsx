@@ -18,7 +18,7 @@ import {
     moveBookmarksBelowTarget,
 } from "../utils/bookmark"
 import { handleHoverAndDrop } from "../utils/dnd"
-import { BookmarkTreeNode } from "../../types"
+import { BookmarkTreeNode } from "../types"
 import { RootState, HoverArea } from "../types"
 import { DNDTypes, __MAC__ } from "../consts"
 

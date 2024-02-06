@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 
-import { BookmarkTreeNode } from "../../types"
+import { BookmarkTreeNode } from "../types"
 
 export const slice = createSlice({
     name: "dnd",

@@ -110,6 +110,7 @@ export default function FolderTreeItem({
     return (
         <>
             <Box
+                id={bookmarkNode.id}
                 ref={nodeRef}
                 sx={{
                     display: "flex",

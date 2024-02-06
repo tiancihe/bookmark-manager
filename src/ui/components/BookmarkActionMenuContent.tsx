@@ -9,6 +9,7 @@ import { openBookmarkEditModal } from "../store/modal"
 import { isNodeBookmark, removeBookmarks, pasteBookmarks, getChildBookmarks, isNodeFolder } from "../utils/bookmark"
 import { RootState, BookmarkTreeNode } from "../types"
 import { snackbarMessageSignal } from "../signals"
+import { setState } from "../store/bookmark"
 
 export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu: () => void }) {
     const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
@@ -33,6 +34,26 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
 
     return (
         <Fragment>
+            {search && selectedNodes.length === 1 && selectedNodes[0].parentId && (
+                <MenuItem
+                    onClick={async e => {
+                        e.stopPropagation()
+                        onCloseMenu()
+                        const activeFolderId = selectedNodes[0].parentId!
+                        dispatch(
+                            setState({
+                                search: "",
+                                searchResult: [],
+                                activeFolderId,
+                            }),
+                        )
+                        document.getElementById(activeFolderId)?.scrollIntoView()
+                        document.getElementById(selectedNodes[0].id)?.scrollIntoView()
+                    }}
+                >
+                    Show in folder
+                </MenuItem>
+            )}
             {selectedNodes.length === 1 && (
                 <MenuItem
                     onClick={e => {

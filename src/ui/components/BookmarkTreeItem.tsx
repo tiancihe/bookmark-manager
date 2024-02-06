@@ -138,6 +138,7 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
     return (
         <>
             <Box
+                id={bookmarkNode.id}
                 ref={nodeRef}
                 sx={{
                     display: "flex",

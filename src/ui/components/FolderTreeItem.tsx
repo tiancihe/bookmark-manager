@@ -60,11 +60,12 @@ export default function FolderTreeItem({
 
     const nodeRef = useRef<HTMLElement | null>(null)
     const [_, drag] = useDrag({
-        item: {
-            type: DNDTypes.FolderItem,
-        },
-        begin: () => {
-            dispatch(selectNode(bookmarkNode))
+        type: DNDTypes.FolderItem,
+        item: () => {
+            if (selectedNodes.length === 0) {
+                dispatch(selectNode(bookmarkNode))
+            }
+            return { type: DNDTypes.FolderItem }
         },
     })
     const [, drop] = useDrop({

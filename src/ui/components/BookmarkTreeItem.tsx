@@ -92,13 +92,12 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
 
     const nodeRef = useRef<HTMLElement | null>(null)
     const [, drag] = useDrag({
-        item: {
-            type: DNDTypes.BookmarkItem,
-        },
-        begin: () => {
-            if (!isSelected) {
+        type: DNDTypes.BookmarkItem,
+        item: () => {
+            if (selectedNodes.length === 0) {
                 dispatch(selectNode(bookmarkNode))
             }
+            return { type: DNDTypes.BookmarkItem }
         },
     })
     const [, drop] = useDrop({
@@ -145,7 +144,7 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
                     alignItems: "center",
                     paddingLeft: theme.spacing(3),
                     paddingRight: theme.spacing(1),
-                    backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.25) : undefined,
+                    backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.1) : undefined,
                     userSelect: "none",
                 }}
                 onClick={e => {

@@ -2,7 +2,7 @@ import { useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { CssBaseline, Stack } from "@mui/material"
 import { DndProvider } from "react-dnd"
-import HTML5Backend from "react-dnd-html5-backend"
+import { HTML5Backend } from "react-dnd-html5-backend"
 
 import { loadBookmarkTree, syncBookmarkStateFromHashParams } from "./store/bookmark"
 import { resetDndState } from "./store/dnd"

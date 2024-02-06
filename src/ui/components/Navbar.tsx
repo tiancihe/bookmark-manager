@@ -18,9 +18,11 @@ import { Search, Clear, Brightness4, Brightness5, MoreVert } from "@mui/icons-ma
 
 import useSettings from "../hooks/useSettings"
 import { selectNode } from "../store/dnd"
-import { setHashParam, sortFolderByName, sortFolderByUrl } from "../utils"
-import { RootState } from "../types"
+import { setHashParam } from "../utils"
+import { sortFolderByName, sortFolderByUrl } from "../utils/bookmark"
+import { BookmarkNodeType, RootState } from "../types"
 import { __MAC__ } from "../consts"
+import { openBookmarkCreateModal } from "../store/modal"
 
 const PREFIX = "Navbar"
 
@@ -250,6 +252,7 @@ export default function Navbar() {
                 </div>
                 <Menu open={!!actionMenuAnchor} anchorEl={actionMenuAnchor} onClose={closeActionMenu}>
                     <MenuItem
+                        disabled={!!search}
                         onClick={e => {
                             e.stopPropagation()
                             closeActionMenu()
@@ -261,6 +264,7 @@ export default function Navbar() {
                         Sort by name
                     </MenuItem>
                     <MenuItem
+                        disabled={!!search}
                         onClick={e => {
                             e.stopPropagation()
                             closeActionMenu()
@@ -270,6 +274,25 @@ export default function Navbar() {
                         }}
                     >
                         Sort by URL
+                    </MenuItem>
+                    <Divider />
+                    <MenuItem
+                        disabled={!!search}
+                        onClick={() => {
+                            dispatch(openBookmarkCreateModal(BookmarkNodeType.Bookmark))
+                            closeActionMenu()
+                        }}
+                    >
+                        Add new bookmark
+                    </MenuItem>
+                    <MenuItem
+                        disabled={!!search}
+                        onClick={() => {
+                            dispatch(openBookmarkCreateModal(BookmarkNodeType.Folder))
+                            closeActionMenu()
+                        }}
+                    >
+                        Add new folder
                     </MenuItem>
                     <Divider />
                     <MenuItem>

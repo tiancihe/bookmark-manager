@@ -1,4 +1,4 @@
-import { useRef, createRef } from "react"
+import { useRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Box, Menu, Typography } from "@mui/material"
 import { useTheme, alpha, styled } from "@mui/material/styles"
@@ -8,8 +8,15 @@ import { useDrag, useDrop } from "react-dnd"
 import useContextMenu from "../hooks/useContextMenu"
 import useSettings from "../hooks/useSettings"
 import { selectNodes, selectNode } from "../store/dnd"
-import { getFavicon, isNodeSelected, setHashParam, isNodeFolder, isNodeBookmark } from "../utils"
-import { moveNodesAboveTarget, moveNodesUnderParent, moveNodesBelowTarget } from "../utils/bookmark"
+import { getFavicon, setHashParam } from "../utils"
+import {
+    isNodeSelected,
+    isNodeFolder,
+    isNodeBookmark,
+    moveBookmarksAboveTarget,
+    moveBookmarksUnderParent,
+    moveBookmarksBelowTarget,
+} from "../utils/bookmark"
 import { handleHoverAndDrop } from "../utils/dnd"
 import { BookmarkTreeNode } from "../../types"
 import { RootState, HoverArea } from "../types"
@@ -115,9 +122,9 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
                 handleHoverAndDrop({
                     node,
                     monitor,
-                    top: () => moveNodesAboveTarget(selectedNodes, bookmarkNode),
-                    mid: () => moveNodesUnderParent(selectedNodes, bookmarkNode),
-                    bottom: () => moveNodesBelowTarget(selectedNodes, bookmarkNode),
+                    top: () => moveBookmarksAboveTarget(selectedNodes, bookmarkNode),
+                    mid: () => moveBookmarksUnderParent(selectedNodes, bookmarkNode),
+                    bottom: () => moveBookmarksBelowTarget(selectedNodes, bookmarkNode),
                 })
             }
             HoverStateManager.reset()

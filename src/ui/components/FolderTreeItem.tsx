@@ -1,4 +1,4 @@
-import { PropsWithChildren, useState, useEffect, useMemo, useRef, createRef } from "react"
+import { PropsWithChildren, useState, useEffect, useMemo, useRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Box, Menu, Typography } from "@mui/material"
 import { useTheme, alpha } from "@mui/material/styles"
@@ -7,13 +7,18 @@ import { useDrop, useDrag } from "react-dnd"
 
 import useContextMenu from "../hooks/useContextMenu"
 import { selectNode } from "../store/dnd"
-import { setHashParam, isNodeFolder, isNodeSelected } from "../utils"
-import { moveNodesUnderParent, moveNodesAboveTarget, moveNodesBelowTarget } from "../utils/bookmark"
+import { setHashParam } from "../utils"
+import {
+    isNodeFolder,
+    isNodeSelected,
+    moveBookmarksUnderParent,
+    moveBookmarksAboveTarget,
+    moveBookmarksBelowTarget,
+} from "../utils/bookmark"
 import { handleHoverAndDrop } from "../utils/dnd"
 import { BookmarkTreeNode } from "../../types"
 import { RootState, HoverArea } from "../types"
 import { DNDTypes } from "../consts"
-
 import FolderTreeItemContextMenuContent from "./FolderTreeItemContextMenuContent"
 import HoverStateManager from "../hover-state-manager"
 
@@ -88,17 +93,9 @@ export default function FolderTreeItem({
                 handleHoverAndDrop({
                     node,
                     monitor,
-                    top: () => {
-                        if (selectedNodes.length === 1 && isNodeFolder(selectedNodes[0])) {
-                            moveNodesAboveTarget(selectedNodes, bookmarkNode)
-                        }
-                    },
-                    mid: () => moveNodesUnderParent(selectedNodes, bookmarkNode),
-                    bottom: () => {
-                        if (selectedNodes.length === 1 && isNodeFolder(selectedNodes[0])) {
-                            moveNodesBelowTarget(selectedNodes, bookmarkNode)
-                        }
-                    },
+                    top: () => moveBookmarksAboveTarget(selectedNodes, bookmarkNode),
+                    mid: () => moveBookmarksUnderParent(selectedNodes, bookmarkNode),
+                    bottom: () => moveBookmarksBelowTarget(selectedNodes, bookmarkNode),
                 })
             }
             HoverStateManager.reset()
@@ -119,11 +116,7 @@ export default function FolderTreeItem({
                     height: theme.spacing(5),
                     paddingLeft: theme.spacing(3 * level),
                     borderRadius: theme.spacing(0, 3, 3, 0),
-                    backgroundColor: isActive
-                        ? alpha(theme.palette.primary.main, 0.1)
-                        : isSelected
-                          ? alpha(theme.palette.primary.main, 0.25)
-                          : undefined,
+                    backgroundColor: isActive ? alpha(theme.palette.primary.main, 0.1) : undefined,
                     cursor: "pointer",
                     "&:hover": {
                         backgroundColor: isActive ? undefined : theme.palette.action.hover,
@@ -195,6 +188,7 @@ export default function FolderTreeItem({
                     sx={{
                         paddingLeft: theme.spacing(1),
                         color: isActive ? theme.palette.primary.main : theme.palette.text.primary,
+                        userSelect: "none",
                     }}
                     noWrap
                     title={bookmarkNode.title}

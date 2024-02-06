@@ -6,9 +6,9 @@ import copyToClipboard from "copy-to-clipboard"
 import { clearSelectedNodes } from "../store/dnd"
 import { setCopiedNodes } from "../store/cnp"
 import { openBookmarkEditModal } from "../store/modal"
-import { showSnackbar } from "../store/snackbar"
-import { isNodeBookmark, removeNodes, pasteNodes, getChildBookmarks, isNodeFolder } from "../utils"
+import { isNodeBookmark, removeBookmarks, pasteBookmarks, getChildBookmarks, isNodeFolder } from "../utils/bookmark"
 import { RootState, BookmarkTreeNode } from "../types"
+import { snackbarMessageSignal } from "../signals"
 
 export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu: () => void }) {
     const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
@@ -48,7 +48,7 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                 onClick={async e => {
                     e.stopPropagation()
                     onCloseMenu()
-                    removeNodes(selectedNodes)
+                    removeBookmarks(selectedNodes)
                     dispatch(clearSelectedNodes())
                 }}
             >
@@ -61,7 +61,7 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                     onCloseMenu()
                     copyToClipboard(selectedNodes.map(node => node.url ?? node.title).join("\t\n"))
                     dispatch(setCopiedNodes(selectedNodes))
-                    dispatch(showSnackbar({ message: `Copied ${selectedNodes.length} items` }))
+                    snackbarMessageSignal.value = `${selectedNodes.length} items copied`
                 }}
             >
                 Copy
@@ -72,7 +72,7 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                         e.stopPropagation()
                         onCloseMenu()
                         copyToClipboard(selectedNodes[0].url!)
-                        dispatch(showSnackbar({ message: "URL copied" }))
+                        snackbarMessageSignal.value = "URL copied"
                     }}
                 >
                     Copy URL
@@ -86,7 +86,7 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                     if (!search && activeFolder) {
                         // paste copied nodes after the last of the selected nodes or append in the children of the current folder
                         const target = selectedNodes[selectedNodes.length - 1]
-                        pasteNodes({
+                        pasteBookmarks({
                             src: copiedNodes,
                             dest: activeFolder,
                             destIndex: target ? target.index! : undefined,

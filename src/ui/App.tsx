@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { CssBaseline, Snackbar, Stack } from "@mui/material"
+import { CssBaseline, Stack } from "@mui/material"
 import { DndProvider } from "react-dnd"
 import HTML5Backend from "react-dnd-html5-backend"
 
@@ -16,6 +16,8 @@ import BookmarkPanel from "./components/BookmarkPanel"
 import BookmarkEditModal from "./components/BookmarkEditModal"
 import BookmarkCreateModal from "./components/BookmarkCreateModal"
 import Splitter from "./components/Splitter"
+import GlobalSnackbar from "./components/Snackbar"
+import { useUndoRedo } from "./hooks/useUndoRedo"
 
 export default function App() {
     const bookmarkTree = useSelector((state: RootState) => state.bookmark.bookmarkTree)
@@ -78,9 +80,10 @@ export default function App() {
     }, [selectedNodes])
 
     const modalType = useSelector((state: RootState) => state.modal.modalType)
-    const snackbarState = useSelector((state: RootState) => state.snackbar)
     const bookmarkNode = useSelector((state: RootState) => state.modal.bookmarkNode)
     const createType = useSelector((state: RootState) => state.modal.createType)
+
+    useUndoRedo()
 
     return (
         <>
@@ -101,14 +104,7 @@ export default function App() {
             {modalType === ModalType.BookmarkCreate && (
                 <BookmarkCreateModal createType={createType!} onClose={() => dispatch(closeModal())} />
             )}
-            <Snackbar
-                anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left",
-                }}
-                open={snackbarState.visible}
-                message={snackbarState.message}
-            />
+            <GlobalSnackbar />
         </>
     )
 }

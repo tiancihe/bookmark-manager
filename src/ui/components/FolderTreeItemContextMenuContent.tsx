@@ -5,9 +5,9 @@ import copyToClipboard from "copy-to-clipboard"
 
 import { openBookmarkEditModal } from "../store/modal"
 import { setCopiedNodes } from "../store/cnp"
-import { showSnackbar } from "../store/snackbar"
 import { BookmarkTreeNode, BookmarkNodeType } from "../types"
-import { setHashParam } from "../utils"
+import { removeBookmark } from "../utils/bookmark"
+import { snackbarMessageSignal } from "../signals"
 
 export default function FolderTreeItemContextMenuContent({
     bookmarkNode,
@@ -31,11 +31,8 @@ export default function FolderTreeItemContextMenuContent({
                 Rename
             </MenuItem>
             <MenuItem
-                onClick={() => {
-                    setHashParam({ folder: bookmarkNode.parentId })
-                    browser.bookmarks.removeTree(bookmarkNode.id).catch(() => {
-                        dispatch(showSnackbar({ message: `Can not delete folder: ${bookmarkNode.title}` }))
-                    })
+                onClick={async () => {
+                    await removeBookmark(bookmarkNode.id)
                     onClose()
                 }}
             >
@@ -47,7 +44,7 @@ export default function FolderTreeItemContextMenuContent({
                     e.stopPropagation()
                     dispatch(setCopiedNodes([bookmarkNode]))
                     copyToClipboard(bookmarkNode.title)
-                    dispatch(showSnackbar({ message: `Copied "${bookmarkNode.title}"` }))
+                    snackbarMessageSignal.value = `"${bookmarkNode.title}" copied`
                     onClose()
                 }}
             >

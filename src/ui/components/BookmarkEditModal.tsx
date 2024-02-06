@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Modal, Card, CardHeader, CardContent, TextField, CardActions, Button, Stack } from "@mui/material"
 
 import { BookmarkTreeNode } from "../../types"
-import { isNodeBookmark } from "../utils"
+import { isNodeBookmark, updateBookmark } from "../utils/bookmark"
 
 export default function BookmarkEditModal({
     bookmarkNode,
@@ -17,16 +17,11 @@ export default function BookmarkEditModal({
     const isBookmark = isNodeBookmark(bookmarkNode)
 
     const handleSubmit = async () => {
-        const payload: Partial<Pick<BookmarkTreeNode, "title" | "url">> = {
-            title,
-        }
-
-        if (isBookmark) {
-            payload.url = url
-        }
-
         try {
-            await browser.bookmarks.update(bookmarkNode.id, payload)
+            await updateBookmark(bookmarkNode.id, {
+                title,
+                url: isBookmark ? url : undefined,
+            })
             onClose()
         } catch (err) {
             console.error(err)

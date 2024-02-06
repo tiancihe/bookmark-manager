@@ -35,7 +35,11 @@ function createBatchingUpdateManager() {
 
     const batchUpdate = async (update: () => Promise<void>) => {
         beginBatchingUpdate()
-        await update()
+        try {
+            await update()
+        } catch (e) {
+            console.error(e)
+        }
         endBatchingUpdate()
     }
 

@@ -3,8 +3,7 @@ import { useSelector } from "react-redux"
 import { Modal, Card, CardHeader, CardContent, CardActions, Button, TextField, Snackbar, Stack } from "@mui/material"
 
 import { RootState, BookmarkNodeType } from "../types"
-
-type CreateDetails = browser.bookmarks.CreateDetails
+import { createBookmark } from "../utils/bookmark"
 
 export default function CreateBookmarkModal({
     createType,
@@ -28,18 +27,12 @@ export default function CreateBookmarkModal({
                 return
             }
 
-            const detail: CreateDetails = {
+            await createBookmark({
                 parentId: activeFolder.id,
                 title,
                 url,
-                type: createType,
-            }
-
-            if (createType === BookmarkNodeType.Folder) {
-                delete detail.url
-            }
-
-            await browser.bookmarks.create(detail)
+                type: createType === BookmarkNodeType.Bookmark ? BookmarkNodeType.Bookmark : undefined,
+            })
 
             onClose()
         } else {

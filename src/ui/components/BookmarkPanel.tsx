@@ -2,15 +2,13 @@ import { useEffect, useMemo } from "react"
 import { styled } from "@mui/material/styles"
 import { useSelector, useDispatch } from "react-redux"
 import { Paper, Menu, MenuItem, Typography, Stack, Box } from "@mui/material"
-import copyToClipboard from "copy-to-clipboard"
 
 import useContextMenu from "../hooks/useContextMenu"
+import { useCopyPaste } from "../hooks/useCopyPaste"
 import { openBookmarkCreateModal } from "../store/modal"
 import { selectNodes, clearSelectedNodes, selectNode } from "../store/dnd"
-import { setCopiedNodes } from "../store/cnp"
-import { showSnackbar } from "../store/snackbar"
-import { pasteNodes, isNodeBookmark, isNodeFolder, setHashParam, removeNodes } from "../utils"
-import { openTab } from "../utils/bookmark"
+import { setHashParam } from "../utils"
+import { isNodeBookmark, isNodeFolder, removeBookmarks, openTab } from "../utils/bookmark"
 import { RootState, BookmarkNodeType } from "../types"
 import { __MAC__ } from "../consts"
 import BookmarkTreeItem from "./BookmarkTreeItem"
@@ -101,49 +99,6 @@ export default function BookmarkPanel() {
         return () => window.removeEventListener("keydown", escapeListener)
     }, [selectedNodes])
 
-    // copy and paste bookmarks
-    useEffect(() => {
-        const copyListener = (e: KeyboardEvent) => {
-            if (
-                e.target === document.body &&
-                e.key === "c" &&
-                ((__MAC__ && e.metaKey && !e.shiftKey) || (!__MAC__ && e.ctrlKey && !e.shiftKey))
-            ) {
-                if (selectedNodes.length) {
-                    e.preventDefault()
-                    dispatch(setCopiedNodes([...selectedNodes]))
-                    copyToClipboard(selectedNodes.map(node => node.url ?? node.title).join("\t\n"))
-                    dispatch(showSnackbar({ message: `Copied ${selectedNodes.length} items` }))
-                }
-            }
-        }
-        window.addEventListener("keydown", copyListener)
-
-        const pasteListener = async (e: KeyboardEvent) => {
-            if (e.target === document.body && e.key === "v" && ((__MAC__ && e.metaKey) || (!__MAC__ && e.ctrlKey))) {
-                if (copiedNodes.length) {
-                    e.preventDefault()
-                    // only paste when not searching and a folder opened
-                    if (!search && activeFolder) {
-                        // paste copied nodes after the last of the selected nodes or append in the children of the current folder
-                        const target = selectedNodes[selectedNodes.length - 1]
-                        pasteNodes({
-                            src: copiedNodes,
-                            dest: activeFolder,
-                            destIndex: target ? target.index! : undefined,
-                        })
-                    }
-                }
-            }
-        }
-        window.addEventListener("keydown", pasteListener)
-
-        return () => {
-            window.removeEventListener("keydown", copyListener)
-            window.removeEventListener("keydown", pasteListener)
-        }
-    }, [selectedNodes, copiedNodes])
-
     // capture delete key to delete selected nodes
     useEffect(() => {
         const deleteListener = async (e: KeyboardEvent) => {
@@ -151,7 +106,7 @@ export default function BookmarkPanel() {
                 e.target === document.body &&
                 ((__MAC__ && e.key === "Backspace") || (!__MAC__ && e.key === "Delete"))
             ) {
-                removeNodes(selectedNodes)
+                removeBookmarks(selectedNodes)
             }
         }
         window.addEventListener("keydown", deleteListener)
@@ -159,6 +114,8 @@ export default function BookmarkPanel() {
     }, [selectedNodes])
 
     const { contextMenuProps, closeContextMenu, handleContextMenuEvent } = useContextMenu()
+
+    useCopyPaste()
 
     return (
         <Box

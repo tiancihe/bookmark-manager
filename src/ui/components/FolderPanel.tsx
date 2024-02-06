@@ -4,7 +4,7 @@ import { Box } from "@mui/material"
 
 import { BookmarkTreeNode } from "../../types"
 import { RootState } from "../types"
-import { isNodeFolder } from "../utils"
+import { isNodeFolder } from "../utils/bookmark"
 
 import FolderTreeItem from "./FolderTreeItem"
 import useSettings from "../hooks/useSettings"
@@ -62,7 +62,7 @@ export default function FolderPanel() {
             sx={{
                 width: settings?.splitterPosition || 256,
                 height: "100%",
-                padding: theme => theme.spacing(1),
+                padding: theme => theme.spacing(2, 1),
                 overflow: "auto",
             }}
         >

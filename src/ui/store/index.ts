@@ -5,14 +5,12 @@ import { bookmark } from "./bookmark"
 import { dnd } from "./dnd"
 import { cnp } from "./cnp"
 import { modal } from "./modal"
-import { snackbar } from "./snackbar"
 
 export const reducer = combineReducers({
     bookmark,
     dnd,
     cnp,
     modal,
-    snackbar,
 })
 
 const middleware = [thunk]
@@ -23,6 +21,7 @@ const store = configureStore({
 })
 
 if (__DEV__) {
+    // @ts-ignore
     window.__REDUX_STORE__ = store
 }
 

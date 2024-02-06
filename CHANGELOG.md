@@ -1,3 +1,10 @@
+## 1.0.0 (2024/02/07)
+
+- add bookmark action history functionality
+- add "cut" and "show in folder" functionality
+- tweaked styling
+- some ux improvements and bug fixes
+
 ## 0.9.0 (2020/10/10)
 
 - persist user settings

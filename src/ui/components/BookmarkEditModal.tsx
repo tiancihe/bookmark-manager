@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Modal, Card, CardHeader, CardContent, TextField, CardActions, Button, Stack } from "@mui/material"
 
 import { BookmarkTreeNode } from "../../types"
-import { BookmarkNodeType } from "../types"
+import { isNodeBookmark } from "../utils"
 
 export default function BookmarkEditModal({
     bookmarkNode,
@@ -14,7 +14,7 @@ export default function BookmarkEditModal({
     const [title, setTitle] = useState(bookmarkNode.title)
     const [url, setUrl] = useState(bookmarkNode.url)
 
-    const isBookmark = bookmarkNode.type === BookmarkNodeType.Bookmark
+    const isBookmark = isNodeBookmark(bookmarkNode)
 
     const handleSubmit = async () => {
         const payload: Partial<Pick<BookmarkTreeNode, "title" | "url">> = {

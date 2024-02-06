@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux"
 import { Paper, Menu, MenuItem, Typography, Stack, Box } from "@mui/material"
 
 import useContextMenu from "../hooks/useContextMenu"
-import { useCopyPaste } from "../hooks/useCopyPaste"
+import { useCopyPasteCut } from "../hooks/useCopyPasteCut"
 import { openBookmarkCreateModal } from "../store/modal"
 import { selectNodes, clearSelectedNodes, selectNode } from "../store/dnd"
 import { setHashParam } from "../utils"
@@ -12,6 +12,7 @@ import { isNodeBookmark, isNodeFolder, removeBookmarks, openTab } from "../utils
 import { RootState, BookmarkNodeType } from "../types"
 import { __MAC__ } from "../consts"
 import BookmarkTreeItem from "./BookmarkTreeItem"
+import { snackbarMessageSignal } from "../signals"
 
 const StyledPaper = styled(Paper)(({ theme }) => {
     return {
@@ -107,6 +108,7 @@ export default function BookmarkPanel() {
                 ((__MAC__ && e.key === "Backspace") || (!__MAC__ && e.key === "Delete"))
             ) {
                 removeBookmarks(selectedNodes)
+                snackbarMessageSignal.value = `${selectedNodes.length} items deleted`
             }
         }
         window.addEventListener("keydown", deleteListener)
@@ -115,7 +117,7 @@ export default function BookmarkPanel() {
 
     const { contextMenuProps, closeContextMenu, handleContextMenuEvent } = useContextMenu()
 
-    useCopyPaste()
+    useCopyPasteCut()
 
     return (
         <Box

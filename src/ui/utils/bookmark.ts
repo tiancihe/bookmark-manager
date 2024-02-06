@@ -3,7 +3,6 @@ import naturalCompare from "natural-compare"
 import { BatchingUpdateManager } from "../consts"
 import { BookmarkNodeType, BookmarkTreeNode } from "../types"
 import { createActionHistory } from "./actionHistory"
-import { snackbarMessageSignal } from "../signals"
 
 export const bookmarkActionHistory = createActionHistory<{
     id?: string
@@ -71,16 +70,15 @@ async function _createBookmarkTree(bookmark: BookmarkTreeNode, parentId?: string
 
 export const createBookmark: typeof browser.bookmarks.create = async details => {
     const bookmark = await _createBookmark(details)
+    let bookmarkId = bookmark.id
     bookmarkActionHistory.record({
-        info: { id: bookmark.id },
         async do() {
             const _bookmark = await _createBookmark(details)
-            this.info && (this.info.id = _bookmark.id)
+            bookmarkId = _bookmark.id
             return _bookmark
         },
         async undo() {
-            if (!this.info?.id) return
-            await browser.bookmarks.removeTree(this.info.id)
+            await browser.bookmarks.removeTree(bookmarkId)
         },
     })
     return bookmark
@@ -102,19 +100,16 @@ export const updateBookmark: typeof browser.bookmarks.update = async (id, change
 
 export const removeBookmark: typeof browser.bookmarks.removeTree = async id => {
     const bookmark = (await browser.bookmarks.get(id))[0]
-    await browser.bookmarks.removeTree(id)
-    snackbarMessageSignal.value = `${bookmark.title} deleted`
+    let _bookmark = bookmark
+    const remove = async () => {
+        await browser.bookmarks.removeTree(_bookmark.id)
+    }
+    remove()
     bookmarkActionHistory.record({
-        info: { bookmark },
-        async do() {
-            if (!this.info?.bookmark?.id) return
-            await browser.bookmarks.removeTree(this.info.bookmark.id)
-        },
+        do: remove,
         async undo() {
             await BatchingUpdateManager.batchUpdate(async () => {
-                if (!this.info?.bookmark) return
-                const _bookmark = await _createBookmark(this.info.bookmark)
-                this.info.bookmark = _bookmark
+                _bookmark = await _createBookmark(_bookmark)
             })
         },
     })
@@ -127,27 +122,23 @@ export async function removeBookmarks(bookmarks: BookmarkTreeNode[]) {
         return await removeBookmark(bookmarks[0].id)
     }
 
-    await BatchingUpdateManager.batchUpdate(async () => {
-        for (let i = 0; i < bookmarks.length; i++) {
-            const node = bookmarks[i]
-            await browser.bookmarks.removeTree(node.id)
-        }
-    })
-    snackbarMessageSignal.value = `${bookmarks.length} items deleted`
-    bookmarkActionHistory.record({
-        info: { bookmarks },
-        async do() {
-            if (!this.info?.bookmarks) return
-            for (let i = 0; i < this.info.bookmarks.length; i++) {
-                const node = this.info.bookmarks[i]
+    let _bookmarks = bookmarks
+
+    const remove = async () => {
+        await BatchingUpdateManager.batchUpdate(async () => {
+            for (let i = 0; i < _bookmarks.length; i++) {
+                const node = _bookmarks[i]
                 await browser.bookmarks.removeTree(node.id)
             }
-        },
+        })
+    }
+
+    remove()
+
+    bookmarkActionHistory.record({
+        do: remove,
         async undo() {
-            if (!this.info?.bookmarks) return
-            const _bookmarks = await Promise.all(this.info.bookmarks.map(bookmark => _createBookmarkTree(bookmark)))
-            this.info.bookmarks = _bookmarks
-            return _bookmarks
+            _bookmarks = await Promise.all(_bookmarks.map(bookmark => _createBookmarkTree(bookmark)))
         },
     })
 }
@@ -174,34 +165,25 @@ export interface PasteBookmarksSpec extends Omit<PasteBookmarkSpec, "src"> {
 
 export async function pasteBookmarks(spec: PasteBookmarksSpec) {
     const { src, dest, destIndex } = spec
-    await BatchingUpdateManager.batchUpdate(async () => {
-        for (let i = 0; i < src.length; i++) {
-            await pasteBookmark({
-                src: src[i],
-                dest,
-                destIndex: destIndex ? destIndex + i : undefined,
-            })
-        }
-    })
+    let bookmarks = src
+    const paste = async () => {
+        await BatchingUpdateManager.batchUpdate(async () => {
+            bookmarks = await Promise.all(
+                bookmarks.map((b, i) =>
+                    pasteBookmark({
+                        src: b,
+                        dest,
+                        destIndex: destIndex ? destIndex + i : undefined,
+                    }),
+                ),
+            )
+        })
+    }
+    paste()
     bookmarkActionHistory.record({
-        info: { bookmarks: spec.src },
-        async do() {
-            await BatchingUpdateManager.batchUpdate(async () => {
-                if (!this.info?.bookmarks) return
-                this.info.bookmarks = await Promise.all(
-                    this.info.bookmarks.map((bookmark, i) =>
-                        pasteBookmark({
-                            src: bookmark,
-                            dest,
-                            destIndex: destIndex ? destIndex + i : undefined,
-                        }),
-                    ),
-                )
-            })
-        },
+        do: paste,
         async undo() {
-            if (!this.info?.bookmarks) return
-            await Promise.all(this.info.bookmarks.map(bookmark => browser.bookmarks.removeTree(bookmark.id)))
+            await Promise.all(bookmarks.map(bookmark => browser.bookmarks.removeTree(bookmark.id)))
         },
     })
 }

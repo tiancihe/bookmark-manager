@@ -33,6 +33,7 @@ export default function FolderTreeItemContextMenuContent({
             <MenuItem
                 onClick={async () => {
                     await removeBookmark(bookmarkNode.id)
+                    snackbarMessageSignal.value = `${bookmarkNode.title} deleted`
                     onClose()
                 }}
             >

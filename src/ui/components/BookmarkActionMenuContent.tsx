@@ -49,12 +49,25 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                     e.stopPropagation()
                     onCloseMenu()
                     removeBookmarks(selectedNodes)
+                    snackbarMessageSignal.value = `${selectedNodes.length} items deleted`
                     dispatch(clearSelectedNodes())
                 }}
             >
                 Delete
             </MenuItem>
             <Divider />
+            <MenuItem
+                onClick={e => {
+                    e.stopPropagation()
+                    onCloseMenu()
+                    copyToClipboard(selectedNodes.map(node => node.url ?? node.title).join("\t\n"))
+                    dispatch(setCopiedNodes(selectedNodes))
+                    removeBookmarks(selectedNodes)
+                    snackbarMessageSignal.value = `${selectedNodes.length} items cut`
+                }}
+            >
+                Cut
+            </MenuItem>
             <MenuItem
                 onClick={e => {
                     e.stopPropagation()

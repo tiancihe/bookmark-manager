@@ -56,6 +56,10 @@ const _createBookmark: typeof browser.bookmarks.create = async details => {
     if (__CHROME__) {
         delete _details.type
     }
+    if (details.type !== BookmarkNodeType.Bookmark) {
+        delete _details.url
+        delete _details.type
+    }
     const bookmark = await browser.bookmarks.create(_details)
     return bookmark
 }
@@ -188,17 +192,26 @@ export async function pasteBookmarks(spec: PasteBookmarksSpec) {
     })
 }
 
-async function _sortFolderBy(_folder: BookmarkTreeNode, key: "title" | "url") {
+async function _sortFolderBy(_folder: BookmarkTreeNode, key: "title" | "url" | "date-asc" | "date-desc") {
     const folder = (await browser.bookmarks.getSubTree(_folder.id))[0]
 
     if (!isNodeFolder(folder) || !folder.children) return
 
     // always keeps folders on top
     const subFolders = folder.children.filter(isNodeFolder)
-    subFolders.sort((a, b) => naturalCompare(a.title, b.title))
-
     const bookmarks = folder.children.filter(isNodeBookmark)
-    bookmarks.sort((a, b) => naturalCompare(a[key] || "", b[key] || ""))
+
+    if (key === "title" || key === "url") {
+        subFolders.sort((a, b) => naturalCompare(a.title, b.title))
+        bookmarks.sort((a, b) => naturalCompare(a[key] || "", b[key] || ""))
+    } else {
+        subFolders.sort((a, b) =>
+            key === "date-desc" ? (a.dateAdded || 0) - (b.dateAdded || 0) : (b.dateAdded || 0) - (a.dateAdded || 0),
+        )
+        bookmarks.sort((a, b) =>
+            key === "date-desc" ? (a.dateAdded || 0) - (b.dateAdded || 0) : (b.dateAdded || 0) - (a.dateAdded || 0),
+        )
+    }
 
     const sorted = [...subFolders, ...bookmarks]
 
@@ -253,6 +266,16 @@ export async function sortFolderByName(folder: BookmarkTreeNode) {
 export async function sortFolderByUrl(folder: BookmarkTreeNode) {
     if (!isNodeFolder(folder) || !folder.children) return
     await sortFolderBy(folder, "url")
+}
+
+export async function sortFolderByDateAsc(folder: BookmarkTreeNode) {
+    if (!isNodeFolder(folder) || !folder.children) return
+    await sortFolderBy(folder, "date-asc")
+}
+
+export async function sortFolderByDateDesc(folder: BookmarkTreeNode) {
+    if (!isNodeFolder(folder) || !folder.children) return
+    await sortFolderBy(folder, "date-desc")
 }
 
 export async function moveBookmarksUnderParent(bookmarks: BookmarkTreeNode[], parent: BookmarkTreeNode) {

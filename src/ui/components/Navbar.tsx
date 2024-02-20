@@ -19,7 +19,7 @@ import { Search, Clear, Brightness4, Brightness5, MoreVert } from "@mui/icons-ma
 import useSettings from "../hooks/useSettings"
 import { selectNode } from "../store/dnd"
 import { setHashParam } from "../utils"
-import { sortFolderByName, sortFolderByUrl } from "../utils/bookmark"
+import { sortFolderByDateAsc, sortFolderByDateDesc, sortFolderByName, sortFolderByUrl } from "../utils/bookmark"
 import { BookmarkNodeType, RootState } from "../types"
 import { __MAC__ } from "../consts"
 import { openBookmarkCreateModal } from "../store/modal"
@@ -252,7 +252,7 @@ export default function Navbar() {
                 </div>
                 <Menu open={!!actionMenuAnchor} anchorEl={actionMenuAnchor} onClose={closeActionMenu}>
                     <MenuItem
-                        disabled={!!search}
+                        disabled={!!search || !activeFolder}
                         onClick={e => {
                             e.stopPropagation()
                             closeActionMenu()
@@ -264,7 +264,7 @@ export default function Navbar() {
                         Sort by name
                     </MenuItem>
                     <MenuItem
-                        disabled={!!search}
+                        disabled={!!search || !activeFolder}
                         onClick={e => {
                             e.stopPropagation()
                             closeActionMenu()
@@ -275,9 +275,33 @@ export default function Navbar() {
                     >
                         Sort by URL
                     </MenuItem>
+                    <MenuItem
+                        disabled={!!search || !activeFolder}
+                        onClick={e => {
+                            e.stopPropagation()
+                            closeActionMenu()
+                            if (!search && activeFolder) {
+                                sortFolderByDateDesc(activeFolder)
+                            }
+                        }}
+                    >
+                        Sort by date added (oldest first)
+                    </MenuItem>
+                    <MenuItem
+                        disabled={!!search || !activeFolder}
+                        onClick={e => {
+                            e.stopPropagation()
+                            closeActionMenu()
+                            if (!search && activeFolder) {
+                                sortFolderByDateAsc(activeFolder)
+                            }
+                        }}
+                    >
+                        Sort by date added (newest first)
+                    </MenuItem>
                     <Divider />
                     <MenuItem
-                        disabled={!!search}
+                        disabled={!!search || !activeFolder}
                         onClick={() => {
                             dispatch(openBookmarkCreateModal(BookmarkNodeType.Bookmark))
                             closeActionMenu()
@@ -286,7 +310,7 @@ export default function Navbar() {
                         Add new bookmark
                     </MenuItem>
                     <MenuItem
-                        disabled={!!search}
+                        disabled={!!search || !activeFolder}
                         onClick={() => {
                             dispatch(openBookmarkCreateModal(BookmarkNodeType.Folder))
                             closeActionMenu()

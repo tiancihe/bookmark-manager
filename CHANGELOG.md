@@ -1,3 +1,8 @@
+## 1.1.0 (2024/02/20)
+
+- sort by date added
+- sponsor link
+
 ## 1.0.0 (2024/02/07)
 
 - add bookmark action history functionality

@@ -1,6 +1,6 @@
 # Bookmark Manager
 
-A bookmark manager extension for browsers.
+A bookmark manager extension for firefox.
 
 ## Features
 
@@ -16,24 +16,32 @@ A bookmark manager extension for browsers.
 - Supports dark mode
 - Settings are kept locally, such as theme setting (light / dark)
 
-### TODO
-
-- i18n
-
 ## Development
 
-1. First, install dependencies (make sure nodejs is installed)
+1. make sure nodejs is installed
 
    ```bash
+   # use nvm to manage nodejs versions
+   # https://github.com/nvm-sh/nvm
+   nvm install 18
+   nvm use 18
+   ```
+
+2. install dependencies
+
+   ```bash
+   # this project is using pnpm as its package manager, to install it, run
+   npm i -g pnpm
+   # install dependencies using pnpm
    pnpm i
    ```
 
-2. start dev server
+3. run `pnpm run dev` to start dev server
 
-   ```bash
-   pnpm dev
-   ```
+4. load the extension in your firefox desktop browser
 
-3. load the extension inside the package folder in your firefox desktop browser
+   1. visit `about:debugging#/runtime/this-firefox` and click `Load Temporary Add-on...` button
 
-4. run `pnpm run pack` to pack the artifacts for AMO submission
+   2. select the `manifest.json` file under the `package` folder
+
+5. when done developing, run `pnpm run pack` to build and pack the extension into `web-ext-artifacts`

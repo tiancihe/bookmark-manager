@@ -12,6 +12,7 @@ import {
     Divider,
     FormControlLabel,
     Switch,
+    Link,
 } from "@mui/material"
 import { alpha } from "@mui/material/styles"
 import { Search, Clear, Brightness4, Brightness5, MoreVert } from "@mui/icons-material"
@@ -342,6 +343,12 @@ export default function Navbar() {
                             }
                             label="Always show URL"
                         />
+                    </MenuItem>
+                    <Divider />
+                    <MenuItem>
+                        <Link href="https://paypal.me/tiancihe95" target="_blank" underline="none">
+                            Support me on paypal
+                        </Link>
                     </MenuItem>
                 </Menu>
             </Toolbar>

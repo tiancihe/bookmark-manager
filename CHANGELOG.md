@@ -1,3 +1,8 @@
+## 1.1.1 (2024/02/23)
+
+- fix missing ui.html
+- fix missing roboto font
+
 ## 1.1.0 (2024/02/20)
 
 - sort by date added

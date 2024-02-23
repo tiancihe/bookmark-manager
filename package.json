@@ -4,9 +4,9 @@
   "description": "Bookmark management with ease",
   "private": true,
   "scripts": {
-    "dev": "NODE_ENV=development webpack",
-    "build": "NODE_ENV=production webpack",
-    "pack": "npm run build && web-ext build -s package -o -i ui.html && npm run zip-src",
+    "dev": "BUILD_TARGET=firefox NODE_ENV=development webpack",
+    "build": "BUILD_TARGET=firefox NODE_ENV=production webpack",
+    "pack": "npm run build && web-ext build -s package -o && npm run zip-src",
     "zip-src": "node scripts/zip-source"
   },
   "dependencies": {
@@ -46,7 +46,9 @@
     "@types/webextension-polyfill": "^0.10.7",
     "babel-loader": "^9.1.3",
     "babel-plugin-import": "^1.13.8",
+    "css-loader": "^6.10.0",
     "prettier": "^3.2.5",
+    "style-loader": "^3.3.4",
     "typescript": "^5.3.3",
     "web-ext": "^7.11.0",
     "webpack": "^5.90.3",

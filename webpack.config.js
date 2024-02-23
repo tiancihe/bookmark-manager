@@ -2,6 +2,7 @@ const path = require("path")
 const { DefinePlugin } = require("webpack")
 
 const isDev = process.env.NODE_ENV === "development"
+const buildTarget = process.env.BUILD_TARGET
 
 /** @type {import('webpack').Configuration} */
 const commonConfig = {
@@ -26,7 +27,7 @@ const commonConfig = {
     module: {
         rules: [
             {
-                test: /\.(j|t)sx?$/,
+                test: /\.(j|t)sx?$/i,
                 exclude: /node_modules/,
                 use: [
                     {
@@ -67,6 +68,10 @@ const commonConfig = {
                     },
                 ],
             },
+            {
+                test: /\.css$/i,
+                use: ["style-loader", "css-loader"],
+            },
         ],
     },
 }
@@ -76,7 +81,7 @@ const firefoxConfig = {
     ...commonConfig,
     output: {
         ...commonConfig.output,
-        path: path.join(__dirname, "package/scripts"),
+        path: path.join(__dirname, "package/assets"),
     },
     plugins: [
         new DefinePlugin({
@@ -91,7 +96,7 @@ const chromeConfig = {
     ...commonConfig,
     output: {
         ...commonConfig.output,
-        path: path.join(__dirname, "chrome/scripts"),
+        path: path.join(__dirname, "chrome/assets"),
     },
     plugins: [
         new DefinePlugin({
@@ -101,4 +106,5 @@ const chromeConfig = {
     ],
 }
 
-module.exports = [firefoxConfig, chromeConfig]
+module.exports =
+    buildTarget === "firefox" ? firefoxConfig : buildTarget === "chrome" ? chromeConfig : [firefoxConfig, chromeConfig]

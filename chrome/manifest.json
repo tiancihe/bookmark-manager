@@ -21,7 +21,7 @@
     }
   },
   "background": {
-    "service_worker": "scripts/background.js"
+    "service_worker": "assets/background.js"
   },
   "permissions": ["bookmarks", "tabs", "storage", "favicon"]
 }

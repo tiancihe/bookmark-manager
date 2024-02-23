@@ -1,13 +1,8 @@
+.DS_store
 node_modules
 
-package-lock.json
-yarn.lock
-
-dll
-package/scripts
+package/assets
 package/.web-extension-id
-chrome/scripts
+chrome/assets
 
 web-ext-artifacts
-
-.DS_store

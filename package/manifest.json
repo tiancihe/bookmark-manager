@@ -21,7 +21,7 @@
     }
   },
   "background": {
-    "scripts": ["scripts/background.js"]
+    "scripts": ["assets/background.js"]
   },
   "permissions": ["bookmarks", "tabs", "storage"]
 }

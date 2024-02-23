@@ -1,3 +1,7 @@
+## 1.2.0 (2024/02/23)
+
+- add find duplicated bookmarks functionality
+
 ## 1.1.1 (2024/02/23)
 
 - fix missing ui.html

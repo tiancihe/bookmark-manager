@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "BUILD_TARGET=firefox NODE_ENV=development webpack",
     "build": "BUILD_TARGET=firefox NODE_ENV=production webpack",
+    "analyze": "BUILD_TARGET=firefox NODE_ENV=production webpack --analyze",
     "pack": "npm run build && web-ext build -s package -o && npm run zip-src",
     "zip-src": "node scripts/zip-source"
   },
@@ -52,6 +53,7 @@
     "typescript": "^5.3.3",
     "web-ext": "^7.11.0",
     "webpack": "^5.90.3",
+    "webpack-bundle-analyzer": "^4.10.1",
     "webpack-cli": "^5.1.4"
   }
 }

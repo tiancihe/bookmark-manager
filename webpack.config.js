@@ -29,44 +29,7 @@ const commonConfig = {
             {
                 test: /\.(j|t)sx?$/i,
                 exclude: /node_modules/,
-                use: [
-                    {
-                        loader: "babel-loader",
-                        options: {
-                            compact: false,
-                            presets: [
-                                "@babel/preset-env",
-                                [
-                                    "@babel/preset-react",
-                                    {
-                                        runtime: "automatic",
-                                    },
-                                ],
-                                "@babel/preset-typescript",
-                            ],
-                            plugins: [
-                                [
-                                    "babel-plugin-import",
-                                    {
-                                        libraryName: "@mui/material",
-                                        libraryDirectory: "",
-                                        camel2DashComponentName: false,
-                                    },
-                                    "core",
-                                ],
-                                [
-                                    "babel-plugin-import",
-                                    {
-                                        libraryName: "@mui/icons-material",
-                                        libraryDirectory: "",
-                                        camel2DashComponentName: false,
-                                    },
-                                    "icons",
-                                ],
-                            ],
-                        },
-                    },
-                ],
+                use: "babel-loader",
             },
             {
                 test: /\.css$/i,

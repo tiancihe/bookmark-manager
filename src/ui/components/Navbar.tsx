@@ -97,6 +97,7 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
 
 export default function Navbar() {
     const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
+    const bookmarkList = useSelector((state: RootState) => state.bookmark.bookmarkList)
     const search = useSelector((state: RootState) => state.bookmark.search)
     const searchResult = useSelector((state: RootState) => state.bookmark.searchResult)
     const dispatch = useDispatch()
@@ -189,7 +190,7 @@ export default function Navbar() {
                     className={classes.title}
                     onClick={e => {
                         e.stopPropagation()
-                        setHashParam({ search: undefined, folder: undefined })
+                        setHashParam({ search: undefined, folder: undefined, dedupe: undefined })
                     }}
                 >
                     Bookmarks
@@ -318,6 +319,19 @@ export default function Navbar() {
                         }}
                     >
                         Add new folder
+                    </MenuItem>
+                    <Divider />
+                    <MenuItem
+                        onClick={() => {
+                            closeActionMenu()
+                            setHashParam({
+                                folder: undefined,
+                                search: undefined,
+                                dedupe: "1",
+                            })
+                        }}
+                    >
+                        Find duplicated bookmarks
                     </MenuItem>
                     <Divider />
                     <MenuItem>

@@ -28,6 +28,7 @@ export enum ModalType {
 export interface HashParams {
     search?: string
     folder?: string
+    dedupe?: "1"
 }
 
 export type Settings = {

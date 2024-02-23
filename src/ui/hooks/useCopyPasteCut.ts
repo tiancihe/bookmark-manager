@@ -5,8 +5,8 @@ import copyToClipboard from "copy-to-clipboard"
 import { __MAC__ } from "../consts"
 import { RootState } from "../types"
 import { setCopiedNodes } from "../store/cnp"
+import { setSnackbarMessage } from "../store/message"
 import { pasteBookmarks, removeBookmarks } from "../utils/bookmark"
-import { snackbarMessageSignal } from "../signals"
 
 export function useCopyPasteCut() {
     const dispatch = useDispatch()
@@ -28,7 +28,7 @@ export function useCopyPasteCut() {
                     e.preventDefault()
                     copyToClipboard(selectedNodes.map(node => node.url ?? node.title).join("\t\n"))
                     dispatch(setCopiedNodes([...selectedNodes]))
-                    snackbarMessageSignal.value = `${selectedNodes.length} items copied`
+                    dispatch(setSnackbarMessage(`${selectedNodes.length} items copied`))
                 }
                 return
             }
@@ -65,7 +65,7 @@ export function useCopyPasteCut() {
                     copyToClipboard(selectedNodes.map(node => node.url ?? node.title).join("\t\n"))
                     dispatch(setCopiedNodes([...selectedNodes]))
                     removeBookmarks(selectedNodes)
-                    snackbarMessageSignal.value = `${selectedNodes.length} items cut`
+                    dispatch(setSnackbarMessage(`${selectedNodes.length} items cut`))
                 }
             }
         }

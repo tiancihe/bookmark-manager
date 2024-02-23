@@ -23,9 +23,6 @@ dependencies:
   '@mui/material':
     specifier: ^5.15.10
     version: 5.15.10(@emotion/react@11.11.3)(@emotion/styled@11.11.0)(@types/react@18.2.57)(react-dom@18.2.0)(react@18.2.0)
-  '@preact/signals-react':
-    specifier: ^2.0.0
-    version: 2.0.0(react@18.2.0)
   '@reduxjs/toolkit':
     specifier: ^1.2.3
     version: 1.9.7(react-redux@7.2.9)(react@18.2.0)
@@ -1948,20 +1945,6 @@ packages:
 
   /@popperjs/core@2.11.8:
     resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
-    dev: false
-
-  /@preact/signals-core@1.5.1:
-    resolution: {integrity: sha512-dE6f+WCX5ZUDwXzUIWNMhhglmuLpqJhuy3X3xHrhZYI0Hm2LyQwOu0l9mdPiWrVNsE+Q7txOnJPgtIqHCYoBVA==}
-    dev: false
-
-  /@preact/signals-react@2.0.0(react@18.2.0):
-    resolution: {integrity: sha512-tMVi2SXFXlojaiPNWa8dlYaidR/XvEgMSp+iymKJgMssBM/QVtUQrodKZek1BJju+dkVHiyeuQHmkuLOI9oyNw==}
-    peerDependencies:
-      react: ^16.14.0 || 17.x || 18.x
-    dependencies:
-      '@preact/signals-core': 1.5.1
-      react: 18.2.0
-      use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
 
   /@react-dnd/asap@5.0.2:
@@ -5923,14 +5906,6 @@ packages:
     dependencies:
       punycode: 2.3.1
     dev: true
-
-  /use-sync-external-store@1.2.0(react@18.2.0):
-    resolution: {integrity: sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==}
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
-    dependencies:
-      react: 18.2.0
-    dev: false
 
   /util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}

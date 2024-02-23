@@ -3,6 +3,7 @@ import naturalCompare from "natural-compare"
 import { BatchingUpdateManager } from "../consts"
 import { BookmarkNodeType, BookmarkTreeNode } from "../types"
 import { createActionHistory } from "./actionHistory"
+import store from "../store"
 
 export const bookmarkActionHistory = createActionHistory<{
     id?: string
@@ -25,6 +26,23 @@ export function isNodeBookmark(node: BookmarkTreeNode) {
 
 export function isNodeFolder(node: BookmarkTreeNode) {
     return node.type === BookmarkNodeType.Folder || !node.url
+}
+
+export function getParentPathDesc(node: BookmarkTreeNode) {
+    const {
+        bookmark: { bookmarkMap },
+    } = store.getState()
+    let parentId = node.parentId
+    const parentPath = [] as BookmarkTreeNode[]
+    while (parentId) {
+        const parent = bookmarkMap[parentId]
+        parentPath.push(parent)
+        parentId = parent.parentId
+    }
+    return parentPath
+        .reverse()
+        .map(node => node.title)
+        .join("/")
 }
 
 /** get all child bookmarks under a folder */

@@ -6,13 +6,13 @@ import { Paper, Menu, MenuItem, Typography, Stack, Box } from "@mui/material"
 import useContextMenu from "../hooks/useContextMenu"
 import { useCopyPasteCut } from "../hooks/useCopyPasteCut"
 import { openBookmarkCreateModal } from "../store/modal"
+import { setSnackbarMessage } from "../store/message"
 import { selectNodes, clearSelectedNodes, selectNode } from "../store/dnd"
 import { setHashParam } from "../utils"
 import { isNodeBookmark, isNodeFolder, removeBookmarks, openTab } from "../utils/bookmark"
 import { RootState, BookmarkNodeType } from "../types"
 import { __MAC__ } from "../consts"
 import BookmarkTreeItem from "./BookmarkTreeItem"
-import { snackbarMessageSignal } from "../signals"
 
 const StyledPaper = styled(Paper)(({ theme }) => {
     return {
@@ -25,10 +25,10 @@ const StyledPaper = styled(Paper)(({ theme }) => {
 
 export default function BookmarkPanel() {
     const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
+    const duplicatedBookmarks = useSelector((state: RootState) => state.bookmark.duplicatedBookmarks)
     const search = useSelector((state: RootState) => state.bookmark.search)
     const searchResult = useSelector((state: RootState) => state.bookmark.searchResult)
     const selectedNodes = useSelector((state: RootState) => state.dnd.selectedNodes)
-    const copiedNodes = useSelector((state: RootState) => state.cnp.copied)
     const dispatch = useDispatch()
 
     const activeFolderChildren = useMemo(() => {
@@ -108,7 +108,7 @@ export default function BookmarkPanel() {
                 ((__MAC__ && e.key === "Backspace") || (!__MAC__ && e.key === "Delete"))
             ) {
                 removeBookmarks(selectedNodes)
-                snackbarMessageSignal.value = `${selectedNodes.length} items deleted`
+                dispatch(setSnackbarMessage(`${selectedNodes.length} items deleted`))
             }
         }
         window.addEventListener("keydown", deleteListener)
@@ -131,7 +131,13 @@ export default function BookmarkPanel() {
                 handleContextMenuEvent(e)
             }}
         >
-            {search ? (
+            {duplicatedBookmarks.length ? (
+                <StyledPaper elevation={3}>
+                    {duplicatedBookmarks.map(child => (
+                        <BookmarkTreeItem key={child.id} bookmarkNode={child} showParentPath={true} />
+                    ))}
+                </StyledPaper>
+            ) : search ? (
                 searchResult.length ? (
                     <StyledPaper elevation={3}>
                         {searchResult.map(child => (

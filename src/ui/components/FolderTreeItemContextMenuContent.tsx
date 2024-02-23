@@ -5,9 +5,9 @@ import copyToClipboard from "copy-to-clipboard"
 
 import { openBookmarkEditModal } from "../store/modal"
 import { setCopiedNodes } from "../store/cnp"
+import { setSnackbarMessage } from "../store/message"
 import { BookmarkTreeNode, BookmarkNodeType } from "../types"
 import { removeBookmark } from "../utils/bookmark"
-import { snackbarMessageSignal } from "../signals"
 
 export default function FolderTreeItemContextMenuContent({
     bookmarkNode,
@@ -33,7 +33,7 @@ export default function FolderTreeItemContextMenuContent({
             <MenuItem
                 onClick={async () => {
                     await removeBookmark(bookmarkNode.id)
-                    snackbarMessageSignal.value = `${bookmarkNode.title} deleted`
+                    dispatch(setSnackbarMessage(`${bookmarkNode.title} deleted`))
                     onClose()
                 }}
             >
@@ -45,7 +45,7 @@ export default function FolderTreeItemContextMenuContent({
                     e.stopPropagation()
                     dispatch(setCopiedNodes([bookmarkNode]))
                     copyToClipboard(bookmarkNode.title)
-                    snackbarMessageSignal.value = `"${bookmarkNode.title}" copied`
+                    dispatch(setSnackbarMessage(`"${bookmarkNode.title}" copied`))
                     onClose()
                 }}
             >

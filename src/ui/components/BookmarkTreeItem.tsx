@@ -16,6 +16,7 @@ import {
     moveBookmarksAboveTarget,
     moveBookmarksUnderParent,
     moveBookmarksBelowTarget,
+    getParentPathDesc,
 } from "../utils/bookmark"
 import { handleHoverAndDrop } from "../utils/dnd"
 import { BookmarkTreeNode } from "../types"
@@ -78,7 +79,13 @@ const Root = styled("div")(({ theme }) => ({
     },
 }))
 
-export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: BookmarkTreeNode }) {
+export default function BookmarkTreeItem({
+    bookmarkNode,
+    showParentPath,
+}: {
+    bookmarkNode: BookmarkTreeNode
+    showParentPath?: boolean
+}) {
     const theme = useTheme()
 
     const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
@@ -243,7 +250,7 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
                 <Box sx={{ flex: 1, display: "flex", alignItems: "center", overflow: "hidden" }}>
                     <Typography
                         sx={{
-                            flex: settings?.alwaysShowURL || isSelected ? "0 auto" : 1,
+                            flex: showParentPath || settings?.alwaysShowURL || isSelected ? "0 auto" : 1,
                             marginLeft: theme.spacing(2),
                         }}
                         variant="body2"
@@ -252,21 +259,28 @@ export default function BookmarkTreeItem({ bookmarkNode }: { bookmarkNode: Bookm
                     >
                         {bookmarkNode.title}
                     </Typography>
-                    {(settings?.alwaysShowURL || isSelected) && (
-                        <Typography
-                            sx={{
-                                flex: 1,
-                                minWidth: 100,
-                                margin: theme.spacing(0, 2),
-                                color: alpha(theme.palette.text.primary, 0.55),
-                            }}
-                            variant="body2"
-                            noWrap
-                            title={bookmarkNode.url}
-                        >
-                            {bookmarkNode.url}
-                        </Typography>
-                    )}
+                    {(() => {
+                        if (showParentPath || settings?.alwaysShowURL || isSelected) {
+                            const text =
+                                showParentPath && !isSelected ? getParentPathDesc(bookmarkNode) : bookmarkNode.url
+                            return (
+                                <Typography
+                                    sx={{
+                                        flex: 1,
+                                        minWidth: 200,
+                                        margin: theme.spacing(0, 2),
+                                        color: alpha(theme.palette.text.primary, 0.55),
+                                    }}
+                                    variant="body2"
+                                    noWrap
+                                    title={text}
+                                >
+                                    {text}
+                                </Typography>
+                            )
+                        }
+                        return null
+                    })()}
                 </Box>
                 <BookmarkActionMenu />
             </Box>

@@ -6,14 +6,15 @@ import copyToClipboard from "copy-to-clipboard"
 import { clearSelectedNodes } from "../store/dnd"
 import { setCopiedNodes } from "../store/cnp"
 import { openBookmarkEditModal } from "../store/modal"
+import { setSnackbarMessage } from "../store/message"
 import { isNodeBookmark, removeBookmarks, pasteBookmarks, getChildBookmarks, isNodeFolder } from "../utils/bookmark"
 import { RootState, BookmarkTreeNode } from "../types"
-import { snackbarMessageSignal } from "../signals"
-import { setState } from "../store/bookmark"
+import { setHashParam } from "../utils"
 
 export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu: () => void }) {
     const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
     const search = useSelector((state: RootState) => state.bookmark.search)
+    const duplicatedBookmarks = useSelector((state: RootState) => state.bookmark.duplicatedBookmarks)
     const selectedNodes = useSelector((state: RootState) => state.dnd.selectedNodes)
     const copiedNodes = useSelector((state: RootState) => state.cnp.copied)
     const dispatch = useDispatch()
@@ -34,27 +35,25 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
 
     return (
         <Fragment>
-            {search && selectedNodes.length === 1 && selectedNodes[0].parentId && (
+            {(search || duplicatedBookmarks.length) && selectedNodes.length === 1 && selectedNodes[0].parentId ? (
                 <MenuItem
                     onClick={async e => {
                         e.stopPropagation()
                         onCloseMenu()
                         const activeFolderId = selectedNodes[0].parentId!
-                        dispatch(
-                            setState({
-                                search: "",
-                                searchResult: [],
-                                activeFolderId,
-                            }),
-                        )
+                        setHashParam({
+                            folder: activeFolderId,
+                            search: undefined,
+                            dedupe: undefined,
+                        })
                         document.getElementById(activeFolderId)?.scrollIntoView()
                         document.getElementById(selectedNodes[0].id)?.scrollIntoView()
                     }}
                 >
                     Show in folder
                 </MenuItem>
-            )}
-            {selectedNodes.length === 1 && (
+            ) : null}
+            {selectedNodes.length === 1 ? (
                 <MenuItem
                     onClick={e => {
                         e.stopPropagation()
@@ -64,13 +63,13 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                 >
                     {isNodeBookmark(selectedNodes[0]) ? "Edit" : "Rename"}
                 </MenuItem>
-            )}
+            ) : null}
             <MenuItem
                 onClick={async e => {
                     e.stopPropagation()
                     onCloseMenu()
                     removeBookmarks(selectedNodes)
-                    snackbarMessageSignal.value = `${selectedNodes.length} items deleted`
+                    dispatch(setSnackbarMessage(`${selectedNodes.length} items deleted`))
                     dispatch(clearSelectedNodes())
                 }}
             >
@@ -84,7 +83,7 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                     copyToClipboard(selectedNodes.map(node => node.url ?? node.title).join("\t\n"))
                     dispatch(setCopiedNodes(selectedNodes))
                     removeBookmarks(selectedNodes)
-                    snackbarMessageSignal.value = `${selectedNodes.length} items cut`
+                    dispatch(setSnackbarMessage(`${selectedNodes.length} items cut`))
                 }}
             >
                 Cut
@@ -95,23 +94,23 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                     onCloseMenu()
                     copyToClipboard(selectedNodes.map(node => node.url ?? node.title).join("\t\n"))
                     dispatch(setCopiedNodes(selectedNodes))
-                    snackbarMessageSignal.value = `${selectedNodes.length} items copied`
+                    dispatch(setSnackbarMessage(`${selectedNodes.length} items copied`))
                 }}
             >
                 Copy
             </MenuItem>
-            {selectedNodes.length === 1 && isNodeBookmark(selectedNodes[0]) && (
+            {selectedNodes.length === 1 && isNodeBookmark(selectedNodes[0]) ? (
                 <MenuItem
                     onClick={e => {
                         e.stopPropagation()
                         onCloseMenu()
                         copyToClipboard(selectedNodes[0].url!)
-                        snackbarMessageSignal.value = "URL copied"
+                        dispatch(setSnackbarMessage("URL copied"))
                     }}
                 >
                     Copy URL
                 </MenuItem>
-            )}
+            ) : null}
             <MenuItem
                 onClick={e => {
                     e.stopPropagation()

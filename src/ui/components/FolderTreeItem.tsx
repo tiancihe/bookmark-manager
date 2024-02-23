@@ -126,19 +126,11 @@ export default function FolderTreeItem({
                 }}
                 onClick={e => {
                     e.stopPropagation()
-                    if (!isActive) {
-                        // there are two cases when isActive is false:
-                        if (search) {
-                            // 1: search state is not empty
-                            setHashParam({
-                                folder: bookmarkNode.id,
-                                search: undefined,
-                            })
-                        } else {
-                            // 2: search state is empty and there is no active folder
-                            setHashParam({ folder: bookmarkNode.id })
-                        }
-                    }
+                    setHashParam({
+                        folder: bookmarkNode.id,
+                        search: undefined,
+                        dedupe: undefined,
+                    })
                 }}
                 onContextMenu={e => {
                     e.preventDefault()

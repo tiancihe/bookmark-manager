@@ -5,12 +5,14 @@ import { bookmark } from "./bookmark"
 import { dnd } from "./dnd"
 import { cnp } from "./cnp"
 import { modal } from "./modal"
+import { message } from "./message"
 
 export const reducer = combineReducers({
     bookmark,
     dnd,
     cnp,
     modal,
+    message,
 })
 
 const middleware = [thunk]

@@ -1,27 +1,31 @@
 import { Button, Snackbar } from "@mui/material"
-import { useSignals } from "@preact/signals-react/runtime"
+import { useDispatch, useSelector } from "react-redux"
 
-import { snackbarMessageSignal } from "../signals"
+import { clearSnackbarMessage } from "../store/message"
 import { bookmarkActionHistory } from "../utils/bookmark"
+import { RootState } from "../types"
 
 export default function GlobalSnackbar() {
-    useSignals()
+    const snackbarMessage = useSelector((state: RootState) => state.message.snackbarMessage)
+    const dispatch = useDispatch()
     return (
         <Snackbar
             anchorOrigin={{
                 vertical: "bottom",
                 horizontal: "left",
             }}
-            open={!!snackbarMessageSignal.value}
-            onClose={() => (snackbarMessageSignal.value = "")}
+            open={!!snackbarMessage}
+            onClose={() => {
+                dispatch(clearSnackbarMessage())
+            }}
             autoHideDuration={8000}
-            message={snackbarMessageSignal.value}
+            message={snackbarMessage}
             action={
                 <Button
                     variant="text"
                     onClick={() => {
                         bookmarkActionHistory.undo()
-                        snackbarMessageSignal.value = ""
+                        dispatch(clearSnackbarMessage())
                     }}
                 >
                     Undo

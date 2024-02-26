@@ -1,11 +1,11 @@
 import { Divider } from "@mui/material"
 import { useEffect, useRef, useState } from "react"
 
-import useSettings from "../hooks/useSettings"
+import { setSettings, useStore } from "../store"
 import { __FOLDER_PANEL_ID__ } from "../consts"
 
 export default function Splitter() {
-    const { settings, setSettings } = useSettings()
+    const settings = useStore(s => s.settings)
 
     const [isVisible, setIsVisible] = useState(false)
     const [isDragging, setIsDragging] = useState(false)
@@ -14,7 +14,7 @@ export default function Splitter() {
     useEffect(() => {
         if (isDragging) {
             const onMouseMove = (e: MouseEvent) => {
-                if (!settings?.splitterPosition || !isDragging) return
+                if (!isDragging) return
                 const folderPanel = document.getElementById(__FOLDER_PANEL_ID__)
                 if (folderPanel) {
                     folderPanel.style.width = `${Math.max(
@@ -24,9 +24,7 @@ export default function Splitter() {
                 }
             }
             const onMouseUp = (e: MouseEvent) => {
-                if (!settings) return
                 setSettings({
-                    ...settings,
                     splitterPosition: Math.max(
                         Math.min(settings.splitterPosition + (e.clientX - startPosRef.current), 400),
                         256,

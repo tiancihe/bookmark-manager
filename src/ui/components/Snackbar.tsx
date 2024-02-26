@@ -1,13 +1,11 @@
 import { Button, Snackbar } from "@mui/material"
-import { useDispatch, useSelector } from "react-redux"
 
-import { clearSnackbarMessage } from "../store/message"
 import { bookmarkActionHistory } from "../utils/bookmark"
-import { RootState } from "../types"
+import { clearSnackbarMessage, useStore } from "../store"
 
 export default function GlobalSnackbar() {
-    const snackbarMessage = useSelector((state: RootState) => state.message.snackbarMessage)
-    const dispatch = useDispatch()
+    const snackbarMessage = useStore(state => state.snackbarMessage)
+
     return (
         <Snackbar
             anchorOrigin={{
@@ -16,7 +14,7 @@ export default function GlobalSnackbar() {
             }}
             open={!!snackbarMessage}
             onClose={() => {
-                dispatch(clearSnackbarMessage())
+                clearSnackbarMessage()
             }}
             autoHideDuration={8000}
             message={snackbarMessage}
@@ -25,7 +23,7 @@ export default function GlobalSnackbar() {
                     variant="text"
                     onClick={() => {
                         bookmarkActionHistory.undo()
-                        dispatch(clearSnackbarMessage())
+                        clearSnackbarMessage()
                     }}
                 >
                     Undo

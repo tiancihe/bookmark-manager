@@ -1,13 +1,11 @@
 import { PropsWithChildren, useState, useEffect, useMemo, useRef } from "react"
-import { useSelector, useDispatch } from "react-redux"
 import { Box, Menu, Typography } from "@mui/material"
 import { useTheme, alpha } from "@mui/material/styles"
 import { ArrowRight, ArrowDropDown, FolderOutlined, FolderOpenOutlined } from "@mui/icons-material"
 import { useDrop, useDrag } from "react-dnd"
 
 import useContextMenu from "../hooks/useContextMenu"
-import { selectNode } from "../store/dnd"
-import { setHashParam } from "../utils"
+import { setHashParam } from "../utils/hashParams"
 import {
     isNodeFolder,
     isNodeSelected,
@@ -16,11 +14,11 @@ import {
     moveBookmarksBelowTarget,
 } from "../utils/bookmark"
 import { handleHoverAndDrop } from "../utils/dnd"
-import { BookmarkTreeNode } from "../types"
-import { RootState, HoverArea } from "../types"
+import { BookmarkTreeNode, HoverArea } from "../types"
 import { DNDTypes } from "../consts"
 import FolderTreeItemContextMenuContent from "./FolderTreeItemContextMenuContent"
 import HoverStateManager from "../hover-state-manager"
+import { setSelectedBookmarkNodes, useStore } from "../store"
 
 export default function FolderTreeItem({
     level,
@@ -34,16 +32,14 @@ export default function FolderTreeItem({
 }>) {
     const theme = useTheme()
 
-    const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
-    const search = useSelector((state: RootState) => state.bookmark.search)
+    const activeFolder = useStore(state => state.activeFolder)
+    const search = useStore(state => state.search)
     // if search state is true, all folder items should stay inactive
     // user should be able to click any folder to active it and clear search state in the mean time
     const isActive = !search && activeFolder?.id === bookmarkNode.id
 
-    const selectedNodes = useSelector((state: RootState) => state.dnd.selectedNodes)
+    const selectedNodes = useStore(state => state.selectedBookmarkNodes)
     const isSelected = isNodeSelected(bookmarkNode, selectedNodes)
-
-    const dispatch = useDispatch()
 
     const [open, setOpen] = useState(defaultOpen)
 
@@ -63,7 +59,7 @@ export default function FolderTreeItem({
         type: DNDTypes.FolderItem,
         item: () => {
             if (selectedNodes.length === 0) {
-                dispatch(selectNode(bookmarkNode))
+                setSelectedBookmarkNodes([bookmarkNode])
             }
             return { type: DNDTypes.FolderItem }
         },

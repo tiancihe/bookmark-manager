@@ -1,16 +1,19 @@
 import { useEffect, useMemo } from "react"
 import { styled } from "@mui/material/styles"
-import { useSelector, useDispatch } from "react-redux"
 import { Paper, Menu, MenuItem, Typography, Stack, Box } from "@mui/material"
 
+import {
+    clearSelectedBookmarkNodes,
+    openBookmarkCreateModal,
+    setSelectedBookmarkNodes,
+    setSnackbarMessage,
+    useStore,
+} from "../store"
 import useContextMenu from "../hooks/useContextMenu"
 import { useCopyPasteCut } from "../hooks/useCopyPasteCut"
-import { openBookmarkCreateModal } from "../store/modal"
-import { setSnackbarMessage } from "../store/message"
-import { selectNodes, clearSelectedNodes, selectNode } from "../store/dnd"
-import { setHashParam } from "../utils"
+import { setHashParam } from "../utils/hashParams"
 import { isNodeBookmark, isNodeFolder, removeBookmarks, openTab } from "../utils/bookmark"
-import { RootState, BookmarkNodeType } from "../types"
+import { BookmarkNodeType } from "../types"
 import { __MAC__ } from "../consts"
 import BookmarkTreeItem from "./BookmarkTreeItem"
 
@@ -24,12 +27,11 @@ const StyledPaper = styled(Paper)(({ theme }) => {
 })
 
 export default function BookmarkPanel() {
-    const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
-    const duplicatedBookmarks = useSelector((state: RootState) => state.bookmark.duplicatedBookmarks)
-    const search = useSelector((state: RootState) => state.bookmark.search)
-    const searchResult = useSelector((state: RootState) => state.bookmark.searchResult)
-    const selectedNodes = useSelector((state: RootState) => state.dnd.selectedNodes)
-    const dispatch = useDispatch()
+    const activeFolder = useStore(state => state.activeFolder)
+    const duplicatedBookmarks = useStore(state => state.duplicatedBookmarks)
+    const search = useStore(state => state.search)
+    const searchResult = useStore(state => state.searchResult)
+    const selectedNodes = useStore(state => state.selectedBookmarkNodes)
 
     const activeFolderChildren = useMemo(() => {
         return activeFolder !== null && Array.isArray(activeFolder.children) && activeFolder.children.length > 0
@@ -45,9 +47,9 @@ export default function BookmarkPanel() {
             const items = searchResult.length ? searchResult : activeFolderChildren ?? []
             const currentIndex = items.findIndex(item => item.id === selectedNodes[0].id)
             if (e.key === "ArrowDown" && currentIndex < items.length - 1) {
-                dispatch(selectNode(items[currentIndex + 1]))
+                setSelectedBookmarkNodes([items[currentIndex + 1]])
             } else if (e.key === "ArrowUp" && currentIndex > 0) {
-                dispatch(selectNode(items[currentIndex - 1]))
+                setSelectedBookmarkNodes([items[currentIndex - 1]])
             } else if (e.key === "Enter") {
                 const item = items[currentIndex!]
                 if (isNodeBookmark(item)) {
@@ -73,12 +75,12 @@ export default function BookmarkPanel() {
             ) {
                 if (searchResult.length) {
                     e.preventDefault()
-                    dispatch(selectNodes(searchResult))
+                    setSelectedBookmarkNodes(searchResult)
                     return
                 }
                 if (activeFolder && activeFolder.children && activeFolder.children.length) {
                     e.preventDefault()
-                    dispatch(selectNodes(activeFolder.children))
+                    setSelectedBookmarkNodes(activeFolder.children)
                     return
                 }
             }
@@ -92,7 +94,7 @@ export default function BookmarkPanel() {
         const escapeListener = (e: KeyboardEvent) => {
             if (e.target === document.body && e.key === "Escape") {
                 if (selectedNodes.length) {
-                    dispatch(clearSelectedNodes())
+                    clearSelectedBookmarkNodes()
                 }
             }
         }
@@ -108,7 +110,7 @@ export default function BookmarkPanel() {
                 ((__MAC__ && e.key === "Backspace") || (!__MAC__ && e.key === "Delete"))
             ) {
                 removeBookmarks(selectedNodes)
-                dispatch(setSnackbarMessage(`${selectedNodes.length} items deleted`))
+                setSnackbarMessage(`${selectedNodes.length} items deleted`)
             }
         }
         window.addEventListener("keydown", deleteListener)
@@ -161,7 +163,7 @@ export default function BookmarkPanel() {
             <Menu {...contextMenuProps}>
                 <MenuItem
                     onClick={() => {
-                        dispatch(openBookmarkCreateModal(BookmarkNodeType.Bookmark))
+                        openBookmarkCreateModal(BookmarkNodeType.Bookmark)
                         closeContextMenu()
                     }}
                 >
@@ -169,7 +171,7 @@ export default function BookmarkPanel() {
                 </MenuItem>
                 <MenuItem
                     onClick={() => {
-                        dispatch(openBookmarkCreateModal(BookmarkNodeType.Folder))
+                        openBookmarkCreateModal(BookmarkNodeType.Folder)
                         closeContextMenu()
                     }}
                 >

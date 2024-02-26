@@ -7,6 +7,8 @@ export const __MAC__ = /mac/i.test(navigator.userAgent)
 
 export const __FOLDER_PANEL_ID__ = "__FOLDER_PANEL__"
 
+export const SETTINGS_KEY = "__SETTINGS__"
+
 export type BatchingUpdateListener = (isBatchingUpdate: boolean) => void
 
 function createBatchingUpdateManager() {

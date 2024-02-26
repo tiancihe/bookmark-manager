@@ -1,23 +1,24 @@
 import { Fragment, useMemo } from "react"
-import { useSelector, useDispatch } from "react-redux"
 import { MenuItem, Divider, Typography } from "@mui/material"
 import copyToClipboard from "copy-to-clipboard"
 
-import { clearSelectedNodes } from "../store/dnd"
-import { setCopiedNodes } from "../store/cnp"
-import { openBookmarkEditModal } from "../store/modal"
-import { setSnackbarMessage } from "../store/message"
+import { BookmarkTreeNode } from "../types"
+import { setHashParam } from "../utils/hashParams"
 import { isNodeBookmark, removeBookmarks, pasteBookmarks, getChildBookmarks, isNodeFolder } from "../utils/bookmark"
-import { RootState, BookmarkTreeNode } from "../types"
-import { setHashParam } from "../utils"
+import {
+    useStore,
+    openBookmarkEditModal,
+    clearSelectedBookmarkNodes,
+    setCopiedBookmarkNodes,
+    setSnackbarMessage,
+} from "../store"
 
 export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu: () => void }) {
-    const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
-    const search = useSelector((state: RootState) => state.bookmark.search)
-    const duplicatedBookmarks = useSelector((state: RootState) => state.bookmark.duplicatedBookmarks)
-    const selectedNodes = useSelector((state: RootState) => state.dnd.selectedNodes)
-    const copiedNodes = useSelector((state: RootState) => state.cnp.copied)
-    const dispatch = useDispatch()
+    const activeFolder = useStore(state => state.activeFolder)
+    const search = useStore(state => state.search)
+    const duplicatedBookmarks = useStore(state => state.duplicatedBookmarks)
+    const selectedNodes = useStore(state => state.selectedBookmarkNodes)
+    const copiedNodes = useStore(state => state.copiedBookmarkNodes)
 
     const selectedBookmarks = useMemo(() => {
         const result = [] as BookmarkTreeNode[]
@@ -58,7 +59,7 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                     onClick={e => {
                         e.stopPropagation()
                         onCloseMenu()
-                        dispatch(openBookmarkEditModal(selectedNodes[0]))
+                        openBookmarkEditModal(selectedNodes[0])
                     }}
                 >
                     {isNodeBookmark(selectedNodes[0]) ? "Edit" : "Rename"}
@@ -69,8 +70,7 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                     e.stopPropagation()
                     onCloseMenu()
                     removeBookmarks(selectedNodes)
-                    dispatch(setSnackbarMessage(`${selectedNodes.length} items deleted`))
-                    dispatch(clearSelectedNodes())
+                    clearSelectedBookmarkNodes(`${selectedNodes.length} items deleted`)
                 }}
             >
                 Delete
@@ -81,9 +81,8 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                     e.stopPropagation()
                     onCloseMenu()
                     copyToClipboard(selectedNodes.map(node => node.url ?? node.title).join("\t\n"))
-                    dispatch(setCopiedNodes(selectedNodes))
                     removeBookmarks(selectedNodes)
-                    dispatch(setSnackbarMessage(`${selectedNodes.length} items cut`))
+                    setCopiedBookmarkNodes(selectedNodes, `${selectedNodes.length} items cut`)
                 }}
             >
                 Cut
@@ -93,8 +92,7 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                     e.stopPropagation()
                     onCloseMenu()
                     copyToClipboard(selectedNodes.map(node => node.url ?? node.title).join("\t\n"))
-                    dispatch(setCopiedNodes(selectedNodes))
-                    dispatch(setSnackbarMessage(`${selectedNodes.length} items copied`))
+                    setCopiedBookmarkNodes(selectedNodes, `${selectedNodes.length} items copied`)
                 }}
             >
                 Copy
@@ -105,7 +103,7 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                         e.stopPropagation()
                         onCloseMenu()
                         copyToClipboard(selectedNodes[0].url!)
-                        dispatch(setSnackbarMessage("URL copied"))
+                        setSnackbarMessage("URL copied")
                     }}
                 >
                     Copy URL

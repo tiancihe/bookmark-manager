@@ -1,13 +1,10 @@
 import { Fragment } from "react"
-import { useDispatch } from "react-redux"
 import { MenuItem, Divider } from "@mui/material"
 import copyToClipboard from "copy-to-clipboard"
 
-import { openBookmarkEditModal } from "../store/modal"
-import { setCopiedNodes } from "../store/cnp"
-import { setSnackbarMessage } from "../store/message"
 import { BookmarkTreeNode, BookmarkNodeType } from "../types"
 import { removeBookmark } from "../utils/bookmark"
+import { openBookmarkEditModal, setSelectedBookmarkNodes, setSnackbarMessage } from "../store"
 
 export default function FolderTreeItemContextMenuContent({
     bookmarkNode,
@@ -16,15 +13,13 @@ export default function FolderTreeItemContextMenuContent({
     bookmarkNode: BookmarkTreeNode
     onClose: () => void
 }) {
-    const dispatch = useDispatch()
-
     const childBookmarks = bookmarkNode.children?.filter(item => item.type === BookmarkNodeType.Bookmark) ?? []
 
     return (
         <Fragment>
             <MenuItem
                 onClick={() => {
-                    dispatch(openBookmarkEditModal(bookmarkNode))
+                    openBookmarkEditModal(bookmarkNode)
                     onClose()
                 }}
             >
@@ -33,7 +28,7 @@ export default function FolderTreeItemContextMenuContent({
             <MenuItem
                 onClick={async () => {
                     await removeBookmark(bookmarkNode.id)
-                    dispatch(setSnackbarMessage(`${bookmarkNode.title} deleted`))
+                    setSnackbarMessage(`${bookmarkNode.title} deleted`)
                     onClose()
                 }}
             >
@@ -43,9 +38,8 @@ export default function FolderTreeItemContextMenuContent({
             <MenuItem
                 onClick={e => {
                     e.stopPropagation()
-                    dispatch(setCopiedNodes([bookmarkNode]))
                     copyToClipboard(bookmarkNode.title)
-                    dispatch(setSnackbarMessage(`"${bookmarkNode.title}" copied`))
+                    setSelectedBookmarkNodes([bookmarkNode], `"${bookmarkNode.title}" copied`)
                     onClose()
                 }}
             >

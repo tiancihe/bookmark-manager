@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, createRef } from "react"
 import { styled } from "@mui/material/styles"
-import { useSelector, useDispatch } from "react-redux"
 import {
     AppBar,
     Toolbar,
@@ -17,13 +16,11 @@ import {
 import { alpha } from "@mui/material/styles"
 import { Search, Clear, Brightness4, Brightness5, MoreVert } from "@mui/icons-material"
 
-import useSettings from "../hooks/useSettings"
-import { selectNode } from "../store/dnd"
-import { setHashParam } from "../utils"
+import { setHashParam } from "../utils/hashParams"
 import { sortFolderByDateAsc, sortFolderByDateDesc, sortFolderByName, sortFolderByUrl } from "../utils/bookmark"
-import { BookmarkNodeType, RootState } from "../types"
+import { BookmarkNodeType } from "../types"
 import { __MAC__ } from "../consts"
-import { openBookmarkCreateModal } from "../store/modal"
+import { openBookmarkCreateModal, setSelectedBookmarkNodes, setSettings, useStore } from "../store"
 
 const PREFIX = "Navbar"
 
@@ -96,19 +93,15 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
 }))
 
 export default function Navbar() {
-    const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
-    const bookmarkList = useSelector((state: RootState) => state.bookmark.bookmarkList)
-    const search = useSelector((state: RootState) => state.bookmark.search)
-    const searchResult = useSelector((state: RootState) => state.bookmark.searchResult)
-    const dispatch = useDispatch()
+    const activeFolder = useStore(state => state.activeFolder)
+    const search = useStore(state => state.search)
+    const searchResult = useStore(state => state.searchResult)
 
     const [input, setInput] = useState(search)
     const inputRef = useRef(createRef<HTMLInputElement>())
     // sync input with global search state
     useEffect(() => {
-        if (input !== search) {
-            setInput(search)
-        }
+        setInput(search)
     }, [search])
     useEffect(() => {
         // capture search hotkey to focus on input
@@ -169,7 +162,7 @@ export default function Navbar() {
                 if (e.key === "ArrowDown") {
                     input.blur()
                     if (searchResult.length) {
-                        dispatch(selectNode(searchResult[0]))
+                        setSelectedBookmarkNodes([searchResult[0]])
                     }
                 }
             }
@@ -178,7 +171,7 @@ export default function Navbar() {
         }
     }, [inputRef.current, isInputFocused, searchResult])
 
-    const { settings, setSettings } = useSettings()
+    const settings = useStore(state => state.settings)
 
     const [actionMenuAnchor, setActionMenuAnchor] = useState<null | HTMLElement>(null)
     const closeActionMenu = () => setActionMenuAnchor(null)
@@ -243,7 +236,7 @@ export default function Navbar() {
                         color="inherit"
                         onClick={e => {
                             e.stopPropagation()
-                            setSettings({ ...settings!, darkMode: !settings?.darkMode })
+                            setSettings({ darkMode: !settings?.darkMode })
                         }}
                     >
                         {settings?.darkMode ? <Brightness5 /> : <Brightness4 />}
@@ -305,7 +298,7 @@ export default function Navbar() {
                     <MenuItem
                         disabled={!!search || !activeFolder}
                         onClick={() => {
-                            dispatch(openBookmarkCreateModal(BookmarkNodeType.Bookmark))
+                            openBookmarkCreateModal(BookmarkNodeType.Bookmark)
                             closeActionMenu()
                         }}
                     >
@@ -314,7 +307,7 @@ export default function Navbar() {
                     <MenuItem
                         disabled={!!search || !activeFolder}
                         onClick={() => {
-                            dispatch(openBookmarkCreateModal(BookmarkNodeType.Folder))
+                            openBookmarkCreateModal(BookmarkNodeType.Folder)
                             closeActionMenu()
                         }}
                     >
@@ -340,7 +333,7 @@ export default function Navbar() {
                                 <Switch
                                     color="primary"
                                     checked={settings?.disableFavicon}
-                                    onChange={(_, checked) => setSettings({ ...settings!, disableFavicon: checked })}
+                                    onChange={(_, checked) => setSettings({ disableFavicon: checked })}
                                 />
                             }
                             label="Disable favicon"
@@ -352,7 +345,7 @@ export default function Navbar() {
                                 <Switch
                                     color="primary"
                                     checked={settings?.alwaysShowURL}
-                                    onChange={(_, checked) => setSettings({ ...settings!, alwaysShowURL: checked })}
+                                    onChange={(_, checked) => setSettings({ alwaysShowURL: checked })}
                                 />
                             }
                             label="Always show URL"

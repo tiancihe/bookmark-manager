@@ -1,18 +1,14 @@
 import { useState } from "react"
-import { useSelector } from "react-redux"
 import { Modal, Card, CardHeader, CardContent, CardActions, Button, TextField, Snackbar, Stack } from "@mui/material"
 
-import { RootState, BookmarkNodeType } from "../types"
+import { closeModal, useStore } from "../store"
+import { BookmarkNodeType, ModalType } from "../types"
 import { createBookmark } from "../utils/bookmark"
 
-export default function CreateBookmarkModal({
-    createType,
-    onClose,
-}: {
-    createType: BookmarkNodeType
-    onClose: () => void
-}) {
-    const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
+export default function CreateBookmarkModal() {
+    const modalType = useStore(state => state.bookmarkModalType)
+    const createType = useStore(state => state.bookmarkCreateType)
+    const activeFolder = useStore(state => state.activeFolder)
 
     const [title, setTitle] = useState("")
     const [url, setUrl] = useState("")
@@ -34,14 +30,14 @@ export default function CreateBookmarkModal({
                 type: createType === BookmarkNodeType.Bookmark ? BookmarkNodeType.Bookmark : undefined,
             })
 
-            onClose()
+            closeModal()
         } else {
             setShowNoActiveFolderError(true)
         }
     }
 
     return (
-        <Modal open onClose={onClose}>
+        <Modal open={modalType === ModalType.BookmarkCreate} onClose={closeModal}>
             <Stack height="100%" alignItems="center" justifyContent="center">
                 <Card sx={{ width: 500 }} onClick={e => e.stopPropagation()} onDoubleClick={e => e.stopPropagation()}>
                     <CardHeader title={`Add ${createType}`} />
@@ -77,7 +73,7 @@ export default function CreateBookmarkModal({
                     </CardContent>
                     <CardActions>
                         <Stack width="100%" direction="row" justifyContent="flex-end" spacing={2}>
-                            <Button variant="outlined" color="primary" onClick={onClose}>
+                            <Button variant="outlined" color="primary" onClick={closeModal}>
                                 Cancel
                             </Button>
                             <Button variant="contained" color="primary" onClick={handleSubmit}>

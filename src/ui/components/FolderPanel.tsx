@@ -1,20 +1,18 @@
 import { Fragment, useMemo } from "react"
-import { useSelector } from "react-redux"
 import { Box } from "@mui/material"
 
 import { BookmarkTreeNode } from "../types"
-import { RootState } from "../types"
 import { isNodeFolder } from "../utils/bookmark"
 
 import FolderTreeItem from "./FolderTreeItem"
-import useSettings from "../hooks/useSettings"
 import { __FOLDER_PANEL_ID__ } from "../consts"
+import { useStore } from "../store"
 
 export default function FolderPanel() {
-    const { settings } = useSettings()
-    const bookmarkTree = useSelector((state: RootState) => state.bookmark.bookmarkTree)
-    const bookmarkMap = useSelector((state: RootState) => state.bookmark.bookmarkMap)
-    const activeFolder = useSelector((state: RootState) => state.bookmark.activeFolder)
+    const settings = useStore(state => state.settings)
+    const bookmarkTree = useStore(state => state.bookmarkTree)
+    const bookmarkMap = useStore(state => state.bookmarkMap)
+    const activeFolder = useStore(state => state.activeFolder)
 
     const defaultOpenFolders = useMemo(() => {
         const defaultOpenFolders = {} as Record<string, boolean>

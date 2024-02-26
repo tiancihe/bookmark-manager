@@ -94,6 +94,9 @@ devDependencies:
   babel-plugin-import:
     specifier: ^1.13.8
     version: 1.13.8
+  cross-env:
+    specifier: ^7.0.3
+    version: 7.0.3
   css-loader:
     specifier: ^6.10.0
     version: 6.10.0(webpack@5.90.3)
@@ -2909,6 +2912,14 @@ packages:
       path-type: 4.0.0
       yaml: 1.10.2
     dev: false
+
+  /cross-env@7.0.3:
+    resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
+    engines: {node: '>=10.14', npm: '>=6', yarn: '>=1'}
+    hasBin: true
+    dependencies:
+      cross-spawn: 7.0.3
+    dev: true
 
   /cross-spawn@7.0.3:
     resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==}

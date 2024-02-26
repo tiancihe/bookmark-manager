@@ -44,7 +44,7 @@ const firefoxConfig = {
     ...commonConfig,
     output: {
         ...commonConfig.output,
-        path: path.join(__dirname, "package/assets"),
+        path: path.join(__dirname, "firefox/assets"),
     },
     plugins: [
         new DefinePlugin({

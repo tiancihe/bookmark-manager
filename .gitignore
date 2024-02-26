@@ -1,8 +1,7 @@
 .DS_store
 node_modules
 
-package/assets
-package/.web-extension-id
+firefox/assets
 chrome/assets
 
 web-ext-artifacts

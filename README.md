@@ -1,6 +1,6 @@
 # Bookmark Manager
 
-A bookmark manager extension for firefox.
+A bookmark manager extension for browsers.
 
 ## Features
 
@@ -17,7 +17,7 @@ A bookmark manager extension for firefox.
 - Settings are kept locally, such as theme setting (light / dark)
 - Find duplicated bookmarks
 
-## Development
+## Build Instructions for Firefox
 
 1. make sure nodejs is installed
 
@@ -37,12 +37,20 @@ A bookmark manager extension for firefox.
    pnpm i
    ```
 
-3. run `pnpm run dev` to start dev server
+3. run `pnpm run pack:firefox` to build the extension into `web-ext-artifacts` folder
 
-4. load the extension in your firefox desktop browser
+## Development
+
+1. run `pnpm run dev` to start dev server
+
+2. load the extension in your firefox desktop browser
 
    1. visit `about:debugging#/runtime/this-firefox` and click `Load Temporary Add-on...` button
 
-   2. select the `manifest.json` file under the `package` folder
+   2. select the `manifest.json` file under the `firefox` folder
 
-5. when done developing, run `pnpm run pack` to build and pack the extension into `web-ext-artifacts`
+3. load the extension in your chrome desktop browser
+
+   1. visit `chrome://extensions` and click `Load unpacked` button
+
+   2. select the `chrome` folder

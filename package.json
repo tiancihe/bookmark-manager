@@ -11,9 +11,23 @@
     "build:firefox": "cross-env BUILD_TARGET=firefox pnpm run build",
     "build:chrome": "cross-env BUILD_TARGET=chrome pnpm run build",
     "analyze": "cross-env NODE_ENV=production webpack --analyze",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "pack": "node scripts/pack.js",
     "pack:firefox": "cross-env BUILD_TARGET=firefox node scripts/pack.js",
-    "pack:chrome": "cross-env BUILD_TARGET=chrome node scripts/pack.js"
+    "pack:chrome": "cross-env BUILD_TARGET=chrome node scripts/pack.js",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
   },
   "dependencies": {
     "@babel/runtime": "^7.8.7",
@@ -38,6 +52,8 @@
     "@babel/preset-env": "^7.23.9",
     "@babel/preset-react": "^7.23.3",
     "@babel/preset-typescript": "^7.23.3",
+    "@commitlint/cli": "^18.6.1",
+    "@commitlint/config-conventional": "^18.6.2",
     "@types/chrome": "^0.0.261",
     "@types/firefox-webext-browser": "^120.0.1",
     "@types/lodash": "^4.14.149",
@@ -45,10 +61,17 @@
     "@types/react": "^18.2.58",
     "@types/react-dom": "^18.2.19",
     "@types/webextension-polyfill": "^0.10.7",
+    "@typescript-eslint/eslint-plugin": "^7.0.2",
+    "@typescript-eslint/parser": "^7.0.2",
     "babel-loader": "^9.1.3",
     "babel-plugin-import": "^1.13.8",
     "cross-env": "^7.0.3",
     "css-loader": "^6.10.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.33.2",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
     "prettier": "^3.2.5",
     "style-loader": "^3.3.4",
     "typescript": "^5.3.3",

@@ -1,6 +1,6 @@
 import { useRef } from "react"
 import { Box, Menu, Typography } from "@mui/material"
-import { useTheme, alpha, styled } from "@mui/material/styles"
+import { useTheme, alpha } from "@mui/material/styles"
 import { FolderOutlined } from "@mui/icons-material"
 import { useDrag, useDrop } from "react-dnd"
 
@@ -24,58 +24,6 @@ import { DNDTypes, __MAC__ } from "../consts"
 import BookmarkActionMenu from "./BookmarkActionMenu"
 import BookmarkActionMenuContent from "./BookmarkActionMenuContent"
 import HoverStateManager from "../hover-state-manager"
-
-const PREFIX = "BookmarkTreeItem"
-
-const classes = {
-    container: `${PREFIX}-container`,
-    icon: `${PREFIX}-icon`,
-    title: `${PREFIX}-title`,
-    url: `${PREFIX}-url`,
-    actions: `${PREFIX}-actions`,
-}
-
-const Root = styled("div")(({ theme }) => ({
-    [`& .${classes.container}`]: {
-        display: "flex",
-        alignItems: "center",
-        paddingLeft: theme.spacing(3),
-        userSelect: "none",
-    },
-
-    [`& .${classes.icon}`]: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: theme.spacing(2),
-        height: theme.spacing(2),
-        "& img": {
-            maxWidth: "100%",
-            maxHeight: "100%",
-        },
-    },
-
-    [`& .${classes.title}`]: {
-        flex: 2,
-        margin: theme.spacing(0, 2),
-        overflow: "hidden",
-        whiteSpace: "nowrap",
-        textOverflow: "ellipsis",
-    },
-
-    [`& .${classes.url}`]: {
-        flex: 1,
-        margin: theme.spacing(0, 2),
-        overflow: "hidden",
-        whiteSpace: "nowrap",
-        textOverflow: "ellipsis",
-        color: alpha(theme.palette.text.primary, 0.55),
-    },
-
-    [`& .${classes.actions}`]: {
-        justifySelf: "flex-end",
-    },
-}))
 
 export default function BookmarkTreeItem({
     bookmarkNode,
@@ -110,13 +58,19 @@ export default function BookmarkTreeItem({
         hover: (item, monitor) => {
             const node = nodeRef.current
             if (node) {
-                HoverStateManager.subscribe({ bookmarkNode, isSelected, node, theme })
+                HoverStateManager.subscribe({
+                    bookmarkNode,
+                    isSelected,
+                    node,
+                    theme,
+                })
                 handleHoverAndDrop({
                     node,
                     monitor,
                     top: () => HoverStateManager.applyHoverStyle(HoverArea.Top),
                     mid: () => HoverStateManager.applyHoverStyle(HoverArea.Mid),
-                    bottom: () => HoverStateManager.applyHoverStyle(HoverArea.Bottom),
+                    bottom: () =>
+                        HoverStateManager.applyHoverStyle(HoverArea.Bottom),
                 })
             }
         },
@@ -126,9 +80,12 @@ export default function BookmarkTreeItem({
                 handleHoverAndDrop({
                     node,
                     monitor,
-                    top: () => moveBookmarksAboveTarget(selectedNodes, bookmarkNode),
-                    mid: () => moveBookmarksUnderParent(selectedNodes, bookmarkNode),
-                    bottom: () => moveBookmarksBelowTarget(selectedNodes, bookmarkNode),
+                    top: () =>
+                        moveBookmarksAboveTarget(selectedNodes, bookmarkNode),
+                    mid: () =>
+                        moveBookmarksUnderParent(selectedNodes, bookmarkNode),
+                    bottom: () =>
+                        moveBookmarksBelowTarget(selectedNodes, bookmarkNode),
                 })
             }
             HoverStateManager.reset()
@@ -136,7 +93,8 @@ export default function BookmarkTreeItem({
     })
     drag(drop(nodeRef.current))
 
-    const { contextMenuProps, handleContextMenuEvent, closeContextMenu } = useContextMenu()
+    const { contextMenuProps, handleContextMenuEvent, closeContextMenu } =
+        useContextMenu()
 
     return (
         <>
@@ -148,7 +106,9 @@ export default function BookmarkTreeItem({
                     alignItems: "center",
                     paddingLeft: theme.spacing(3),
                     paddingRight: theme.spacing(1),
-                    backgroundColor: isSelected ? alpha(theme.palette.primary.main, 0.1) : undefined,
+                    backgroundColor: isSelected
+                        ? alpha(theme.palette.primary.main, 0.1)
+                        : undefined,
                     userSelect: "none",
                 }}
                 onClick={e => {
@@ -158,18 +118,31 @@ export default function BookmarkTreeItem({
                         // if ctrl is pressed (command on mac)
                         if (!isSelected) {
                             // and the current node is not selected, select it
-                            setSelectedBookmarkNodes(selectedNodes.concat(bookmarkNode))
+                            setSelectedBookmarkNodes(
+                                selectedNodes.concat(bookmarkNode),
+                            )
                         } else {
                             // otherwise unselect it
-                            setSelectedBookmarkNodes(selectedNodes.filter(node => node.id !== bookmarkNode.id))
+                            setSelectedBookmarkNodes(
+                                selectedNodes.filter(
+                                    node => node.id !== bookmarkNode.id,
+                                ),
+                            )
                         }
                     } else if (e.shiftKey) {
                         // if shift is pressed, select all nodes between the first node and the current node, including them
                         // display strategy: searchResult || activeFolder.children
 
-                        const target = searchResult.length > 0 ? searchResult : activeFolder!.children!
-                        const firstNodeIndex = target.findIndex(node => node.id === selectedNodes[0].id)
-                        const currentNodeIndex = target.findIndex(node => node.id === bookmarkNode.id)
+                        const target =
+                            searchResult.length > 0
+                                ? searchResult
+                                : activeFolder!.children!
+                        const firstNodeIndex = target.findIndex(
+                            node => node.id === selectedNodes[0].id,
+                        )
+                        const currentNodeIndex = target.findIndex(
+                            node => node.id === bookmarkNode.id,
+                        )
                         setSelectedBookmarkNodes(
                             target.slice(
                                 Math.min(firstNodeIndex, currentNodeIndex),
@@ -239,12 +212,26 @@ export default function BookmarkTreeItem({
                     }}
                 >
                     {isFolder && <FolderOutlined fontSize="small" />}
-                    {!settings?.disableFavicon && isBookmark && <img src={getFavicon(bookmarkNode.url || "")} />}
+                    {!settings?.disableFavicon && isBookmark && (
+                        <img src={getFavicon(bookmarkNode.url || "")} />
+                    )}
                 </Box>
-                <Box sx={{ flex: 1, display: "flex", alignItems: "center", overflow: "hidden" }}>
+                <Box
+                    sx={{
+                        flex: 1,
+                        display: "flex",
+                        alignItems: "center",
+                        overflow: "hidden",
+                    }}
+                >
                     <Typography
                         sx={{
-                            flex: showParentPath || settings?.alwaysShowURL || isSelected ? "0 auto" : 1,
+                            flex:
+                                showParentPath ||
+                                settings?.alwaysShowURL ||
+                                isSelected
+                                    ? "0 auto"
+                                    : 1,
                             marginLeft: theme.spacing(2),
                         }}
                         variant="body2"
@@ -254,16 +241,25 @@ export default function BookmarkTreeItem({
                         {bookmarkNode.title}
                     </Typography>
                     {(() => {
-                        if (showParentPath || settings?.alwaysShowURL || isSelected) {
+                        if (
+                            showParentPath ||
+                            settings?.alwaysShowURL ||
+                            isSelected
+                        ) {
                             const text =
-                                showParentPath && !isSelected ? getParentPathDesc(bookmarkNode) : bookmarkNode.url
+                                showParentPath && !isSelected
+                                    ? getParentPathDesc(bookmarkNode)
+                                    : bookmarkNode.url
                             return (
                                 <Typography
                                     sx={{
                                         flex: 1,
                                         minWidth: 200,
                                         margin: theme.spacing(0, 2),
-                                        color: alpha(theme.palette.text.primary, 0.55),
+                                        color: alpha(
+                                            theme.palette.text.primary,
+                                            0.55,
+                                        ),
                                     }}
                                     variant="body2"
                                     noWrap

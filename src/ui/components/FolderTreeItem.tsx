@@ -1,7 +1,12 @@
 import { PropsWithChildren, useState, useEffect, useMemo, useRef } from "react"
 import { Box, Menu, Typography } from "@mui/material"
 import { useTheme, alpha } from "@mui/material/styles"
-import { ArrowRight, ArrowDropDown, FolderOutlined, FolderOpenOutlined } from "@mui/icons-material"
+import {
+    ArrowRight,
+    ArrowDropDown,
+    FolderOutlined,
+    FolderOpenOutlined,
+} from "@mui/icons-material"
 import { useDrop, useDrag } from "react-dnd"
 
 import useContextMenu from "../hooks/useContextMenu"
@@ -50,12 +55,14 @@ export default function FolderTreeItem({
     }, [defaultOpen])
 
     const hasSubfolders = useMemo(
-        () => Array.isArray(bookmarkNode.children) && bookmarkNode.children.filter(isNodeFolder).length > 0,
+        () =>
+            Array.isArray(bookmarkNode.children) &&
+            bookmarkNode.children.filter(isNodeFolder).length > 0,
         [bookmarkNode],
     )
 
     const nodeRef = useRef<HTMLElement | null>(null)
-    const [_, drag] = useDrag({
+    const [, drag] = useDrag({
         type: DNDTypes.FolderItem,
         item: () => {
             if (selectedNodes.length === 0) {
@@ -80,7 +87,8 @@ export default function FolderTreeItem({
                     monitor,
                     top: () => HoverStateManager.applyHoverStyle(HoverArea.Top),
                     mid: () => HoverStateManager.applyHoverStyle(HoverArea.Mid),
-                    bottom: () => HoverStateManager.applyHoverStyle(HoverArea.Bottom),
+                    bottom: () =>
+                        HoverStateManager.applyHoverStyle(HoverArea.Bottom),
                 })
             }
         },
@@ -90,9 +98,12 @@ export default function FolderTreeItem({
                 handleHoverAndDrop({
                     node,
                     monitor,
-                    top: () => moveBookmarksAboveTarget(selectedNodes, bookmarkNode),
-                    mid: () => moveBookmarksUnderParent(selectedNodes, bookmarkNode),
-                    bottom: () => moveBookmarksBelowTarget(selectedNodes, bookmarkNode),
+                    top: () =>
+                        moveBookmarksAboveTarget(selectedNodes, bookmarkNode),
+                    mid: () =>
+                        moveBookmarksUnderParent(selectedNodes, bookmarkNode),
+                    bottom: () =>
+                        moveBookmarksBelowTarget(selectedNodes, bookmarkNode),
                 })
             }
             HoverStateManager.reset()
@@ -101,7 +112,8 @@ export default function FolderTreeItem({
 
     drag(drop(nodeRef.current))
 
-    const { contextMenuProps, handleContextMenuEvent, closeContextMenu } = useContextMenu()
+    const { contextMenuProps, handleContextMenuEvent, closeContextMenu } =
+        useContextMenu()
 
     return (
         <>
@@ -114,10 +126,14 @@ export default function FolderTreeItem({
                     height: theme.spacing(5),
                     paddingLeft: theme.spacing(3 * level),
                     borderRadius: theme.spacing(0, 3, 3, 0),
-                    backgroundColor: isActive ? alpha(theme.palette.primary.main, 0.1) : undefined,
+                    backgroundColor: isActive
+                        ? alpha(theme.palette.primary.main, 0.1)
+                        : undefined,
                     cursor: "pointer",
                     "&:hover": {
-                        backgroundColor: isActive ? undefined : theme.palette.action.hover,
+                        backgroundColor: isActive
+                            ? undefined
+                            : theme.palette.action.hover,
                     },
                 }}
                 onClick={e => {
@@ -141,7 +157,9 @@ export default function FolderTreeItem({
                         alignItems: "center",
                         width: theme.spacing(3),
                         height: theme.spacing(5),
-                        color: isActive ? theme.palette.primary.main : theme.palette.text.primary,
+                        color: isActive
+                            ? theme.palette.primary.main
+                            : theme.palette.text.primary,
                     }}
                 >
                     {hasSubfolders &&
@@ -168,16 +186,24 @@ export default function FolderTreeItem({
                         alignItems: "center",
                         width: theme.spacing(3),
                         height: theme.spacing(5),
-                        color: isActive ? theme.palette.primary.main : theme.palette.text.primary,
+                        color: isActive
+                            ? theme.palette.primary.main
+                            : theme.palette.text.primary,
                     }}
                 >
-                    {open ? <FolderOpenOutlined fontSize="small" /> : <FolderOutlined fontSize="small" />}
+                    {open ? (
+                        <FolderOpenOutlined fontSize="small" />
+                    ) : (
+                        <FolderOutlined fontSize="small" />
+                    )}
                 </Box>
                 <Typography
                     variant="body2"
                     sx={{
                         paddingLeft: theme.spacing(1),
-                        color: isActive ? theme.palette.primary.main : theme.palette.text.primary,
+                        color: isActive
+                            ? theme.palette.primary.main
+                            : theme.palette.text.primary,
                         userSelect: "none",
                     }}
                     noWrap
@@ -187,7 +213,10 @@ export default function FolderTreeItem({
                 </Typography>
             </Box>
             <Menu {...contextMenuProps}>
-                <FolderTreeItemContextMenuContent bookmarkNode={bookmarkNode} onClose={closeContextMenu} />
+                <FolderTreeItemContextMenuContent
+                    bookmarkNode={bookmarkNode}
+                    onClose={closeContextMenu}
+                />
             </Menu>
             {open && children}
         </>

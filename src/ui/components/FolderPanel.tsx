@@ -35,7 +35,10 @@ export default function FolderPanel() {
         if (!bookmarkTree) return null
 
         const render = (bookmarkNode: BookmarkTreeNode, level: number) => {
-            const children = bookmarkNode.children?.filter(isNodeFolder)?.map(child => render(child, level + 1)) || null
+            const children =
+                bookmarkNode.children
+                    ?.filter(isNodeFolder)
+                    ?.map(child => render(child, level + 1)) || null
 
             return bookmarkNode.title ? (
                 <FolderTreeItem
@@ -60,7 +63,7 @@ export default function FolderPanel() {
             sx={{
                 width: settings?.splitterPosition || 256,
                 height: "100%",
-                padding: theme => theme.spacing(2, 1),
+                padding: theme => theme.spacing(2, 0),
                 overflow: "auto",
             }}
         >

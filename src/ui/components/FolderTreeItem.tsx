@@ -155,7 +155,8 @@ export default function FolderTreeItem({
                         flexShrink: 0,
                         display: "flex",
                         alignItems: "center",
-                        width: theme.spacing(3),
+                        justifyContent: "center",
+                        width: theme.spacing(5),
                         height: theme.spacing(5),
                         color: isActive
                             ? theme.palette.primary.main

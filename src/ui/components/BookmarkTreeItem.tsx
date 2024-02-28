@@ -37,6 +37,7 @@ export default function BookmarkTreeItem({
 
     const activeFolder = useStore(state => state.activeFolder)
     const searchResult = useStore(state => state.searchResult)
+    const duplicatedBookmarks = useStore(state => state.duplicatedBookmarks)
     const selectedNodes = useStore(state => state.selectedBookmarkNodes)
 
     const isFolder = isNodeFolder(bookmarkNode)
@@ -131,12 +132,14 @@ export default function BookmarkTreeItem({
                         }
                     } else if (e.shiftKey) {
                         // if shift is pressed, select all nodes between the first node and the current node, including them
-                        // display strategy: searchResult || activeFolder.children
+                        // display strategy: duplicatedNodes || searchResult || activeFolder.children
 
                         const target =
-                            searchResult.length > 0
-                                ? searchResult
-                                : activeFolder!.children!
+                            duplicatedBookmarks.length > 0
+                                ? duplicatedBookmarks
+                                : searchResult.length > 0
+                                  ? searchResult
+                                  : activeFolder!.children!
                         const firstNodeIndex = target.findIndex(
                             node => node.id === selectedNodes[0].id,
                         )

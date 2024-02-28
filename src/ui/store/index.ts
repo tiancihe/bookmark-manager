@@ -2,7 +2,12 @@ import { create } from "zustand"
 import { combine } from "zustand/middleware"
 import naturalCompare from "natural-compare"
 
-import { BookmarkNodeType, BookmarkTreeNode, ModalType, Settings } from "../types"
+import {
+    BookmarkNodeType,
+    BookmarkTreeNode,
+    ModalType,
+    Settings,
+} from "../types"
 import { getHashParams } from "../utils/hashParams"
 import { SETTINGS_KEY } from "../consts"
 
@@ -43,7 +48,9 @@ if (__DEV__) {
 
 export const loadSettings = async () => {
     try {
-        const settings = (await browser.storage.local.get(SETTINGS_KEY))[SETTINGS_KEY] as Settings
+        const settings = (await browser.storage.local.get(SETTINGS_KEY))[
+            SETTINGS_KEY
+        ] as Settings
         if (settings) {
             useStore.setState({ loadingSettings: false, settings })
             return
@@ -82,7 +89,11 @@ export const loadBookmarkTree = async () => {
         }
         iterate(tree)
     }
-    useStore.setState({ bookmarkTree: tree, bookmarkMap: map, bookmarkList: list })
+    useStore.setState({
+        bookmarkTree: tree,
+        bookmarkMap: map,
+        bookmarkList: list,
+    })
 }
 
 export const syncStateFromHashParams = async () => {
@@ -118,7 +129,10 @@ export const syncStateFromHashParams = async () => {
     })
 }
 
-export const setSelectedBookmarkNodes = (nodes: BookmarkTreeNode[], snackbarMessage = "") => {
+export const setSelectedBookmarkNodes = (
+    nodes: BookmarkTreeNode[],
+    snackbarMessage = "",
+) => {
     useStore.setState({ selectedBookmarkNodes: nodes, snackbarMessage })
 }
 
@@ -126,7 +140,10 @@ export const clearSelectedBookmarkNodes = (snackbarMessage = "") => {
     useStore.setState({ selectedBookmarkNodes: [], snackbarMessage })
 }
 
-export const setCopiedBookmarkNodes = (nodes: BookmarkTreeNode[], snackbarMessage = "") => {
+export const setCopiedBookmarkNodes = (
+    nodes: BookmarkTreeNode[],
+    snackbarMessage = "",
+) => {
     useStore.setState({ copiedBookmarkNodes: nodes, snackbarMessage })
 }
 
@@ -143,13 +160,23 @@ export const clearSnackbarMessage = () => {
 }
 
 export const openBookmarkEditModal = (bookmark: BookmarkTreeNode) => {
-    useStore.setState({ bookmarkModalType: ModalType.BookmarkEdit, bookmarkEditing: bookmark })
+    useStore.setState({
+        bookmarkModalType: ModalType.BookmarkEdit,
+        bookmarkEditing: bookmark,
+    })
 }
 
 export const openBookmarkCreateModal = (type: BookmarkNodeType) => {
-    useStore.setState({ bookmarkModalType: ModalType.BookmarkEdit, bookmarkCreateType: type })
+    useStore.setState({
+        bookmarkModalType: ModalType.BookmarkCreate,
+        bookmarkCreateType: type,
+    })
 }
 
 export const closeModal = () => {
-    useStore.setState({ bookmarkModalType: null, bookmarkEditing: null, bookmarkCreateType: null })
+    useStore.setState({
+        bookmarkModalType: null,
+        bookmarkEditing: null,
+        bookmarkCreateType: null,
+    })
 }

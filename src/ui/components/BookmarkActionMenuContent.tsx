@@ -4,7 +4,13 @@ import copyToClipboard from "copy-to-clipboard"
 
 import { BookmarkTreeNode } from "../types"
 import { setHashParam } from "../utils/hashParams"
-import { isNodeBookmark, removeBookmarks, pasteBookmarks, getChildBookmarks, isNodeFolder } from "../utils/bookmark"
+import {
+    isNodeBookmark,
+    removeBookmarks,
+    pasteBookmarks,
+    getChildBookmarks,
+    isNodeFolder,
+} from "../utils/bookmark"
 import {
     useStore,
     openBookmarkEditModal,
@@ -13,7 +19,11 @@ import {
     setSnackbarMessage,
 } from "../store"
 
-export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu: () => void }) {
+export default function BookmarkActionMenuContent({
+    onCloseMenu,
+}: {
+    onCloseMenu: () => void
+}) {
     const activeFolder = useStore(state => state.activeFolder)
     const search = useStore(state => state.search)
     const duplicatedBookmarks = useStore(state => state.duplicatedBookmarks)
@@ -36,7 +46,9 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
 
     return (
         <Fragment>
-            {(search || duplicatedBookmarks.length) && selectedNodes.length === 1 && selectedNodes[0].parentId ? (
+            {(search || duplicatedBookmarks.length) &&
+            selectedNodes.length === 1 &&
+            selectedNodes[0].parentId ? (
                 <MenuItem
                     onClick={async e => {
                         e.stopPropagation()
@@ -47,8 +59,12 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                             search: undefined,
                             dedupe: undefined,
                         })
-                        document.getElementById(activeFolderId)?.scrollIntoView()
-                        document.getElementById(selectedNodes[0].id)?.scrollIntoView()
+                        document
+                            .getElementById(activeFolderId)
+                            ?.scrollIntoView()
+                        document
+                            .getElementById(selectedNodes[0].id)
+                            ?.scrollIntoView()
                     }}
                 >
                     Show in folder
@@ -70,7 +86,11 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                     e.stopPropagation()
                     onCloseMenu()
                     removeBookmarks(selectedNodes)
-                    clearSelectedBookmarkNodes(`${selectedNodes.length} items deleted`)
+                    clearSelectedBookmarkNodes()
+                    setSnackbarMessage(
+                        `${selectedNodes.length} items deleted`,
+                        true,
+                    )
                 }}
             >
                 Delete
@@ -80,9 +100,17 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                 onClick={e => {
                     e.stopPropagation()
                     onCloseMenu()
-                    copyToClipboard(selectedNodes.map(node => node.url ?? node.title).join("\t\n"))
+                    copyToClipboard(
+                        selectedNodes
+                            .map(node => node.url ?? node.title)
+                            .join("\t\n"),
+                    )
                     removeBookmarks(selectedNodes)
-                    setCopiedBookmarkNodes(selectedNodes, `${selectedNodes.length} items cut`)
+                    setCopiedBookmarkNodes(selectedNodes)
+                    setSnackbarMessage(
+                        `${selectedNodes.length} items cut`,
+                        true,
+                    )
                 }}
             >
                 Cut
@@ -91,8 +119,16 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                 onClick={e => {
                     e.stopPropagation()
                     onCloseMenu()
-                    copyToClipboard(selectedNodes.map(node => node.url ?? node.title).join("\t\n"))
-                    setCopiedBookmarkNodes(selectedNodes, `${selectedNodes.length} items copied`)
+                    copyToClipboard(
+                        selectedNodes
+                            .map(node => node.url ?? node.title)
+                            .join("\t\n"),
+                    )
+                    setCopiedBookmarkNodes(selectedNodes)
+                    setSnackbarMessage(
+                        `${selectedNodes.length} items copied`,
+                        false,
+                    )
                 }}
             >
                 Copy
@@ -103,7 +139,7 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                         e.stopPropagation()
                         onCloseMenu()
                         copyToClipboard(selectedNodes[0].url!)
-                        setSnackbarMessage("URL copied")
+                        setSnackbarMessage("URL copied", false)
                     }}
                 >
                     Copy URL
@@ -144,7 +180,9 @@ export default function BookmarkActionMenuContent({ onCloseMenu }: { onCloseMenu
                 }}
             >
                 {selectedBookmarks.length > 1 ? (
-                    <Typography>Open all ({selectedBookmarks.length}) bookmarks</Typography>
+                    <Typography>
+                        Open all ({selectedBookmarks.length}) bookmarks
+                    </Typography>
                 ) : (
                     "Open in new tab"
                 )}

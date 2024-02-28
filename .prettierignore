@@ -1,0 +1,4 @@
+node_modules
+chrome/assets
+firefox/assets
+pnpm-lock.yaml

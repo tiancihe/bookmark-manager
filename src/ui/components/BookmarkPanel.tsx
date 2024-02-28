@@ -12,7 +12,12 @@ import {
 import useContextMenu from "../hooks/useContextMenu"
 import { useCopyPasteCut } from "../hooks/useCopyPasteCut"
 import { setHashParam } from "../utils/hashParams"
-import { isNodeBookmark, isNodeFolder, removeBookmarks, openTab } from "../utils/bookmark"
+import {
+    isNodeBookmark,
+    isNodeFolder,
+    removeBookmarks,
+    openTab,
+} from "../utils/bookmark"
 import { BookmarkNodeType } from "../types"
 import { __MAC__ } from "../consts"
 import BookmarkTreeItem from "./BookmarkTreeItem"
@@ -34,7 +39,9 @@ export default function BookmarkPanel() {
     const selectedNodes = useStore(state => state.selectedBookmarkNodes)
 
     const activeFolderChildren = useMemo(() => {
-        return activeFolder !== null && Array.isArray(activeFolder.children) && activeFolder.children.length > 0
+        return activeFolder !== null &&
+            Array.isArray(activeFolder.children) &&
+            activeFolder.children.length > 0
             ? activeFolder.children
             : null
     }, [activeFolder])
@@ -44,8 +51,12 @@ export default function BookmarkPanel() {
     useEffect(() => {
         const listener = (e: KeyboardEvent) => {
             if (!selectedNodes.length) return
-            const items = searchResult.length ? searchResult : activeFolderChildren ?? []
-            const currentIndex = items.findIndex(item => item.id === selectedNodes[0].id)
+            const items = searchResult.length
+                ? searchResult
+                : activeFolderChildren ?? []
+            const currentIndex = items.findIndex(
+                item => item.id === selectedNodes[0].id,
+            )
             if (e.key === "ArrowDown" && currentIndex < items.length - 1) {
                 setSelectedBookmarkNodes([items[currentIndex + 1]])
             } else if (e.key === "ArrowUp" && currentIndex > 0) {
@@ -78,7 +89,11 @@ export default function BookmarkPanel() {
                     setSelectedBookmarkNodes(searchResult)
                     return
                 }
-                if (activeFolder && activeFolder.children && activeFolder.children.length) {
+                if (
+                    activeFolder &&
+                    activeFolder.children &&
+                    activeFolder.children.length
+                ) {
                     e.preventDefault()
                     setSelectedBookmarkNodes(activeFolder.children)
                     return
@@ -107,17 +122,22 @@ export default function BookmarkPanel() {
         const deleteListener = async (e: KeyboardEvent) => {
             if (
                 e.target === document.body &&
-                ((__MAC__ && e.key === "Backspace") || (!__MAC__ && e.key === "Delete"))
+                ((__MAC__ && e.key === "Backspace") ||
+                    (!__MAC__ && e.key === "Delete"))
             ) {
                 removeBookmarks(selectedNodes)
-                setSnackbarMessage(`${selectedNodes.length} items deleted`)
+                setSnackbarMessage(
+                    `${selectedNodes.length} items deleted`,
+                    true,
+                )
             }
         }
         window.addEventListener("keydown", deleteListener)
         return () => window.removeEventListener("keydown", deleteListener)
     }, [selectedNodes])
 
-    const { contextMenuProps, closeContextMenu, handleContextMenuEvent } = useContextMenu()
+    const { contextMenuProps, closeContextMenu, handleContextMenuEvent } =
+        useContextMenu()
 
     useCopyPasteCut()
 
@@ -136,19 +156,33 @@ export default function BookmarkPanel() {
             {duplicatedBookmarks.length ? (
                 <StyledPaper elevation={3}>
                     {duplicatedBookmarks.map(child => (
-                        <BookmarkTreeItem key={child.id} bookmarkNode={child} showParentPath={true} />
+                        <BookmarkTreeItem
+                            key={child.id}
+                            bookmarkNode={child}
+                            showParentPath={true}
+                        />
                     ))}
                 </StyledPaper>
             ) : search ? (
                 searchResult.length ? (
                     <StyledPaper elevation={3}>
                         {searchResult.map(child => (
-                            <BookmarkTreeItem key={child.id} bookmarkNode={child} />
+                            <BookmarkTreeItem
+                                key={child.id}
+                                bookmarkNode={child}
+                            />
                         ))}
                     </StyledPaper>
                 ) : (
-                    <Stack height="100%" alignItems="center" justifyContent="center">
-                        <Typography variant="body2" color={theme => theme.palette.text.secondary}>
+                    <Stack
+                        height="100%"
+                        alignItems="center"
+                        justifyContent="center"
+                    >
+                        <Typography
+                            variant="body2"
+                            color={theme => theme.palette.text.secondary}
+                        >
                             No search results found
                         </Typography>
                     </Stack>

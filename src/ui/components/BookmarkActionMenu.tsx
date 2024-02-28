@@ -10,7 +10,10 @@ export default function BookmarkActionMenu() {
 
     return (
         <>
-            <IconButton onClick={e => setMenuAnchor(e.currentTarget)} onDoubleClick={e => e.stopPropagation()}>
+            <IconButton
+                onClick={e => setMenuAnchor(e.currentTarget)}
+                onDoubleClick={e => e.stopPropagation()}
+            >
                 <MoreVert />
             </IconButton>
             <Menu

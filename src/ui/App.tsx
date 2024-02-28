@@ -9,7 +9,6 @@ import Navbar from "./components/Navbar"
 import FolderPanel from "./components/FolderPanel"
 import BookmarkPanel from "./components/BookmarkPanel"
 import BookmarkEditModal from "./components/BookmarkEditModal"
-import BookmarkCreateModal from "./components/BookmarkCreateModal"
 import Splitter from "./components/Splitter"
 import GlobalSnackbar from "./components/Snackbar"
 
@@ -32,7 +31,6 @@ export default function App() {
                 </DndProvider>
             </Stack>
             <BookmarkEditModal />
-            <BookmarkCreateModal />
             <GlobalSnackbar />
         </>
     )

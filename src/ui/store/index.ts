@@ -30,12 +30,17 @@ export const useStore = create(
             duplicatedBookmarks: [] as BookmarkTreeNode[],
             selectedBookmarkNodes: [] as BookmarkTreeNode[],
             copiedBookmarkNodes: [] as BookmarkTreeNode[],
-            snackbarMessage: "",
-            bookmarkModalType: null as ModalType | null,
-            /** exists when modalType === ModalType.BookmarkEdit */
-            bookmarkEditing: null as BookmarkTreeNode | null,
-            /** exists when modalType === ModalType.BookmarkCreate */
-            bookmarkCreateType: null as BookmarkNodeType | null,
+            snackbar: {
+                message: "",
+                showUndoAction: false,
+            },
+            bookmarkEditModal: {
+                modalType: null as ModalType | null,
+                /** exists when type === ModalType.BookmarkEdit */
+                bookmarkNode: null as BookmarkTreeNode | null,
+                /** exists when type === ModalType.BookmarkCreate */
+                createType: null as BookmarkNodeType | null,
+            },
         },
         () => ({}),
     ),
@@ -129,54 +134,61 @@ export const syncStateFromHashParams = async () => {
     })
 }
 
-export const setSelectedBookmarkNodes = (
-    nodes: BookmarkTreeNode[],
-    snackbarMessage = "",
-) => {
-    useStore.setState({ selectedBookmarkNodes: nodes, snackbarMessage })
+export const setSelectedBookmarkNodes = (nodes: BookmarkTreeNode[]) => {
+    useStore.setState({ selectedBookmarkNodes: nodes })
 }
 
-export const clearSelectedBookmarkNodes = (snackbarMessage = "") => {
-    useStore.setState({ selectedBookmarkNodes: [], snackbarMessage })
+export const clearSelectedBookmarkNodes = () => {
+    useStore.setState({ selectedBookmarkNodes: [] })
 }
 
-export const setCopiedBookmarkNodes = (
-    nodes: BookmarkTreeNode[],
-    snackbarMessage = "",
-) => {
-    useStore.setState({ copiedBookmarkNodes: nodes, snackbarMessage })
+export const setCopiedBookmarkNodes = (nodes: BookmarkTreeNode[]) => {
+    useStore.setState({ copiedBookmarkNodes: nodes })
 }
 
 export const clearCopiedBookmarkNodes = () => {
     useStore.setState({ copiedBookmarkNodes: [] })
 }
 
-export const setSnackbarMessage = (snackbarMessage: string) => {
-    useStore.setState({ snackbarMessage })
-}
-
-export const clearSnackbarMessage = () => {
-    useStore.setState({ snackbarMessage: "" })
-}
-
-export const openBookmarkEditModal = (bookmark: BookmarkTreeNode) => {
+export const setSnackbarMessage = (
+    message: string,
+    showUndoAction: boolean,
+) => {
     useStore.setState({
-        bookmarkModalType: ModalType.BookmarkEdit,
-        bookmarkEditing: bookmark,
+        snackbar: { message, showUndoAction },
     })
 }
 
-export const openBookmarkCreateModal = (type: BookmarkNodeType) => {
+export const clearSnackbarMessage = () => {
+    useStore.setState({ snackbar: { message: "", showUndoAction: false } })
+}
+
+export const openBookmarkEditModal = (node: BookmarkTreeNode) => {
     useStore.setState({
-        bookmarkModalType: ModalType.BookmarkCreate,
-        bookmarkCreateType: type,
+        bookmarkEditModal: {
+            modalType: ModalType.BookmarkEdit,
+            bookmarkNode: node,
+            createType: null,
+        },
+    })
+}
+
+export const openBookmarkCreateModal = (createType: BookmarkNodeType) => {
+    useStore.setState({
+        bookmarkEditModal: {
+            modalType: ModalType.BookmarkCreate,
+            bookmarkNode: null,
+            createType,
+        },
     })
 }
 
 export const closeModal = () => {
     useStore.setState({
-        bookmarkModalType: null,
-        bookmarkEditing: null,
-        bookmarkCreateType: null,
+        bookmarkEditModal: {
+            modalType: null,
+            bookmarkNode: null,
+            createType: null,
+        },
     })
 }

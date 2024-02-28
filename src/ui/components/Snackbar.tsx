@@ -4,7 +4,7 @@ import { bookmarkActionHistory } from "../utils/bookmark"
 import { clearSnackbarMessage, useStore } from "../store"
 
 export default function GlobalSnackbar() {
-    const snackbarMessage = useStore(state => state.snackbarMessage)
+    const { message, showUndoAction } = useStore(state => state.snackbar)
 
     return (
         <Snackbar
@@ -12,22 +12,24 @@ export default function GlobalSnackbar() {
                 vertical: "bottom",
                 horizontal: "left",
             }}
-            open={!!snackbarMessage}
+            open={!!message}
             onClose={() => {
                 clearSnackbarMessage()
             }}
             autoHideDuration={8000}
-            message={snackbarMessage}
+            message={message}
             action={
-                <Button
-                    variant="text"
-                    onClick={() => {
-                        bookmarkActionHistory.undo()
-                        clearSnackbarMessage()
-                    }}
-                >
-                    Undo
-                </Button>
+                showUndoAction ? (
+                    <Button
+                        variant="text"
+                        onClick={() => {
+                            bookmarkActionHistory.undo()
+                            clearSnackbarMessage()
+                        }}
+                    >
+                        Undo
+                    </Button>
+                ) : null
             }
         />
     )

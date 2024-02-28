@@ -16,7 +16,8 @@ export const useSyncStateFromHashParams = () => {
         loadTree()
 
         // subscribe to batching update event, loadTree on batching ends
-        const batchingUpdateListener: BatchingUpdateListener = isBatchingUpdate => !isBatchingUpdate && loadTree()
+        const batchingUpdateListener: BatchingUpdateListener =
+            isBatchingUpdate => !isBatchingUpdate && loadTree()
         BatchingUpdateManager.subscribe(batchingUpdateListener)
 
         // reloads bookmarkTree when user changes any bookmarks

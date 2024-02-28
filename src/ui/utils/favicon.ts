@@ -8,5 +8,8 @@ export function getFavicon(url: string) {
         _url.searchParams.set("size", "32")
         return _url.toString()
     }
-    return "http://www.google.com/s2/favicons?domain_url=" + encodeURIComponent(new URL(url).origin)
+    return (
+        "http://www.google.com/s2/favicons?domain_url=" +
+        encodeURIComponent(new URL(url).origin)
+    )
 }

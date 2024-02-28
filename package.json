@@ -13,6 +13,7 @@
     "analyze": "cross-env NODE_ENV=production webpack --analyze",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "format": "prettier . --write",
     "pack": "node scripts/pack.js",
     "pack:firefox": "cross-env BUILD_TARGET=firefox node scripts/pack.js",
     "pack:chrome": "cross-env BUILD_TARGET=chrome node scripts/pack.js",

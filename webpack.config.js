@@ -70,4 +70,8 @@ const chromeConfig = {
 }
 
 module.exports =
-    buildTarget === "firefox" ? firefoxConfig : buildTarget === "chrome" ? chromeConfig : [firefoxConfig, chromeConfig]
+    buildTarget === "firefox"
+        ? firefoxConfig
+        : buildTarget === "chrome"
+          ? chromeConfig
+          : [firefoxConfig, chromeConfig]

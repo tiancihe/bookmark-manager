@@ -4,7 +4,12 @@ import copyToClipboard from "copy-to-clipboard"
 
 import { BookmarkTreeNode, BookmarkNodeType } from "../types"
 import { removeBookmark } from "../utils/bookmark"
-import { openBookmarkEditModal, setSelectedBookmarkNodes, setSnackbarMessage } from "../store"
+import {
+    openBookmarkEditModal,
+    setSelectedBookmarkNodes,
+    setSnackbarMessage,
+} from "../store"
+import { setHashParam } from "../utils/hashParams"
 
 export default function FolderTreeItemContextMenuContent({
     bookmarkNode,
@@ -13,7 +18,10 @@ export default function FolderTreeItemContextMenuContent({
     bookmarkNode: BookmarkTreeNode
     onClose: () => void
 }) {
-    const childBookmarks = bookmarkNode.children?.filter(item => item.type === BookmarkNodeType.Bookmark) ?? []
+    const childBookmarks =
+        bookmarkNode.children?.filter(
+            item => item.type === BookmarkNodeType.Bookmark,
+        ) ?? []
 
     return (
         <Fragment>
@@ -27,8 +35,11 @@ export default function FolderTreeItemContextMenuContent({
             </MenuItem>
             <MenuItem
                 onClick={async () => {
+                    setHashParam({
+                        folder: undefined,
+                    })
                     await removeBookmark(bookmarkNode.id)
-                    setSnackbarMessage(`${bookmarkNode.title} deleted`)
+                    setSnackbarMessage(`${bookmarkNode.title} deleted`, true)
                     onClose()
                 }}
             >
@@ -39,7 +50,8 @@ export default function FolderTreeItemContextMenuContent({
                 onClick={e => {
                     e.stopPropagation()
                     copyToClipboard(bookmarkNode.title)
-                    setSelectedBookmarkNodes([bookmarkNode], `"${bookmarkNode.title}" copied`)
+                    setSelectedBookmarkNodes([bookmarkNode])
+                    setSnackbarMessage(`"${bookmarkNode.title}" copied`, false)
                     onClose()
                 }}
             >
@@ -57,7 +69,14 @@ export default function FolderTreeItemContextMenuContent({
                     onClose()
                 }}
             >
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        width: "100%",
+                    }}
+                >
                     <span>Open all bookmarks</span>
                     <span>{childBookmarks.length}</span>
                 </div>

@@ -14,13 +14,29 @@ import {
     Link,
 } from "@mui/material"
 import { alpha } from "@mui/material/styles"
-import { Search, Clear, Brightness4, Brightness5, MoreVert } from "@mui/icons-material"
+import {
+    Search,
+    Clear,
+    Brightness4,
+    Brightness5,
+    MoreVert,
+} from "@mui/icons-material"
 
 import { setHashParam } from "../utils/hashParams"
-import { sortFolderByDateAsc, sortFolderByDateDesc, sortFolderByName, sortFolderByUrl } from "../utils/bookmark"
+import {
+    sortFolderByDateAsc,
+    sortFolderByDateDesc,
+    sortFolderByName,
+    sortFolderByUrl,
+} from "../utils/bookmark"
 import { BookmarkNodeType } from "../types"
 import { __MAC__ } from "../consts"
-import { openBookmarkCreateModal, setSelectedBookmarkNodes, setSettings, useStore } from "../store"
+import {
+    openBookmarkCreateModal,
+    setSelectedBookmarkNodes,
+    setSettings,
+    useStore,
+} from "../store"
 
 const PREFIX = "Navbar"
 
@@ -37,7 +53,10 @@ const classes = {
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
     [`& .${classes.appBar}`]: {
-        backgroundColor: theme.palette.mode === "dark" ? theme.palette.background.default : undefined,
+        backgroundColor:
+            theme.palette.mode === "dark"
+                ? theme.palette.background.default
+                : undefined,
     },
 
     [`& .${classes.toolbar}`]: {
@@ -106,7 +125,11 @@ export default function Navbar() {
     useEffect(() => {
         // capture search hotkey to focus on input
         const focus = (e: KeyboardEvent) => {
-            if (e.target === document.body && e.key === "f" && ((!__MAC__ && e.ctrlKey) || (__MAC__ && e.metaKey))) {
+            if (
+                e.target === document.body &&
+                e.key === "f" &&
+                ((!__MAC__ && e.ctrlKey) || (__MAC__ && e.metaKey))
+            ) {
                 e.preventDefault()
                 const input = inputRef.current.current
                 if (input) {
@@ -173,7 +196,8 @@ export default function Navbar() {
 
     const settings = useStore(state => state.settings)
 
-    const [actionMenuAnchor, setActionMenuAnchor] = useState<null | HTMLElement>(null)
+    const [actionMenuAnchor, setActionMenuAnchor] =
+        useState<null | HTMLElement>(null)
     const closeActionMenu = () => setActionMenuAnchor(null)
 
     return (
@@ -183,7 +207,11 @@ export default function Navbar() {
                     className={classes.title}
                     onClick={e => {
                         e.stopPropagation()
-                        setHashParam({ search: undefined, folder: undefined, dedupe: undefined })
+                        setHashParam({
+                            search: undefined,
+                            folder: undefined,
+                            dedupe: undefined,
+                        })
                     }}
                 >
                     Bookmarks
@@ -241,11 +269,18 @@ export default function Navbar() {
                     >
                         {settings?.darkMode ? <Brightness5 /> : <Brightness4 />}
                     </IconButton>
-                    <IconButton color="inherit" onClick={e => setActionMenuAnchor(e.currentTarget)}>
+                    <IconButton
+                        color="inherit"
+                        onClick={e => setActionMenuAnchor(e.currentTarget)}
+                    >
                         <MoreVert />
                     </IconButton>
                 </div>
-                <Menu open={!!actionMenuAnchor} anchorEl={actionMenuAnchor} onClose={closeActionMenu}>
+                <Menu
+                    open={!!actionMenuAnchor}
+                    anchorEl={actionMenuAnchor}
+                    onClose={closeActionMenu}
+                >
                     <MenuItem
                         disabled={!!search || !activeFolder}
                         onClick={e => {
@@ -333,7 +368,9 @@ export default function Navbar() {
                                 <Switch
                                     color="primary"
                                     checked={settings?.disableFavicon}
-                                    onChange={(_, checked) => setSettings({ disableFavicon: checked })}
+                                    onChange={(_, checked) =>
+                                        setSettings({ disableFavicon: checked })
+                                    }
                                 />
                             }
                             label="Disable favicon"
@@ -345,7 +382,9 @@ export default function Navbar() {
                                 <Switch
                                     color="primary"
                                     checked={settings?.alwaysShowURL}
-                                    onChange={(_, checked) => setSettings({ alwaysShowURL: checked })}
+                                    onChange={(_, checked) =>
+                                        setSettings({ alwaysShowURL: checked })
+                                    }
                                 />
                             }
                             label="Always show URL"
@@ -353,7 +392,11 @@ export default function Navbar() {
                     </MenuItem>
                     <Divider />
                     <MenuItem>
-                        <Link href="https://paypal.me/tiancihe95" target="_blank" underline="none">
+                        <Link
+                            href="https://paypal.me/tiancihe95"
+                            target="_blank"
+                            underline="none"
+                        >
                             Support me on paypal
                         </Link>
                     </MenuItem>

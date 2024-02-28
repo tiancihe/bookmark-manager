@@ -20,7 +20,10 @@ export default function useContextMenu() {
             onClose: () => {
                 setMousePosition(null)
             },
-        } as Pick<MenuProps, "anchorReference" | "anchorPosition" | "open" | "onClose">,
+        } as Pick<
+            MenuProps,
+            "anchorReference" | "anchorPosition" | "open" | "onClose"
+        >,
         handleContextMenuEvent: (e: React.MouseEvent) => {
             e.preventDefault()
             setMousePosition({

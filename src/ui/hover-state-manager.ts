@@ -41,7 +41,8 @@ const createHoverStateManager = () => {
             state.node.style.borderTop = `1px solid ${state.theme.palette.primary.main}`
         },
         [HoverArea.Mid]: () => {
-            !state.isSelected && (state.node.style.backgroundColor = `${alpha(state.theme.palette.primary.main, 0.25)}`)
+            !state.isSelected &&
+                (state.node.style.backgroundColor = `${alpha(state.theme.palette.primary.main, 0.25)}`)
         },
         [HoverArea.Bottom]: () => {
             state.node.style.borderBottom = `1px solid ${state.theme.palette.primary.main}`

@@ -18,7 +18,11 @@ export default function Splitter() {
                 const folderPanel = document.getElementById(__FOLDER_PANEL_ID__)
                 if (folderPanel) {
                     folderPanel.style.width = `${Math.max(
-                        Math.min(settings.splitterPosition + (e.clientX - startPosRef.current), 400),
+                        Math.min(
+                            settings.splitterPosition +
+                                (e.clientX - startPosRef.current),
+                            400,
+                        ),
                         256,
                     )}px`
                 }
@@ -26,7 +30,11 @@ export default function Splitter() {
             const onMouseUp = (e: MouseEvent) => {
                 setSettings({
                     splitterPosition: Math.max(
-                        Math.min(settings.splitterPosition + (e.clientX - startPosRef.current), 400),
+                        Math.min(
+                            settings.splitterPosition +
+                                (e.clientX - startPosRef.current),
+                            400,
+                        ),
                         256,
                     ),
                 })

@@ -16,7 +16,10 @@ if (__DEV__) {
     window.__BOOKMARK_ACTION_HISTORY__ = bookmarkActionHistory
 }
 
-export function isNodeSelected(node: BookmarkTreeNode, selectedNodes: BookmarkTreeNode[]) {
+export function isNodeSelected(
+    node: BookmarkTreeNode,
+    selectedNodes: BookmarkTreeNode[],
+) {
     return selectedNodes.findIndex(_node => _node.id === node.id) >= 0
 }
 
@@ -44,7 +47,10 @@ export function getParentPathDesc(node: BookmarkTreeNode) {
 }
 
 /** get all child bookmarks under a folder */
-export function getChildBookmarks(node: BookmarkTreeNode, accumulator?: BookmarkTreeNode[]) {
+export function getChildBookmarks(
+    node: BookmarkTreeNode,
+    accumulator?: BookmarkTreeNode[],
+) {
     const result = accumulator ?? []
     if (node.children) {
         for (let i = 0; i < node.children.length; i++) {
@@ -80,31 +86,45 @@ const _createBookmark: typeof browser.bookmarks.create = async details => {
     return bookmark
 }
 
-async function _createBookmarkTree(bookmark: BookmarkTreeNode, parentId?: string) {
-    const _bookmark = await _createBookmark({ ...bookmark, parentId: parentId || bookmark.parentId })
+async function _createBookmarkTree(
+    bookmark: BookmarkTreeNode,
+    parentId?: string,
+) {
+    const _bookmark = await _createBookmark({
+        ...bookmark,
+        parentId: parentId || bookmark.parentId,
+    })
     if (bookmark.children) {
-        await Promise.all(bookmark.children.map(child => _createBookmarkTree(child, _bookmark.id)))
+        await Promise.all(
+            bookmark.children.map(child =>
+                _createBookmarkTree(child, _bookmark.id),
+            ),
+        )
     }
     return _bookmark
 }
 
-export const createBookmark: typeof browser.bookmarks.create = async details => {
-    const bookmark = await _createBookmark(details)
-    let bookmarkId = bookmark.id
-    bookmarkActionHistory.record({
-        async do() {
-            const _bookmark = await _createBookmark(details)
-            bookmarkId = _bookmark.id
-            return _bookmark
-        },
-        async undo() {
-            await browser.bookmarks.removeTree(bookmarkId)
-        },
-    })
-    return bookmark
-}
+export const createBookmark: typeof browser.bookmarks.create =
+    async details => {
+        const bookmark = await _createBookmark(details)
+        let bookmarkId = bookmark.id
+        bookmarkActionHistory.record({
+            async do() {
+                const _bookmark = await _createBookmark(details)
+                bookmarkId = _bookmark.id
+                return _bookmark
+            },
+            async undo() {
+                await browser.bookmarks.removeTree(bookmarkId)
+            },
+        })
+        return bookmark
+    }
 
-export const updateBookmark: typeof browser.bookmarks.update = async (id, changes) => {
+export const updateBookmark: typeof browser.bookmarks.update = async (
+    id,
+    changes,
+) => {
     const original = (await browser.bookmarks.get(id))[0]
     const bookmark = await browser.bookmarks.update(id, changes)
     bookmarkActionHistory.record({
@@ -112,7 +132,10 @@ export const updateBookmark: typeof browser.bookmarks.update = async (id, change
             await browser.bookmarks.update(id, changes)
         },
         async undo() {
-            await browser.bookmarks.update(id, { title: original.title, url: original.url })
+            await browser.bookmarks.update(id, {
+                title: original.title,
+                url: original.url,
+            })
         },
     })
     return bookmark
@@ -158,7 +181,9 @@ export async function removeBookmarks(bookmarks: BookmarkTreeNode[]) {
     bookmarkActionHistory.record({
         do: remove,
         async undo() {
-            _bookmarks = await Promise.all(_bookmarks.map(bookmark => _createBookmarkTree(bookmark)))
+            _bookmarks = await Promise.all(
+                _bookmarks.map(bookmark => _createBookmarkTree(bookmark)),
+            )
         },
     })
 }
@@ -203,12 +228,19 @@ export async function pasteBookmarks(spec: PasteBookmarksSpec) {
     bookmarkActionHistory.record({
         do: paste,
         async undo() {
-            await Promise.all(bookmarks.map(bookmark => browser.bookmarks.removeTree(bookmark.id)))
+            await Promise.all(
+                bookmarks.map(bookmark =>
+                    browser.bookmarks.removeTree(bookmark.id),
+                ),
+            )
         },
     })
 }
 
-async function _sortFolderBy(_folder: BookmarkTreeNode, key: "title" | "url" | "date-asc" | "date-desc") {
+async function _sortFolderBy(
+    _folder: BookmarkTreeNode,
+    key: "title" | "url" | "date-asc" | "date-desc",
+) {
     const folder = (await browser.bookmarks.getSubTree(_folder.id))[0]
 
     if (!isNodeFolder(folder) || !folder.children) return
@@ -222,10 +254,14 @@ async function _sortFolderBy(_folder: BookmarkTreeNode, key: "title" | "url" | "
         bookmarks.sort((a, b) => naturalCompare(a[key] || "", b[key] || ""))
     } else {
         subFolders.sort((a, b) =>
-            key === "date-desc" ? (a.dateAdded || 0) - (b.dateAdded || 0) : (b.dateAdded || 0) - (a.dateAdded || 0),
+            key === "date-desc"
+                ? (a.dateAdded || 0) - (b.dateAdded || 0)
+                : (b.dateAdded || 0) - (a.dateAdded || 0),
         )
         bookmarks.sort((a, b) =>
-            key === "date-desc" ? (a.dateAdded || 0) - (b.dateAdded || 0) : (b.dateAdded || 0) - (a.dateAdded || 0),
+            key === "date-desc"
+                ? (a.dateAdded || 0) - (b.dateAdded || 0)
+                : (b.dateAdded || 0) - (a.dateAdded || 0),
         )
     }
 
@@ -255,13 +291,17 @@ const sortFolderBy: typeof _sortFolderBy = async (folder, key) => {
         async undo() {
             if (!this.info?.bookmark?.children) return
             const originalChildren = this.info.bookmark.children
-            const folder = (await browser.bookmarks.getSubTree(this.info.bookmark.id))[0]
+            const folder = (
+                await browser.bookmarks.getSubTree(this.info.bookmark.id)
+            )[0]
             // sort back to original sorting indexes
             await BatchingUpdateManager.batchUpdate(async () => {
                 if (!folder.children) return
                 for (let i = 0; i < folder.children.length; i++) {
                     const node = folder.children[i]
-                    const originalIndex = originalChildren.find(child => child.id === node.id)?.index
+                    const originalIndex = originalChildren.find(
+                        child => child.id === node.id,
+                    )?.index
                     if (node.index !== originalIndex) {
                         await browser.bookmarks.move(node.id, {
                             parentId: folder.id,
@@ -294,7 +334,10 @@ export async function sortFolderByDateDesc(folder: BookmarkTreeNode) {
     await sortFolderBy(folder, "date-desc")
 }
 
-export async function moveBookmarksUnderParent(bookmarks: BookmarkTreeNode[], parent: BookmarkTreeNode) {
+export async function moveBookmarksUnderParent(
+    bookmarks: BookmarkTreeNode[],
+    parent: BookmarkTreeNode,
+) {
     if (bookmarks.length === 1 && bookmarks[0].id === parent.id) return
     const move = async () => {
         await BatchingUpdateManager.batchUpdate(async () => {
@@ -323,11 +366,17 @@ export async function moveBookmarksUnderParent(bookmarks: BookmarkTreeNode[], pa
     })
 }
 
-async function moveBookmarksAt(bookmarks: BookmarkTreeNode[], target: BookmarkTreeNode, position: "above" | "below") {
+async function moveBookmarksAt(
+    bookmarks: BookmarkTreeNode[],
+    target: BookmarkTreeNode,
+    position: "above" | "below",
+) {
     if (bookmarks.length === 1 && bookmarks[0].id === target.id) return
 
     const bookmarkIds = bookmarks.map(b => b.id)
-    const originalBookmarks = await browser.bookmarks.getChildren(target.parentId!)!
+    const originalBookmarks = await browser.bookmarks.getChildren(
+        target.parentId!,
+    )!
     const originalBookmarkIndexMap = originalBookmarks.reduce(
         (prev, cur) => {
             prev[cur.id] = cur.index
@@ -339,13 +388,19 @@ async function moveBookmarksAt(bookmarks: BookmarkTreeNode[], target: BookmarkTr
     const move = async () => {
         await BatchingUpdateManager.batchUpdate(async () => {
             // get target folder's bookmarks without bookmarks to be moved
-            const _bookmarks = (await browser.bookmarks.getChildren(target.parentId!)!).filter(
-                bookmark => bookmarkIds.indexOf(bookmark.id) === -1,
-            )
+            const _bookmarks = (
+                await browser.bookmarks.getChildren(target.parentId!)!
+            ).filter(bookmark => bookmarkIds.indexOf(bookmark.id) === -1)
             // find target bookmark's index
-            const targetBookmarkIndex = _bookmarks.findIndex(node => node.id === target.id)
+            const targetBookmarkIndex = _bookmarks.findIndex(
+                node => node.id === target.id,
+            )
             // put bookmarks to be moved above or below
-            _bookmarks.splice(targetBookmarkIndex + (position === "below" ? 1 : 0), 0, ...bookmarks)
+            _bookmarks.splice(
+                targetBookmarkIndex + (position === "below" ? 1 : 0),
+                0,
+                ...bookmarks,
+            )
             // reorder bookmarks
             for (let i = 0; i < _bookmarks.length; i++) {
                 if (_bookmarks[i].index !== i) {
@@ -366,10 +421,14 @@ async function moveBookmarksAt(bookmarks: BookmarkTreeNode[], target: BookmarkTr
             await BatchingUpdateManager.batchUpdate(async () => {
                 // reset all bookmarks' index inside the target folder
                 // because after move, all bookmarks' index are reordered that are inside the target folder
-                const _bookmarks = await browser.bookmarks.getChildren(target.parentId!)!
+                const _bookmarks = await browser.bookmarks.getChildren(
+                    target.parentId!,
+                )!
                 for (let i = 0; i < _bookmarks.length; i++) {
                     const bookmark = _bookmarks[i]
-                    if (bookmark.index !== originalBookmarkIndexMap[bookmark.id]) {
+                    if (
+                        bookmark.index !== originalBookmarkIndexMap[bookmark.id]
+                    ) {
                         await browser.bookmarks.move(bookmark.id, {
                             parentId: bookmark.parentId,
                             index: originalBookmarkIndexMap[bookmark.id],
@@ -377,9 +436,15 @@ async function moveBookmarksAt(bookmarks: BookmarkTreeNode[], target: BookmarkTr
                     }
                 }
 
-                const bookmarksNotInsideTheSameFolder = bookmarks.filter(b => b.parentId !== target.parentId)
+                const bookmarksNotInsideTheSameFolder = bookmarks.filter(
+                    b => b.parentId !== target.parentId,
+                )
                 // move all other bookmarks back
-                for (let i = 0; i < bookmarksNotInsideTheSameFolder.length; i++) {
+                for (
+                    let i = 0;
+                    i < bookmarksNotInsideTheSameFolder.length;
+                    i++
+                ) {
                     const bookmark = bookmarksNotInsideTheSameFolder[i]
                     await browser.bookmarks.move(bookmark.id, {
                         parentId: bookmark.parentId,
@@ -391,11 +456,17 @@ async function moveBookmarksAt(bookmarks: BookmarkTreeNode[], target: BookmarkTr
     })
 }
 
-export async function moveBookmarksAboveTarget(bookmarks: BookmarkTreeNode[], target: BookmarkTreeNode) {
+export async function moveBookmarksAboveTarget(
+    bookmarks: BookmarkTreeNode[],
+    target: BookmarkTreeNode,
+) {
     moveBookmarksAt(bookmarks, target, "above")
 }
 
-export async function moveBookmarksBelowTarget(bookmarks: BookmarkTreeNode[], target: BookmarkTreeNode) {
+export async function moveBookmarksBelowTarget(
+    bookmarks: BookmarkTreeNode[],
+    target: BookmarkTreeNode,
+) {
     moveBookmarksAt(bookmarks, target, "below")
 }
 

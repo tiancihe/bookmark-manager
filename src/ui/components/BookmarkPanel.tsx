@@ -84,6 +84,11 @@ export default function BookmarkPanel() {
                 e.key === "a" &&
                 ((!__MAC__ && e.ctrlKey) || (__MAC__ && e.metaKey))
             ) {
+                if (duplicatedBookmarks.length) {
+                    e.preventDefault()
+                    setSelectedBookmarkNodes(duplicatedBookmarks)
+                    return
+                }
                 if (searchResult.length) {
                     e.preventDefault()
                     setSelectedBookmarkNodes(searchResult)

@@ -1,5 +1,15 @@
 import { useState } from "react"
-import { Modal, Card, CardHeader, CardContent, CardActions, Button, TextField, Snackbar, Stack } from "@mui/material"
+import {
+    Modal,
+    Card,
+    CardHeader,
+    CardContent,
+    CardActions,
+    Button,
+    TextField,
+    Snackbar,
+    Stack,
+} from "@mui/material"
 
 import { closeModal, useStore } from "../store"
 import { BookmarkNodeType, ModalType } from "../types"
@@ -13,8 +23,11 @@ export default function CreateBookmarkModal() {
     const [title, setTitle] = useState("")
     const [url, setUrl] = useState("")
     // only validates url, title can be empty
-    const [urlValidationError, setUrlValidationError] = useState<string | null>(null)
-    const [showNoActiveFolderError, setShowNoActiveFolderError] = useState(false)
+    const [urlValidationError, setUrlValidationError] = useState<string | null>(
+        null,
+    )
+    const [showNoActiveFolderError, setShowNoActiveFolderError] =
+        useState(false)
 
     const handleSubmit = async () => {
         if (activeFolder !== null) {
@@ -23,23 +36,39 @@ export default function CreateBookmarkModal() {
                 return
             }
 
-            await createBookmark({
-                parentId: activeFolder.id,
-                title,
-                url,
-                type: createType === BookmarkNodeType.Bookmark ? BookmarkNodeType.Bookmark : undefined,
-            })
+            try {
+                await createBookmark({
+                    parentId: activeFolder.id,
+                    title,
+                    url,
+                    type:
+                        createType === BookmarkNodeType.Bookmark
+                            ? BookmarkNodeType.Bookmark
+                            : undefined,
+                })
 
-            closeModal()
+                closeModal()
+            } catch (err) {
+                if (err instanceof Error && err.message) {
+                    setUrlValidationError(err.message)
+                }
+            }
         } else {
             setShowNoActiveFolderError(true)
         }
     }
 
     return (
-        <Modal open={modalType === ModalType.BookmarkCreate} onClose={closeModal}>
+        <Modal
+            open={modalType === ModalType.BookmarkCreate}
+            onClose={closeModal}
+        >
             <Stack height="100%" alignItems="center" justifyContent="center">
-                <Card sx={{ width: 500 }} onClick={e => e.stopPropagation()} onDoubleClick={e => e.stopPropagation()}>
+                <Card
+                    sx={{ width: 500 }}
+                    onClick={e => e.stopPropagation()}
+                    onDoubleClick={e => e.stopPropagation()}
+                >
                     <CardHeader title={`Add ${createType}`} />
                     <CardContent>
                         <Stack spacing={2}>
@@ -59,6 +88,7 @@ export default function CreateBookmarkModal() {
                                 <TextField
                                     label="URL"
                                     fullWidth
+                                    error={!!urlValidationError}
                                     helperText={urlValidationError}
                                     value={url}
                                     onChange={e => setUrl(e.target.value)}
@@ -72,11 +102,24 @@ export default function CreateBookmarkModal() {
                         </Stack>
                     </CardContent>
                     <CardActions>
-                        <Stack width="100%" direction="row" justifyContent="flex-end" spacing={2}>
-                            <Button variant="outlined" color="primary" onClick={closeModal}>
+                        <Stack
+                            width="100%"
+                            direction="row"
+                            justifyContent="flex-end"
+                            spacing={2}
+                        >
+                            <Button
+                                variant="outlined"
+                                color="primary"
+                                onClick={closeModal}
+                            >
                                 Cancel
                             </Button>
-                            <Button variant="contained" color="primary" onClick={handleSubmit}>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={handleSubmit}
+                            >
                                 Save
                             </Button>
                         </Stack>

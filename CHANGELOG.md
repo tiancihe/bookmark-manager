@@ -1,3 +1,7 @@
+## 1.2.1 (2024/02/28)
+
+- fixed some issues
+
 ## 1.2.0 (2024/02/23)
 
 - add find duplicated bookmarks functionality

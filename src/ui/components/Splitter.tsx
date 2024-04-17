@@ -21,7 +21,7 @@ export default function Splitter() {
                         Math.min(
                             settings.splitterPosition +
                                 (e.clientX - startPosRef.current),
-                            400,
+                            800,
                         ),
                         256,
                     )}px`
@@ -33,7 +33,7 @@ export default function Splitter() {
                         Math.min(
                             settings.splitterPosition +
                                 (e.clientX - startPosRef.current),
-                            400,
+                            800,
                         ),
                         256,
                     ),

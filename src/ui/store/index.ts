@@ -75,6 +75,9 @@ export const setSettings = (settings: Partial<Settings>) => {
             ...settings,
         },
     })
+    browser.storage.local.set({
+        [SETTINGS_KEY]: useStore.getState().settings,
+    })
 }
 
 export const loadBookmarkTree = async () => {

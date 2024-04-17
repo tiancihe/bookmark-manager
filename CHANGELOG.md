@@ -1,3 +1,8 @@
+## 1.2.2 (2024/04/17)
+
+- fixed a issue that user settings are not restored during reload
+- slightly alter max splitter position
+
 ## 1.2.1 (2024/02/28)
 
 - fixed some issues
